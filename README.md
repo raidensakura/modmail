@@ -6,7 +6,7 @@
   <br>
 
   <a href="#">
-    <img src="https://img.shields.io/badge/Latest%20Version-v4.0.2-7289da?style=for-the-badge&logo=data:image/gif;base64,R0lGODlhGAAYAPcAAAAAADQ+Yj5MdThCaEFOekNQfWt5e1lqfEdVhVpriVx1iVtsnFZpll1xlF1znFx5mGNtjGR7hWNzjGd5iWJunGNslmN0lGl1lGN5lWt7lWR0nGp1nWR5nGt8nHJ9l3J9jFxto1xtqlZqqF5zpF15pV10rVx5q1Z2ql1us150s114sV50uVd1smJupGNurGN0pGp1pGR6o2t7o2F0rml0rGR5rGt8q3J9pGNus2Fvu2Bzs2p2smR5s2t7tGF0u2N6vGp7u2l1uXJ+uGJ1wWV7w2l+xWl+yl5zwHWDiWyCmHODnHiGmHSLkW2CpGuEqnSCpHqMo3ODrHWKrXyMq3iHp3yTqGyEtWqFunKDs3uLtHSGvXSMvHuMu3eItnyTs3yTu3iUuW+RsV+ApmuCxG2Dy22LxnSMxHuMxHGGzXSLzXqLzXWFxXyTw3uSy3WSx26E0W+N2m+L1XKG03SL1XmL1HOL2HmL23WF2XiS1m+QyHOK4XmL4XaH4nGM5ImXm4WOlJSjnoOOq4OOpYSUrImXqJOcqYONt4OUtIybtIOUu4ycvImYt5OcuIyiqZekqYyiupOjvJurvJimtp+yvqKruae2ua23trLCucPHvIOMxoOUxIuaw4eYyJKbyISW1YiW0o2kyJWlxJqpxZWkzJury5aoxp6xxZ2zyZio1Jyy2Yuk0aOsyKOyxKOzzKy8zKq2yLO7xqOr1KSz1Ku706W026y73Ki21bK716u75LS95KSu4Zyx6bPDzLjGx63B2LPD1LTE3LvL3brI17/S2bbKzrTE47rF47zM5L3M67bH577R5L7R67zK8rjM8MLM3MPK1sTT3crU3MjW2dLZ2srUy8PN5MTO68nP68jL48TS5MnT5cbR68jS7M3b7Mva5dTb6MTO8srO8szF8MXR8snS8c3a8cnY+NXb9tDL7dnm6dzk8tro99Pq9uTp6+r17fr77eTr/efr+Oz09OXz/Ov0/e37/uj39fX19fX89fz+9vP1/fX9/f7//vr2/ODl4sK75yH5BAEAAAAALAAAAAAYABgAAAj/AAEAmFOnoMGDCAvGmRNHYMKHEOdIhEgRIcGKGDMeTJVO00WNBj194/frFik5IOvgqdaP371N26xpefORYq57/HI+s7Vtmy0eKCmmapcz575FPXt+SfHmociiRae1SroNWIoVTQ2uxAk15yJg1awl7ZSCaUE82uRxhTpt1TNXq0Ip2pSobIqCc0iVoqsI0ipXr1bhywfVXxYdiA3Sourz2dqc8lbNQJz4bDWqix73E7ZjhgrKOjYmvfWLbZcZqCdTPjjHGLdtibi2U5Q6NWiEqqq64ifvVe3at1nX2tTuWQ/QyIMfxHOGi+rkyeMklPMDuvWaBqlbj469IPUU2ykPCOw+53t4AAEBADs=">
+    <img src="https://img.shields.io/badge/Latest%20Version-v4.0.2-7289da?style=for-the-badge&logo=data:image/gif;base64,R0lGODlhGAAYAHAAACH5BAEAAD8ALAAAAAAYABgAhXsA/2oA/306/662530e/4sJ/7uk7OPn5op166du84RL94QA/3EA/66D+uvV5Nzc3IIx+7GA/7V8/3QG/3wA/7Rh/6qW2pRa/GEA/8TF3dLb7nY9418b/V8A/7K4z4Rb75Js/GUA/5w6/a6P9MrT5plh5oNw435H8Hc96nMq9HlG83ZN4I1w3NPs5NXv08PU1XEi72kA/5dM/2QA/5OA6YAA/0sA/3AW+atw/7aD/20f/5da/3MA/34M/3UY/wAAAAbXwN8PQCwaj8UAICBEOp/QqHRKhQoGhOqxYDggEoqFltFwHB6QiGRCoVYeh7jlEolcMGJrJh7XbOp1HB1tSFx8fB4fgBEgHSGERGRwh3EbIA0SgCIdg5EjJJOHHiUWJiUnKBApnB1FCiqqKCslJiwlLS6HLzAxvUUyi3YWoXEkJTO9vpENixvEDjQ1MzbJMUYCgAkIojcz3sjJRzg5ESmTGSjf39VHOowmByQs6ursRzsQGRY81f32Rgx6+ADnz5+SIwsIFuz3JOFCgw1ndHiYbEjEiQ9/BAEAOw==">
   </a>
 
   <br>
@@ -39,8 +39,7 @@
     <img src="https://img.shields.io/badge/license-agpl-e74c3c.svg?style=for-the-badge" alt="MIT License">
   </a>
 
-<br>
-<img src='https://i.imgur.com/fru5Q07.png' align='center' width=500>
+<img src='https://github.com/raidensakura/modmail/assets/38610216/106e8fa3-6f8e-4b00-9968-f5c2f3108da0' align='center' width=500>
 </div>
 
 
