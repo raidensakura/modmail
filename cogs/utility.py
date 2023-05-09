@@ -344,9 +344,9 @@ class Utility(commands.Cog):
             owner = app_info.owner
 
         embed.add_field(
-                name= "Bot Owner (Team)" if app_info.team else "Bot Owner",
-                value=str(owner),
-            )
+            name="Bot Owner (Team)" if app_info.team else "Bot Owner",
+            value=str(owner),
+        )
         embed.add_field(name="Uptime", value=self.bot.uptime)
         embed.add_field(name="Latency", value=f"{self.bot.latency * 1000:.2f} ms")
         embed.add_field(name="Python Version", value=f"`{python_version}`")
