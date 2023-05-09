@@ -31,3 +31,6 @@ pillow = "==9.5.0"
 
 [scripts]
 bot = "python bot.py"
+
+[requires]
+python_version = ">=3.7, <3.11"

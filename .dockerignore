@@ -146,3 +146,4 @@ Procfile
 pyproject.toml
 *.md
 .*.json
+docs/

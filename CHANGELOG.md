@@ -15,6 +15,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Fix changing from disabling all threads (`?disable all`) to new threads only (`?disable new`) not updating `dm_disabled` config
 - A few typo in `config_help.json` and corrected its formatting
 - Fixed typo for silent close command
+- Fixed uncached member issue in large guild for react_to_contact and ticket creation
 
 ### Added
 - New .env config option: `REGISTRY_PLUGINS_ONLY`, restricts to only allow adding registry plugins. ([PR #3247](https://github.com/modmail-dev/modmail/pull/3247))
