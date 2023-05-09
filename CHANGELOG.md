@@ -12,13 +12,23 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - `?alias make/create` as aliases to `?alias add`. This improves continuity between the bot and its command structure. ([PR #3195](https://github.com/kyb3r/modmail/pull/3195))
 - Loading the blocked list with the `?blocked` command takes a long time when the list is large. ([PR #3242](https://github.com/kyb3r/modmail/pull/3242))
 - Reply not being forwarded from DM. (PR [#3239](https://github.com/modmail-dev/modmail/pull/3239))
+- Fix changing from disabling all threads (`?disable all`) to new threads only (`?disable new`) not updating `dm_disabled` config
+- A few typo in `config_help.json` and corrected its formatting
+- Fixed typo for silent close command
 
 ### Added
 - New .env config option: `REGISTRY_PLUGINS_ONLY`, restricts to only allow adding registry plugins. ([PR #3247](https://github.com/modmail-dev/modmail/pull/3247))
+- Added custom database name detection in `CONNECTION_URI`
 
 ### Changed
 - Guild icons in embed footers and author urls now have a fixed size of 128. ([PR #3261](https://github.com/modmail-dev/modmail/pull/3261))
 - Repo moved to https://github.com/modmail-dev/modmail.
+- Optimized Dockerfile for smaller overall image size
+- Removed unused dependencies from requirements.txt
+- Migrated all dependencies from `requirements.txt` to `Pipfile`
+- Edited .env.example to only include what's necessary
+- Changed `confirm_thread_creation` reactions to buttons
+- Removed bandit from dev dependencies
 
 # v4.0.2
 
