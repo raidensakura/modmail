@@ -11,7 +11,7 @@ RUN apk update && apk add --virtual build-dependencies build-base gcc libffi-dev
 RUN pip install pipenv
 
 # Install python dependencies in /.venv
-COPY Pipfile Pipfile.lock .
+COPY Pipfile Pipfile.lock /
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 
 FROM base AS runtime
