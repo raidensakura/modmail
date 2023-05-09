@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d55a07bca4dc4124ba70119311769479057e467f2980c11ee214161e8b721d97"
+            "sha256": "085a80eac599fd2914a45d3898b50cf40b4ff9bfe6f9cffbb85d16a38eb19270"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -229,11 +229,11 @@
         },
         "discord.py": {
             "hashes": [
-                "sha256:309146476e986cb8faf038cd5d604d4b3834ef15c2d34df697ce5064bf5cd779",
-                "sha256:aeb186348bf011708b085b2715cf92bbb72c692eb4f59c4c0b488130cc4c4b7e"
+                "sha256:792bdcfe71cfe013c446cf379b2e83e08b5050604322ad6fb592864e63511abd",
+                "sha256:f9df95795c6f52c5db43b7ab43634993e12ef233288636a759166dd9c134d077"
             ],
             "index": "pypi",
-            "version": "==2.0.1"
+            "version": "==2.2.3"
         },
         "dnspython": {
             "hashes": [
