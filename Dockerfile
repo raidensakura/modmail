@@ -20,11 +20,6 @@ FROM base AS runtime
 COPY --from=python-deps /.venv /.venv
 ENV PATH="/.venv/bin:$PATH"
 
-# Create and switch to a new user
-RUN adduser -D modmail
-WORKDIR /home/modmail
-USER modmail
-
 # Install application into container
 ENV USING_DOCKER yes
 COPY . .
