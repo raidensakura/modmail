@@ -6,11 +6,11 @@ import copy
 import hashlib
 import logging
 import os
+import platform
 import re
 import string
 import struct
 import sys
-import platform
 import typing
 from datetime import datetime, timezone
 from subprocess import PIPE
@@ -18,13 +18,12 @@ from types import SimpleNamespace
 
 import discord
 import isodate
-from aiohttp import ClientSession, ClientResponseError
+from aiohttp import ClientResponseError, ClientSession
 from discord.ext import commands, tasks
-from discord.ext.commands.view import StringView
 from discord.ext.commands import MemberConverter
+from discord.ext.commands.view import StringView
 from emoji import UNICODE_EMOJI
 from pkg_resources import parse_version
-
 
 try:
     # noinspection PyUnresolvedReferences

@@ -3,8 +3,8 @@ import inspect
 import os
 import random
 import re
-import traceback
 import sys
+import traceback
 from contextlib import redirect_stdout
 from difflib import get_close_matches
 from io import BytesIO, StringIO
@@ -24,16 +24,9 @@ from pkg_resources import parse_version
 
 from core import checks, utils
 from core.changelog import Changelog
-from core.models import (
-    HostingMethod,
-    InvalidConfigError,
-    PermissionLevel,
-    UnseenFormatter,
-    getLogger,
-)
-from core.utils import trigger_typing, truncate
+from core.models import HostingMethod, InvalidConfigError, PermissionLevel, UnseenFormatter, getLogger
 from core.paginator import EmbedPaginatorSession, MessagePaginatorSession
-
+from core.utils import trigger_typing, truncate
 
 logger = getLogger(__name__)
 
@@ -333,7 +326,6 @@ class Utility(commands.Cog):
         desc += "an organised manner."
         embed.description = desc
 
-        repo_url = "https://github.com/modmail-dev/modmail/graphs/contributors"
         python_version = "{}.{}.{}".format(*sys.version_info[:3])
         dpy_version = discord.__version__
 
@@ -710,6 +702,13 @@ class Utility(commands.Cog):
 
         Do not ping `@everyone` to set mention to everyone, use "everyone" or "all" instead.
 
+        You can also additionally configure a custom message to show after the mention.
+        You can use `[prefix]` as placeholder for bot prefix.
+
+        Examples:
+        - `{prefix}mention message Use [prefix]reply to reply`
+        - `{prefix}mention message disable`
+
         Notes:
         - Type only `{prefix}mention` to retrieve your current "mention" message.
         - `{prefix}mention disable` to disable mention.
@@ -720,6 +719,24 @@ class Utility(commands.Cog):
             embed = discord.Embed(
                 title="Current mention:", color=self.bot.main_color, description=str(current)
             )
+        elif isinstance(user_or_role[0], str) and user_or_role[0].lower() in ("message", "msg"):
+            option = user_or_role[1].lower()
+            if option == "disable":
+                embed = discord.Embed(
+                    description="Disabled mention message on thread creation.",
+                    color=self.bot.main_color,
+                )
+                self.bot.config["mention_message"] = None
+            else:
+                msg = " ".join(user_or_role[1:])
+                mention_msg = msg.replace("[prefix]", self.bot.prefix)
+                embed = discord.Embed(
+                    title="Changed mention message!",
+                    description=f'On thread creation the bot now says "{current} {mention_msg}".',
+                    color=self.bot.main_color,
+                )
+                self.bot.config["mention_message"] = msg
+            await self.bot.config.update()
         elif (
             len(user_or_role) == 1
             and isinstance(user_or_role[0], str)

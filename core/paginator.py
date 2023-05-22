@@ -1,9 +1,9 @@
 import typing
 
 import discord
-from discord import Message, Embed, ButtonStyle, Interaction
-from discord.ui import View, Button, Select
+from discord import ButtonStyle, Embed, Interaction, Message
 from discord.ext import commands
+from discord.ui import Button, Select, View
 
 
 class PaginatorSession:

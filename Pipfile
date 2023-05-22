@@ -5,8 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 black = "==22.3.0"
-pylint = "~=2.9.3"
 typing-extensions = "==4.2.0"
+ruff = "*"
 
 [packages]
 aiohttp = "==3.8.1"

@@ -6,8 +6,8 @@ import shutil
 import sys
 import typing
 import zipfile
-from importlib import invalidate_caches
 from difflib import get_close_matches
+from importlib import invalidate_caches
 from pathlib import Path, PurePath
 from re import match
 from site import USER_SITE
@@ -15,13 +15,12 @@ from subprocess import PIPE
 
 import discord
 from discord.ext import commands
-
 from pkg_resources import parse_version
 
 from core import checks
 from core.models import PermissionLevel, getLogger
 from core.paginator import EmbedPaginatorSession
-from core.utils import truncate, trigger_typing
+from core.utils import trigger_typing, truncate
 
 logger = getLogger(__name__)
 

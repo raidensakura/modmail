@@ -19,6 +19,20 @@ extend-exclude = '''
 )
 '''
 
+[tool.ruff]
+target-version = "py310"
+line-length = 110
+select = ["C90", "E", "F", "I001", "PGH004", "RUF100"]
+ignore = ["F405", "E741", "C901", "F403", "E501"]
+fix = true
+fixable = ["I001"]
+isort.combine-as-imports = true
+force-exclude = true
+
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 25
+
 [tool.poetry]
 name = 'Modmail'
 version = '4.0.2'
@@ -33,6 +47,3 @@ readme = 'README.md'
 repository = 'https://github.com/modmail-dev/modmail'
 homepage = 'https://github.com/modmail-dev/modmail'
 keywords = ['discord', 'modmail']
-
-[tool.pylint.format]
-max-line-length = "110"

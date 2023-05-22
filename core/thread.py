@@ -11,27 +11,25 @@ import warnings
 from datetime import timedelta
 from types import SimpleNamespace
 
-import isodate
-
 import discord
-from discord.ext.commands import MissingRequiredArgument, CommandError
-from lottie.importers import importers as l_importers
+import isodate
+from discord.ext.commands import CommandError, MissingRequiredArgument
 from lottie.exporters import exporters as l_exporters
+from lottie.importers import importers as l_importers
 
 from core.models import DMDisabled, DummyMessage, getLogger
-from core.time import human_timedelta
 from core.utils import (
-    is_image_url,
-    parse_channel_topic,
-    match_title,
-    match_user_id,
-    truncate,
-    get_top_role,
+    AcceptButton,
+    ConfirmThreadCreationView,
+    DenyButton,
     create_thread_channel,
     get_joint_id,
-    AcceptButton,
-    DenyButton,
-    ConfirmThreadCreationView,
+    get_top_role,
+    is_image_url,
+    match_title,
+    match_user_id,
+    parse_channel_topic,
+    truncate,
 )
 
 logger = getLogger(__name__)
@@ -200,6 +198,10 @@ class Thread:
 
         self.ready = True
 
+        mention_msg = self.bot.config["mention_message"]
+        if mention_msg:
+            mention_msg = mention_msg.replace("[prefix]", self.bot.prefix)
+
         if creator is not None and creator != recipient:
             mention = None
         else:
@@ -208,7 +210,10 @@ class Thread:
         async def send_genesis_message():
             info_embed = self._format_info_embed(recipient, log_url, log_count, self.bot.main_color)
             try:
-                msg = await channel.send(mention, embed=info_embed)
+                if mention_msg:
+                    msg = await channel.send((mention + " " + mention_msg), embed=info_embed)
+                else:
+                    msg = await channel.send(mention, embed=info_embed)
                 self.bot.loop.create_task(msg.pin())
                 self._genesis_message = msg
             except Exception:

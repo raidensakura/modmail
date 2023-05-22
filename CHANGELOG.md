@@ -21,6 +21,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - New .env config option: `REGISTRY_PLUGINS_ONLY`, restricts to only allow adding registry plugins. ([PR #3247](https://github.com/modmail-dev/modmail/pull/3247))
 - Added custom database name detection in `CONNECTION_URI`
 - Added dpy and python version info in `?about` embed and credit for contributors
+- New config option: `mention_message`, this will include an additional configurable message next to role mention on thread creation. Defaults to None.
 
 ### Changed
 - Guild icons in embed footers and author urls now have a fixed size of 128. ([PR #3261](https://github.com/modmail-dev/modmail/pull/3261))

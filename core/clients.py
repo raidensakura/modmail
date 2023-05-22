@@ -1,13 +1,12 @@
 import secrets
 import sys
 from json import JSONDecodeError
-from typing import Any, Dict, Union, Optional
+from typing import Any, Dict, Optional, Union
 
 import discord
-from discord import Member, DMChannel, TextChannel, Message
+from aiohttp import ClientResponse, ClientResponseError
+from discord import DMChannel, Member, Message, TextChannel
 from discord.ext import commands
-
-from aiohttp import ClientResponseError, ClientResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ConfigurationError
 from pymongo.uri_parser import parse_uri

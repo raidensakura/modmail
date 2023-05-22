@@ -1,18 +1,17 @@
 import asyncio
 import re
-from datetime import datetime, timezone
+from datetime import timezone
 from itertools import zip_longest
-from typing import Optional, Union, List, Tuple, Literal
 from types import SimpleNamespace
+from typing import List, Literal, Optional, Tuple, Union
 
 import discord
+from dateutil import parser
 from discord.ext import commands
-from discord.ext.commands.view import StringView
 from discord.ext.commands.cooldowns import BucketType
+from discord.ext.commands.view import StringView
 from discord.role import Role
 from discord.utils import escape_markdown
-
-from dateutil import parser
 
 from core import checks
 from core.models import DMDisabled, PermissionLevel, SimilarCategoryConverter, getLogger
@@ -1647,7 +1646,6 @@ class Modmail(commands.Cog):
 
         roles = []
         users = []
-        now = ctx.message.created_at
 
         blocked_users = list(self.bot.blocked_users.items())
         for id_, reason in blocked_users:

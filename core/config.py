@@ -5,14 +5,13 @@ import re
 import typing
 from copy import deepcopy
 
-from dotenv import load_dotenv
-import isodate
-
 import discord
+import isodate
 from discord.ext.commands import BadArgument
+from dotenv import load_dotenv
 
 from core._color_data import ALL_COLORS
-from core.models import DMDisabled, InvalidConfigError, Default, getLogger
+from core.models import Default, DMDisabled, InvalidConfigError, getLogger
 from core.time import UserFriendlyTime
 from core.utils import strtobool
 
@@ -29,6 +28,7 @@ class ConfigManager:
         "fallback_category_id": None,
         "prefix": "?",
         "mention": "@here",
+        "mention_message": None,
         "main_color": str(discord.Color.blurple()),
         "error_color": str(discord.Color.red()),
         "user_typing": False,
