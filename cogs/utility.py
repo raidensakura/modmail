@@ -785,17 +785,23 @@ class Utility(commands.Cog):
         Change the prefix of the bot.
 
         Type only `{prefix}prefix` to retrieve your current bot prefix.
+        Enclose your prefix in doublequotes to include trailing spaces.
+
+        Example: `{prefix}prefix "mm "`
         """
 
         current = self.bot.prefix
-        embed = discord.Embed(title="Current prefix", color=self.bot.main_color, description=f"{current}")
+        embed = discord.Embed(title="Current prefix", color=self.bot.main_color, description=f"`{current}`")
 
         if prefix is None:
             await ctx.send(embed=embed)
         else:
+            pattern = r'"([^"]{1,19})"'
+            match = re.search(pattern, prefix)
+
             embed.title = "Changed prefix!"
-            embed.description = f"Set prefix to `{prefix}`"
-            self.bot.config["prefix"] = prefix
+            embed.description = f"Set prefix to `{match.group(1) if match else prefix}`"
+            self.bot.config["prefix"] = match.group(1) if match else prefix
             await self.bot.config.update()
             await ctx.send(embed=embed)
 
