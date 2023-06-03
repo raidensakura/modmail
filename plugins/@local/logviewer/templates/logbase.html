@@ -35,6 +35,17 @@
 
 
     <div class='entry'>
+		{% if not log_entry.recipient.discriminator or log_entry.recipient.discriminator == '0' %}
+			{% set r_discrim = ' ✨' %}
+		{% else %}
+			{% set r_discrim = '#' + log_entry.recipient.discriminator %}
+		{% endif %}
+
+		{% if not log_entry.creator.discriminator or log_entry.creator.discriminator == '0' %}
+			{% set c_discrim = ' ✨' %}
+		{% else %}
+			{% set c_discrim = '#' + log_entry.creator.discriminator %}
+		{% endif %}
 
         <br>
         <div class="info">
@@ -47,13 +58,13 @@
                     (Open){% else %}(Closed){% endif %}</div>
                 <div title="{{ log_entry.recipient.id }}" class="info__channel-topic tooltip"><span
                         style="color:white">Recipient:
-                        <b>{{ log_entry.recipient.name | e }}</b></span>#{{ log_entry.recipient.discriminator }}
+                        <b>{{ log_entry.recipient.name | e }}</b></span>{{ r_discrim }}
                     <span class='tooltiptext pre pre--inline'>{{ log_entry.recipient.id }}</span>
                 </div>
                 {% if log_entry.recipient != log_entry.creator %}
                 <br>
                 <div class="info__channel-topic tooltip"><span style="color:white">Creator:
-                        <b>{{ log_entry.creator.name | e }}</span></b>#{{ log_entry.creator.discriminator }}
+                        <b>{{ log_entry.creator.name | e }}</span></b>{{ c_discrim }}
                     <span class='tooltiptext pre pre--inline'>{{ log_entry.creator.id }}</span>
                 </div>
                 {% endif %}
