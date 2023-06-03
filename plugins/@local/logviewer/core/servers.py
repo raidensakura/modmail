@@ -236,11 +236,6 @@ class LogviewerServer:
         except ValueError:
             page = 1
 
-        def parse_date(date):
-            date = dateutil.parser.parse(date).astimezone(timezone.utc)
-            timestamp = duration(date, datetime.now(timezone.utc))
-            return timestamp
-
         async def find_logs():
             filter_ = {"bot_id": str(self.bot.user.id)}
 
@@ -285,35 +280,6 @@ class LogviewerServer:
                 max_page += 1
 
             items = await cursor.to_list(length=logs_per_page)
-
-            # iterate over list to change timestamps to readable format
-            # also reduce size of author avatar
-            for index, item in enumerate(items):
-                recipient_avatar_url = items[index]["recipient"][
-                    "avatar_url"
-                ].split("?")[0]
-                items[index]["recipient"]["avatar_url"] = recipient_avatar_url
-
-                creator_avatar_url = items[index]["creator"]["avatar_url"].split(
-                    "?"
-                )[0]
-                items[index]["creator"]["avatar_url"] = creator_avatar_url
-
-                creation_date = item.get("created_at")
-                items[index].update(created_at=parse_date(creation_date))
-                close_date = item.get("closed_at")
-
-                if close_date is not None:
-                    items[index].update(closed_at=parse_date(close_date))
-
-                try:
-                    last_message = items[index].get("last_message")
-                    last_message_duration = parse_date(
-                        last_message.get("timestamp")
-                    )
-                    items[index]["last_message_time"] = last_message_duration
-                except Exception:
-                    pass
 
             return items, max_page, status_open, count_all
         

@@ -75,8 +75,8 @@
 					{% if log.nsfw %} <span class="internal-tag">NSFW</span>
 					{% endif %}
 					<span class="chatlog__timestamp">
-						{% if log.open %} Opened {{ log.created_at }}
-						{% else %} Closed {{ log.closed_at }}
+						{% if log.open %} Opened {{ log.human_created_at }}
+						{% else %} Closed {{ log.human_closed_at }}
 						{% endif %}
 					</span>
 					<div class="chatlog__content" id="{{ log.key }}">
@@ -108,10 +108,10 @@
 									total message{% if log.message_count > 1 %}s{% endif %}
 								</td>
 							</tr>
-							{% if log.last_message_time %}
+							{% if log.last_message %}
 							<tr class="tr-nbb">
 								<td class="td-npy chatlog__timestamp">Last Message:</td>
-								<td class="td-npy chatlog__timestamp">{{ log.last_message_time }}</td>
+								<td class="td-npy chatlog__timestamp">{{ log.last_message.human_created_at }}</td>
 							</tr>
 							{% endif %}
 						</table>

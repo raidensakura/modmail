@@ -6,7 +6,11 @@ from typing import TYPE_CHECKING, List, Optional, Union
 import dateutil.parser
 from natural.date import duration
 
+from core.models import getLogger
+
 from .formatter import format_content_html
+
+logger = getLogger(__name__)
 
 if TYPE_CHECKING:
     from .types_ext import AttachmentPayload, AuthorPayload, LogEntryPayload, MessagePayload
@@ -117,23 +121,49 @@ class LogEntry:
             out += f"Thread closed at {closed_time} \n"
 
         return out
-    
-class LogList:
-    def __init__(self, data, prefix, page, max_page, status_open, count_all):
 
-        for logs in data:
-            pass
+
+class MinimalLogEntry:
+    def __init__(self, data):
+        self.key: str = data["key"]
+        self.open: bool = data["open"]
         
-        self.logs = data
-        self.prefix = prefix
-        self.page = page
-        self.max_page = max_page
-        self.status_open = status_open
-        self.count_all = count_all
+        self.created_at: datetime = dateutil.parser.parse(data["created_at"])
+        if self.created_at.tzinfo is not None:
+            self.created_at = self.created_at.replace(tzinfo=None)
+
+        self.human_created_at: str = duration(self.created_at, now=datetime.utcnow())
+        self.closed_at: Optional[datetime] = (
+            dateutil.parser.parse(data["closed_at"]) if not self.open else None
+        )
+        if self.closed_at is not None and self.closed_at.tzinfo is not None:
+            self.closed_at = self.closed_at.replace(tzinfo=None)
+
+        self.creator: Author = Author(data["creator"])
+        self.recipient: Author = Author(data["recipient"])
+        self.nsfw: bool = data["nsfw"]
+        self.title: Optional[str] = data["title"]
+        self.last_message: Optional[Message] = (
+            Message(data["last_message"]) if data.get("last_message") else None
+        )
+        self.message_count: int = data["message_count"]
 
     @property
     def human_closed_at(self) -> str:
         return duration(self.closed_at, now=datetime.utcnow())
+
+
+class LogList:
+    def __init__(self, data, prefix, page, max_page, status_open, count_all):
+        logs = list()
+        for log in data:
+            logs.append(MinimalLogEntry(log))
+        self.logs: list = logs
+        self.prefix: str = prefix
+        self.page: int = page
+        self.max_page: int = max_page
+        self.status_open: bool = status_open
+        self.count_all: int = count_all
 
 
 class Author:
@@ -141,7 +171,7 @@ class Author:
         self.id: int = int(data.get("id"))
         self.name: str = data["name"]
         self.discriminator: str = data["discriminator"]
-        self.avatar_url: str = data["avatar_url"]
+        self.avatar_url: str = data["avatar_url"].split("?")[0] or data["avatar_url"]
         self.mod: bool = data["mod"]
 
     @property
