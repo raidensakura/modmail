@@ -36,7 +36,7 @@
 					onerror="this.src='/static/img/avatar_default.jpg'" alt="avatar">
 			</div>
 			<div class="info__metadata">
-				<div class="info__guild-name">Greetings, <span style='color:white'>{{ user.username | e}}.</span>
+				<div class="info__guild-name">Greetings, <span style='color:white'>{{ user.global_name or user.username | e}}.</span>
 				</div>
 				<div class="info__channel-topic tooltip">Displaying
 					<span style="color:white"><b>{{ data.logs | length }}</b> out of <b>{{ data.count_all }}</b> threads</span> in
@@ -56,6 +56,11 @@
 		
 		<div class="chatlog">
 			{% for log in data.logs %}
+			{% if not log.creator.discriminator or log.creator.discriminator == '0' %}
+				{% set c_discrim = ' ✨' %}
+			{% else %}
+				{% set c_discrim = '#' + log.creator.discriminator %}
+			{% endif %}
 			<div class="chatlog__message-group active_hover" onclick="hoverIt(this)">
 				<div class="chatlog__author-avatar-container">
 					<img class="chatlog__author-avatar" src="{{ log.creator.avatar_url }}"
@@ -63,7 +68,7 @@
 				</div>
 				<div class="chatlog__messages">
 					<span class="chatlog__author-name" title="{{ log.creator.id }}">
-						<b>{{ log.creator.name | e }}</b></span>#{{ log.creator.discriminator }}
+						<b>{{ log.creator.name | e }}</b></span>{{ c_discrim }}
 					{% if log.open %} <span class="mod-tag">Open</span>
 					{% else %} <span class='red-tag'>Closed</span>
 					{% endif %}
@@ -85,8 +90,13 @@
 							<tr class="tr-nbb">
 								<td class="td-npy">Recipient:</td>
 								<td class="td-npy">
+									{% if not log.recipient.discriminator or log.recipient.discriminator == '0' %}
+										{% set r_discrim = ' ✨' %}
+									{% else %}
+										{% set r_discrim = '#' + log.recipient.discriminator %}
+									{% endif %}
 									<div title="{{ log.recipient.id }}" class="info__channel-topic tooltip">
-										<span style="color:white">{{ log.recipient.name | e }}</span>#{{ log.recipient.discriminator }}
+										<span style="color:white">{{ log.recipient.name | e }}</span>{{ r_discrim }}
 										<span class="tooltiptext pre pre--inline">{{ log.recipient.id }}</span>
 									</div>
 								</td>
@@ -117,7 +127,7 @@
 				</div>
 				<div class="chatlog__messages">
 					<span class="chatlog__author-name">
-						<b>Mei</b></span>#Raiden
+						<b>Raiden Mei</b>
 					<span class="internal-tag">404</span>
 					<span class="chatlog__timestamp">
 						Herrscher of Thunder
