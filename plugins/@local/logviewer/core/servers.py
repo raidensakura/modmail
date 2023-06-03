@@ -3,7 +3,6 @@ from __future__ import annotations
 import base64
 import os
 import re
-import warnings
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
@@ -65,14 +64,15 @@ class Config:
     """
 
     def __init__(self):
+        self.log_url = os.getenv("LOG_URL", "https://example.com")
         self.log_prefix = os.getenv("URL_PREFIX", "/logs")
         self.host = os.getenv("HOST", "0.0.0.0")
         self.port = int(os.getenv("PORT", 8000))
         self.pagination = os.getenv("LOGVIEWER_PAGINATION", 25)
 
         self.using_oauth = all((OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI))
-        logger.info(f"Enabling Logviewer Oauth: {self.using_oauth}")
         if self.using_oauth:
+            logger.info(f"Enabling Logviewer Oauth: {self.using_oauth}")
             self.guild_id = os.getenv("GUILD_ID")
             self.bot_token = os.getenv("TOKEN")
             self.netloc = urlparse(OAUTH2_REDIRECT_URI).netloc
@@ -108,9 +108,12 @@ class LogviewerServer:
         self.app.middlewares.append(aiohttp_error_handler)
 
         self._hooked = True
+        
+        key = os.getenv("LOGVIEWER_SECRET", "A sophisticated key")[:24]
+        key_b = key.encode("utf-8")
+        key64 = base64.urlsafe_b64encode(key_b.ljust(32)[:32])
+        f = fernet.Fernet(key64)
 
-        fernet_key = fernet.Fernet.generate_key()
-        f = fernet.Fernet(fernet_key)
         setup(self.app, EncryptedCookieStorage(f))
 
     def _add_routes(self) -> None:
@@ -151,7 +154,7 @@ class LogviewerServer:
         """
         Stops the log viewer server.
         """
-        logger.warning(" - Shutting down web server. - ")
+        logger.info(" - Shutting down web server. - ")
         if self.site:
             await self.site.stop()
         if self.runner:
@@ -348,14 +351,12 @@ class LogviewerServer:
         **kwargs: Any,
     ) -> Response:
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            session = await get_session(request)
-        kwargs["app"] = request.app
-        kwargs["config"] = self.config
-        kwargs["using_oauth"] = True
+        session = await get_session(request)
         kwargs["session"] = session
         kwargs["user"] = session.get("user")
+        kwargs["app"] = request.app
+        kwargs["config"] = self.config
+        kwargs["using_oauth"] = all((OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI))
         kwargs["logged_in"] = kwargs["user"] is not None
 
         template = jinja_env.get_template(name + ".html")

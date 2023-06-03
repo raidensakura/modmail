@@ -1,5 +1,4 @@
 import os
-import warnings
 from urllib.parse import urlencode
 
 import aiohttp
@@ -25,9 +24,7 @@ def authentication(func):
             result = await func(self, request, key=key or None, **kwargs)
             return result
         
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            session = await get_session(request)
+        session = await get_session(request)
         if not session.get("user"):
             session["last_visit"] = str(request.url)
             raise aiohttp.web.HTTPFound("/login")
@@ -91,9 +88,8 @@ async def fetch_token(code):
         return json
     
 async def login(request):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        session = await get_session(request)
+
+    session = await get_session(request)
     if not session.get("last_visit"):
         session["last_visit"] = "/"
 
@@ -107,9 +103,7 @@ async def login(request):
     raise aiohttp.web.HTTPFound(f"{AUTHORIZATION_BASE_URL}?{urlencode(data)}")
 
 async def oauth_callback(request):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        session = await get_session(request)
+    session = await get_session(request)
 
     code = request.query.get("code")
     token = await fetch_token(code)
@@ -124,8 +118,6 @@ async def oauth_callback(request):
     raise aiohttp.web.HTTPFound("/login")
 
 async def logout(request):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        session = await get_session(request)
+    session = await get_session(request)
     session.invalidate()
     raise aiohttp.web.HTTPFound("/")
