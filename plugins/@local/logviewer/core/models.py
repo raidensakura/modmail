@@ -9,7 +9,7 @@ from natural.date import duration
 from .formatter import format_content_html
 
 if TYPE_CHECKING:
-    from .types_ext import AttachmentPayload, AuthorPayload, LogEntryPayload, LogListPayload, MessagePayload
+    from .types_ext import AttachmentPayload, AuthorPayload, LogEntryPayload, MessagePayload
 
 
 class LogEntry:
@@ -119,7 +119,11 @@ class LogEntry:
         return out
     
 class LogList:
-    def __init__(self, data: LogListPayload, prefix, page, max_page, status_open, count_all):
+    def __init__(self, data, prefix, page, max_page, status_open, count_all):
+
+        for logs in data:
+            pass
+        
         self.logs = data
         self.prefix = prefix
         self.page = page
