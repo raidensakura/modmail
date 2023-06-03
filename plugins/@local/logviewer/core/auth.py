@@ -1,11 +1,13 @@
-from functools import wraps
+import os
+import warnings
+from urllib.parse import urlencode
 
 import aiohttp
 from aiohttp_session import get_session
-from aiohttp_session.cookie_storage import EncryptedCookieStorage
-import os
 
-from urllib.parse import urlencode
+from core.models import getLogger
+
+logger = getLogger(__name__)
 
 OAUTH2_CLIENT_ID = os.getenv("OAUTH2_CLIENT_ID")
 OAUTH2_CLIENT_SECRET = os.getenv("OAUTH2_CLIENT_SECRET")
@@ -16,20 +18,16 @@ AUTHORIZATION_BASE_URL = f"{API_BASE}/oauth2/authorize"
 TOKEN_URL = f"{API_BASE}/oauth2/token"
 ROLE_URL = f"{API_BASE}/guilds/{{guild_id}}/members/{{user_id}}"
 
-from core.models import getLogger
-
-logger = getLogger(__name__)
-
-client_session = aiohttp.ClientSession()
-
 
 def authentication(func):
-    async def wrapper(self, request, **kwargs):
+    async def wrapper(self, request, key=None, **kwargs):
         if not self.config.using_oauth:
-            result = await func(self, request, **kwargs)
+            result = await func(self, request, key=key or None, **kwargs)
             return result
-
-        session = await get_session(request)
+        
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            session = await get_session(request)
         if not session.get("user"):
             session["last_visit"] = str(request.url)
             raise aiohttp.web.HTTPFound("/login")
@@ -45,61 +43,37 @@ def authentication(func):
             "everyone" in whitelist or
             any(int(r) in whitelist for r in roles)
         ):
-            result = await func(self, request, **kwargs)
+            kwargs["using_oauth"] = True
+            kwargs["session"] = session
+            kwargs["user"] = user
+            kwargs["logged_in"] = kwargs["user"] is not None
+            kwargs.update(globals())
+            result = await func(self, request, key=key or None, **kwargs)
             return result
         
-        result = await self.render_template("unauthorized", request)
-
+        result = await self.render_template(
+            "unauthorized", request, message="You are not authorized to view this thread."
+        )
         return result
     return wrapper
 
-
-def authrequired():
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(self, request):
-            if self.config.using_oauth:
-                session = await get_session(request)
-                if not session.get("user"):
-                    session["last_visit"] = str(request.url)
-                    raise aiohttp.web.HTTPFound("/login")
-
-                user = session.get("user")
-                logger.info(user)
-
-                whitelist = self.bot.config.get("oauth_whitelist", [])
-
-                roles = await get_user_roles(user["id"])
-
-                if (
-                    int(user["id"]) not in whitelist and 
-                    "everyone" not in whitelist and
-                    any(int(r) not in whitelist for r in roles)
-                ):
-                    logger.warn("Unauthorized access detected")
-                    return await self.render_template("unauthorized")
-
-        return wrapper
-
-    return decorator
-
 async def get_user_info(token):
     headers = {"Authorization": f"Bearer {token}"}
-    async with client_session.get(
-        f"{API_BASE}/users/@me", headers=headers
-    ) as resp:
-        _r = await resp.json()
-        logger.info(f"UINFO: {_r}")
-        return await resp.json()
+    async with aiohttp.ClientSession() as session:
+        resp = await session.get(f"{API_BASE}/users/@me", headers=headers)
+        user = await resp.json()
+        return user
         
 async def get_user_roles(user_id):
     _guild_id = os.getenv("GUILD_ID", None)
-    _bot_token = os.getenv("BOT_TOKEN", None)
+    _bot_token = os.getenv("TOKEN", None)
     url = ROLE_URL.format(guild_id=_guild_id, user_id=user_id)
     headers = {"Authorization": f"Bot {_bot_token}"}
-    async with client_session.get(url, headers=headers) as resp:
+    async with aiohttp.ClientSession() as session:
+        resp = await session.get(url, headers=headers)
         user = await resp.json()
-    return user.get("roles", [])
+        user_roles = user.get("roles", [])
+        return user_roles
 
 async def fetch_token(code):
     data = {
@@ -111,12 +85,15 @@ async def fetch_token(code):
         "scope": "identify",
     }
 
-    async with client_session.post(TOKEN_URL, data=data) as resp:
+    async with aiohttp.ClientSession() as session:
+        resp = await session.post(TOKEN_URL, data=data)
         json = await resp.json()
         return json
     
 async def login(request):
-    session = await get_session(request)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        session = await get_session(request)
     if not session.get("last_visit"):
         session["last_visit"] = "/"
 
@@ -130,7 +107,9 @@ async def login(request):
     raise aiohttp.web.HTTPFound(f"{AUTHORIZATION_BASE_URL}?{urlencode(data)}")
 
 async def oauth_callback(request):
-    session = await get_session(request)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        session = await get_session(request)
 
     code = request.query.get("code")
     token = await fetch_token(code)
@@ -145,6 +124,8 @@ async def oauth_callback(request):
     raise aiohttp.web.HTTPFound("/login")
 
 async def logout(request):
-    session = await get_session(request)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        session = await get_session(request)
     session.invalidate()
     raise aiohttp.web.HTTPFound("/")

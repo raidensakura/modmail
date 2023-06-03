@@ -1,44 +1,39 @@
 from __future__ import annotations
 
+import base64
 import os
 import re
-import base64
-
+import warnings
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+from urllib.parse import urlparse
 
 import aiohttp
+import dateutil.parser
 import discord
 import jinja2
-
 from aiohttp import web
 from aiohttp.web import Application, Request, Response
+from aiohttp_session import get_session, setup
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
+from cryptography import fernet
 from discord.utils import MISSING
 from jinja2 import Environment, FileSystemLoader
+from natural.date import duration
 
 from core.models import getLogger
 
-from cryptography import fernet
-
-from .handlers import aiohttp_error_handler, AIOHTTPMethodHandler
+from .auth import authentication
+from .handlers import AIOHTTPMethodHandler, aiohttp_error_handler
 from .models import LogEntry, LogList
-from .auth import authrequired, authentication, get_user_roles, get_user_info
-
-from datetime import datetime, timezone
-import dateutil.parser
-from natural.date import duration
-
-from aiohttp_session import setup
-from aiohttp_session.cookie_storage import EncryptedCookieStorage
-
-from urllib.parse import urlparse
-
 
 if TYPE_CHECKING:
-    from jinja2 import Template
+    from jinja2 import Template  # noqa: F401
+
     from bot import ModmailBot
 
-    from .types_ext import RawPayload, LogListPayload
+    from .types_ext import RawPayload
 
 
 logger = getLogger(__name__)
@@ -120,12 +115,13 @@ class LogviewerServer:
 
     def _add_routes(self) -> None:
         prefix = self.config.log_prefix or "/logs"
+        prefix.strip("/")
         self.app.router.add_route("HEAD", "/", AIOHTTPMethodHandler)
-        self.app.router.add_route("GET", "/login", AIOHTTPMethodHandler)
-        self.app.router.add_route("GET", "/callback", AIOHTTPMethodHandler)
-        self.app.router.add_route("GET", "/logout", AIOHTTPMethodHandler)
-        self.app.router.add_route("GET", "/{prefix}", AIOHTTPMethodHandler)
-        for path in ("/", prefix + "/{key}", prefix + "/raw/{key}"):
+        self.app.router.add_route("GET", "/login{r:[\/]{0,1}}", AIOHTTPMethodHandler)
+        self.app.router.add_route("GET", "/callback{r:[\/]{0,1}}", AIOHTTPMethodHandler)
+        self.app.router.add_route("GET", "/logout{r:[\/]{0,1}}", AIOHTTPMethodHandler)
+        self.app.router.add_route("GET", "/{prefix}{r:[\/]{0,1}}", AIOHTTPMethodHandler)
+        for path in ("/", prefix + "/{key}{r:[\/]{0,1}}", prefix + "/raw/{key}{r:[\/]{0,1}}"):
             self.app.router.add_route("GET", path, AIOHTTPMethodHandler)
 
     async def start(self) -> None:
@@ -175,7 +171,7 @@ class LogviewerServer:
 
         return main_deps
 
-    async def process_logs(self, request: Request, *, path: str, key: str) -> Response:
+    async def process_logs(self, request: Request, *, path: str, key: str, **kwargs) -> Response:
         """
         Matches the request path with regex before rendering the logs template to user.
         """
@@ -186,15 +182,16 @@ class LogviewerServer:
         data = match.groupdict()
         raw = data["raw"]
         if not raw:
-            return await self.render_logs(request, key)
+            return await self.render_logs(request, key, **kwargs)
         else:
-            return await self.render_raw_logs(request, key)
+            return await self.render_raw_logs(request, key, **kwargs)
 
     @authentication
     async def render_logs(
         self,
         request: Request,
         key: str,
+        **kwargs,
     ) -> Response:
         """Returns the html rendered log entry"""
         logs = self.bot.api.logs
@@ -202,10 +199,10 @@ class LogviewerServer:
         if not document:
             return await self.raise_error("not_found", message=f"Log entry '{key}' not found.")
         log_entry = LogEntry(document)
-        return await self.render_template("logbase", request, log_entry=log_entry)
+        return await self.render_template("logbase", request, log_entry=log_entry, **kwargs)
 
     @authentication
-    async def render_raw_logs(self, request, key) -> Any:
+    async def render_raw_logs(self, request, key, **kwargs) -> Any:
         """
         Returns the plain text rendered log entry.
         """
@@ -223,7 +220,7 @@ class LogviewerServer:
         )
     
     @authentication
-    async def render_loglist(self, request) -> Any:
+    async def render_loglist(self, request, **kwargs) -> Any:
         """
         Returns the html rendered log list
         """
@@ -240,8 +237,6 @@ class LogviewerServer:
             date = dateutil.parser.parse(date).astimezone(timezone.utc)
             timestamp = duration(date, datetime.now(timezone.utc))
             return timestamp
-        
-        logger.info("googoo gaga")
 
         async def find_logs():
             filter_ = {"bot_id": str(self.bot.user.id)}
@@ -325,7 +320,7 @@ class LogviewerServer:
 
         log_list = LogList(document, prefix, page, max_page, status_open, count_all)
 
-        return await self.render_template("loglist", request, data=log_list)
+        return await self.render_template("loglist", request, data=log_list, **kwargs)
 
     @staticmethod
     async def raise_error(error_type: str, *, message: Optional[str] = None, **kwargs) -> Any:
@@ -353,8 +348,15 @@ class LogviewerServer:
         **kwargs: Any,
     ) -> Response:
 
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            session = await get_session(request)
         kwargs["app"] = request.app
         kwargs["config"] = self.config
+        kwargs["using_oauth"] = True
+        kwargs["session"] = session
+        kwargs["user"] = session.get("user")
+        kwargs["logged_in"] = kwargs["user"] is not None
 
         template = jinja_env.get_template(name + ".html")
         template = await template.render_async(*args, **kwargs)

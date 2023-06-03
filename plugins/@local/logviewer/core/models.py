@@ -1,21 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import dateutil.parser
 from natural.date import duration
-from typing import List, Optional, Union, TYPE_CHECKING
 
 from .formatter import format_content_html
 
 if TYPE_CHECKING:
-    from .types_ext import (
-        AttachmentPayload,
-        AuthorPayload,
-        LogEntryPayload,
-        MessagePayload,
-        LogListPayload
-    )
+    from .types_ext import AttachmentPayload, AuthorPayload, LogEntryPayload, LogListPayload, MessagePayload
 
 
 class LogEntry:

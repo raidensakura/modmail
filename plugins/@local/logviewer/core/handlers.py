@@ -1,21 +1,20 @@
 from __future__ import annotations
 
-from typing import Callable, TYPE_CHECKING
+import os
+from typing import TYPE_CHECKING, Callable
 
 from aiohttp import web
 from aiohttp.web import Response
 
 from core.models import getLogger
-from .auth import login, oauth_callback, logout
 
+from .auth import login, logout, oauth_callback
 
 if TYPE_CHECKING:
     from aiohttp.web import Request
 
 
 logger = getLogger(__name__)
-
-import os
 
 
 @web.middleware
@@ -72,21 +71,25 @@ class AIOHTTPMethodHandler(web.View):
         key = params.get("key")
         server = self.request.app["server"]
 
-        if path == os.getenv("URL_PREFIX", "/logs"):
+        log_prefix = os.getenv("URL_PREFIX", "/logs")
+        log_prefix.strip("/")
+
+        if path in ("/logs", "/logs/"):
             return await server.render_loglist(self.request)
         
-        if path == "/login":
+        if path in ("/login", "/login/"):
             return await login(self.request)
         
-        if path == "/callback":
+        if path in ("/callback", "/callback/"):
             return await oauth_callback(self.request)
         
-        if path == "logout":
+        if path in ("/logout", "/logout/"):
             return await logout(self.request)
         
-        if not key:
+        if path == "/":
             return await server.render_template("index", self.request)
-        elif key:
+        
+        if key:
             return await server.process_logs(self.request, path=self.request.path, key=key)
 
         raise web.HTTPNotFound(reason=f"Invalid path, '{self.request.path}'.")

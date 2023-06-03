@@ -1,6 +1,6 @@
+import base64
 import html
 import re
-import base64
 
 
 def format_content_html(content: str, allow_links: bool = False) -> str:

@@ -2,21 +2,18 @@ from __future__ import annotations
 
 import json
 import os
-
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
-
 from discord.ext import commands
 from discord.utils import MISSING
 
 from core import checks
-from core.models import getLogger, PermissionLevel
+from core.models import PermissionLevel, getLogger
 from core.utils import strtobool
 
 from .core.servers import LogviewerServer
-
 
 if TYPE_CHECKING:
     from bot import ModmailBot

@@ -1,13 +1,6 @@
 from __future__ import annotations
 
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    TypedDict,
-)
-
+from typing import Any, Dict, List, Optional, TypedDict
 
 RawPayload = Dict[str, Any]
 
@@ -50,6 +43,3 @@ class LogEntryPayload(TypedDict):
     closer: Optional[AuthorPayload]
     close_message: Optional[str]
     messages: List[MessagePayload]
-
-
-LogListPayload = List[LogEntryPayload]
