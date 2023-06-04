@@ -137,14 +137,6 @@ class LogviewerServer:
         await self.runner.setup()
         self.site = web.TCPSite(self.runner, self.config.host, self.config.port)
         await self.site.start()
-        favicon_path = static_path / "favicon.webp"
-        if not favicon_path.exists():
-            asset = self.bot.user.display_avatar.replace(size=32, format="webp")
-            try:
-                await asset.save(favicon_path)
-            except discord.NotFound as exc:
-                logger.error("Unable to set 'favicon.webp' due to download failure.")
-                logger.error(f"{type(exc).__name__}: {str(exc)}")
         self._running = True
 
     async def stop(self) -> None:
@@ -321,6 +313,7 @@ class LogviewerServer:
         kwargs["config"] = self.config
         kwargs["using_oauth"] = all((OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI))
         kwargs["logged_in"] = kwargs["user"] is not None
+        kwargs["favicon"] = self.bot.user.display_avatar.replace(size=32, format="webp")
 
         template = jinja_env.get_template(name + ".html")
         template = await template.render_async(*args, **kwargs)
