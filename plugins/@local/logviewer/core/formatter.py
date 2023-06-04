@@ -26,6 +26,15 @@ def format_content_html(content: str, allow_links: bool = False) -> str:
     # Multiline blockquotes (>>> test) are saved as single in Mongo (> test)
     content = re.sub(r"(&gt; )([^\n]+)", r"<blockquote>\2</blockquote>", content)
 
+    # Markdown heading level 1
+    content = re.sub(r'^#\s+(.+)$', r'<h1>\1</h1>', content, flags=re.MULTILINE)
+
+    # Markdown heading level 2
+    content = re.sub(r'^##\s+(.+)$', r'<h2>\1</h2>', content, flags=re.MULTILINE)
+
+    # Markdown heading level 3
+    content = re.sub(r'^###\s+(.+)$', r'<h3>\1</h3>', content, flags=re.MULTILINE)
+
     # Encode links
     if allow_links:
 
