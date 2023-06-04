@@ -3,13 +3,11 @@ from __future__ import annotations
 import base64
 import os
 import re
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 from urllib.parse import urlparse
 
 import aiohttp
-import dateutil.parser
 import discord
 import jinja2
 from aiohttp import web
@@ -19,7 +17,6 @@ from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from cryptography import fernet
 from discord.utils import MISSING
 from jinja2 import Environment, FileSystemLoader
-from natural.date import duration
 
 from core.models import getLogger
 
