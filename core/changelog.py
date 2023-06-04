@@ -186,7 +186,7 @@ class Changelog:
         if branch not in ("stable", "develop"):
             branch = "stable"
 
-        url = url or f"https://raw.githubusercontent.com/modmail-dev/modmail/{branch}/CHANGELOG.md"
+        url = url or f"https://raw.githubusercontent.com/raidensakura/modmail/{branch}/CHANGELOG.md"
 
         async with await bot.session.get(url) as resp:
             return cls(bot, branch, await resp.text())
