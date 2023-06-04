@@ -141,8 +141,8 @@ class MinimalLogEntry:
 
         self.creator: Author = Author(data["creator"])
         self.recipient: Author = Author(data["recipient"])
-        self.nsfw: bool = data["nsfw"]
-        self.title: Optional[str] = data["title"]
+        self.nsfw: Optional[bool] = data.get("nsfw")
+        self.title: Optional[str] = data.get("title")
         self.last_message: Optional[Message] = (
             Message(data["last_message"]) if data.get("last_message") else None
         )
