@@ -226,9 +226,12 @@
             });
         });
 
+		let int_toggle = document.getElementById('internal_toggle')
+		int_toggle.checked = false
+
         function toggleInternalMessages() {
-            let messages = document.getElementsByClassName('internal')
-            let togglestate = document.getElementById('internal_toggle')
+			let messages = document.getElementsByClassName('internal')
+			let togglestate = document.getElementById('internal_toggle')
             for (let m of messages) {
                 if (m.style.display !== "flex" && togglestate.checked) {
                     togglestate.checked = true;
