@@ -71,10 +71,9 @@ class AIOHTTPMethodHandler(web.View):
         key = params.get("key")
         server = self.request.app["server"]
 
-        log_prefix = os.getenv("URL_PREFIX", "/logs")
-        log_prefix.strip("/")
+        log_prefix = os.getenv("LOG_URL_PREFIX", "/logs")
 
-        if path in ("/logs", "/logs/"):
+        if path in (f"{log_prefix}", f"{log_prefix}/"):
             return await server.render_loglist(self.request)
         
         if path in ("/login", "/login/"):

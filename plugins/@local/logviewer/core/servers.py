@@ -61,7 +61,7 @@ class Config:
 
     def __init__(self):
         self.log_url = os.getenv("LOG_URL", "https://example.com")
-        self.log_prefix = os.getenv("URL_PREFIX", "/logs")
+        self.log_prefix = os.getenv("LOG_URL_PREFIX", "/logs")
         self.host = os.getenv("HOST", "0.0.0.0")
         self.port = int(os.getenv("PORT", 8000))
         self.pagination = os.getenv("LOGVIEWER_PAGINATION", 25)

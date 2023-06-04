@@ -84,7 +84,7 @@
 							<tr class="tr-nbb">
 								<td class="td-npy">Thread ID:</td>
 								<td class="td-npy">
-									<a class='log-button thread-href' href="{{ data.prefix }}/{{ log.key }}">{{ log.key }}</a>
+									<a class='log-button thread-href' href="{{ data.prefix }}{{ '' if data.prefix == '/' else '/' }}{{ log.key }}">{{ log.key }}</a>
 								</td>
 							</tr>
 							<tr class="tr-nbb">
