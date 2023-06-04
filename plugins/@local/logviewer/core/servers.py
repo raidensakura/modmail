@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import aiohttp
 import jinja2
 from aiohttp import web
-from aiohttp.web import Application, Request, Response
+from aiohttp.web import Application, Request, Response, normalize_path_middleware
 from aiohttp_session import get_session, setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from cryptography import fernet
@@ -94,7 +94,10 @@ class LogviewerServer:
         """
         Initial setup to start the server.
         """
-        self.app: Application = Application()
+        self.app: Application = Application(
+            middlewares = [ normalize_path_middleware(remove_slash=True, append_slash=False),
+            ]
+        )
         self.app.router.add_static("/static", static_path)
         self.app["server"] = self
 
@@ -114,14 +117,18 @@ class LogviewerServer:
 
     def _add_routes(self) -> None:
         prefix = self.config.log_prefix or "/logs"
-        prefix.strip("/")
         self.app.router.add_route("HEAD", "/", AIOHTTPMethodHandler)
-        self.app.router.add_route("GET", "/login{r:[\/]{0,1}}", AIOHTTPMethodHandler)
-        self.app.router.add_route("GET", "/callback{r:[\/]{0,1}}", AIOHTTPMethodHandler)
-        self.app.router.add_route("GET", "/logout{r:[\/]{0,1}}", AIOHTTPMethodHandler)
-        self.app.router.add_route("GET", "/{prefix}{r:[\/]{0,1}}", AIOHTTPMethodHandler)
-        for path in ("/", prefix + "/{key}{r:[\/]{0,1}}", prefix + "/raw/{key}{r:[\/]{0,1}}"):
-            self.app.router.add_route("GET", path, AIOHTTPMethodHandler)
+        self.app.router.add_route("GET", "/login", AIOHTTPMethodHandler)
+        self.app.router.add_route("GET", "/callback", AIOHTTPMethodHandler)
+        self.app.router.add_route("GET", "/logout", AIOHTTPMethodHandler)
+
+        if prefix == "/":     
+            for path in ("/", "/{key}", "/raw/{key}"):
+                self.app.router.add_route("GET", path, AIOHTTPMethodHandler)
+        else:
+            self.app.router.add_route("GET", prefix, AIOHTTPMethodHandler)
+            for path in ("/", prefix, prefix + "/{key}", prefix + "/raw/{key}"):
+                self.app.router.add_route("GET", path, AIOHTTPMethodHandler)
 
     async def start(self) -> None:
         """
@@ -166,7 +173,9 @@ class LogviewerServer:
         """
         Matches the request path with regex before rendering the logs template to user.
         """
-        path_re = re.compile(rf"^{self.config.log_prefix}/(?:(?P<raw>raw)/)?(?P<key>([a-zA-Z]|[0-9])+)")
+
+        prefix = "" if self.config.log_prefix == "/" else self.config.log_prefix or "/logs"
+        path_re = re.compile(rf"^{prefix}/(?:(?P<raw>raw)/)?(?P<key>([a-zA-Z]|[0-9])+)")
         match = path_re.match(path)
         if match is None:
             return await self.raise_error("not_found", message=f"Invalid path, '{path}'.")
