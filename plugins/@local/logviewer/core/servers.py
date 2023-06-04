@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Any, Optional
 from urllib.parse import urlparse
 
 import aiohttp
-import discord
 import jinja2
 from aiohttp import web
 from aiohttp.web import Application, Request, Response

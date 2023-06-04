@@ -53,7 +53,7 @@ class Version:
         self.version = version.lstrip("vV")
         self.lines = lines.strip()
         self.fields = {}
-        self.changelog_url = f"https://github.com/modmail-dev/modmail/blob/{branch}/CHANGELOG.md"
+        self.changelog_url = f"https://github.com/raidensakura/modmail/blob/{branch}/CHANGELOG.md"
         self.description = ""
         self.parse()
 
@@ -181,10 +181,10 @@ class Changelog:
         res = await proc.stdout.read()
         branch = res.decode("utf-8").rstrip()
         if not branch or err:
-            branch = "master" if not bot.version.is_prerelease else "development"
+            branch = "stable" if not bot.version.is_prerelease else "develop"
 
-        if branch not in ("master", "development"):
-            branch = "master"
+        if branch not in ("stable", "develop"):
+            branch = "stable"
 
         url = url or f"https://raw.githubusercontent.com/modmail-dev/modmail/{branch}/CHANGELOG.md"
 

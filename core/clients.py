@@ -63,7 +63,7 @@ class GitHub:
     """
 
     BASE = "https://api.github.com"
-    REPO = BASE + "/repos/modmail-dev/modmail"
+    REPO = BASE + "/repos/raidensakura/modmail"
     MERGE_URL = BASE + "/repos/{username}/modmail/merges"
     FORK_URL = REPO + "/forks"
     STAR_URL = BASE + "/user/starred/modmail-dev/modmail"
@@ -81,7 +81,7 @@ class GitHub:
 
     @property
     def BRANCH(self) -> str:
-        return "master" if not self.bot.version.is_prerelease else "development"
+        return "stable" if not self.bot.version.is_prerelease else "develop"
 
     async def request(
         self,

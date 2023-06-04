@@ -1985,7 +1985,7 @@ class Utility(commands.Cog):
 
         desc = (
             f"The latest version is [`{self.bot.version}`]"
-            "(https://github.com/modmail-dev/modmail/blob/master/bot.py#L1)"
+            "(https://github.com/raidensakura/modmail/blob/stable/bot.py#L1)"
         )
 
         if self.bot.version >= parse_version(latest.version) and flag.lower() != "force":

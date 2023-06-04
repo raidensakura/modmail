@@ -1,8 +1,8 @@
 version: "1"
 rules:
-  - base: master
-    upstream: modmail-dev:master
+  - base: stable
+    upstream: raidensakura:stable
     mergeMethod: hardreset
-  - base: development
-    upstream: modmail-dev:development
+  - base: develop
+    upstream: raidensakura:develop
     mergeMethod: hardreset
