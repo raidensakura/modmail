@@ -1,42 +1,27 @@
 <div align="center">
-  <img src="https://i.imgur.com/o558Qnq.png" align="center">
+  <img src="https://modmail-docs.netlify.app/logo-long.png" align="center">
   <br>
-  <strong><i>A feature-rich Modmail bot for Discord.</i></strong>
+  <strong><i>Fork of a feature-rich Modmail bot for Discord written in Python.</i></strong>
   <br>
   <br>
 
   <a href="#">
-    <img src="https://img.shields.io/badge/Latest%20Version-v4.0.2-7289da?style=for-the-badge&logo=data:image/gif;base64,R0lGODlhGAAYAHAAACH5BAEAAD8ALAAAAAAYABgAhXsA/2oA/306/662530e/4sJ/7uk7OPn5op166du84RL94QA/3EA/66D+uvV5Nzc3IIx+7GA/7V8/3QG/3wA/7Rh/6qW2pRa/GEA/8TF3dLb7nY9418b/V8A/7K4z4Rb75Js/GUA/5w6/a6P9MrT5plh5oNw435H8Hc96nMq9HlG83ZN4I1w3NPs5NXv08PU1XEi72kA/5dM/2QA/5OA6YAA/0sA/3AW+atw/7aD/20f/5da/3MA/34M/3UY/wAAAAbXwN8PQCwaj8UAICBEOp/QqHRKhQoGhOqxYDggEoqFltFwHB6QiGRCoVYeh7jlEolcMGJrJh7XbOp1HB1tSFx8fB4fgBEgHSGERGRwh3EbIA0SgCIdg5EjJJOHHiUWJiUnKBApnB1FCiqqKCslJiwlLS6HLzAxvUUyi3YWoXEkJTO9vpENixvEDjQ1MzbJMUYCgAkIojcz3sjJRzg5ESmTGSjf39VHOowmByQs6ursRzsQGRY81f32Rgx6+ADnz5+SIwsIFuz3JOFCgw1ndHiYbEjEiQ9/BAEAOw==">
+    <img src="https://img.shields.io/badge/Version-4.0.2-7d5edd?style=shield&logo=https://modmail-docs.netlify.app/favicon.png">
   </a>
-
-  <br>
-  
-  <a href="https://heroku.com/deploy?template=https://github.com/modmail-dev/modmail">
-    <img src="https://img.shields.io/badge/deploy_to-heroku-997FBC.svg?style=for-the-badge&logo=Heroku">
-  </a>
-
-  <a href="https://github.com/modmail-dev/modmail/">
-    <img src="https://api.modmail.dev/badges/instances.svg" alt="Bot instances">
-  </a>
-
   <a href="https://discord.gg/cnUpwrnpYb">
-    <img src="https://img.shields.io/discord/1079074933008781362.svg?label=Discord&logo=Discord&colorB=7289da&style=for-the-badge" alt="Support">
+    <img src="https://img.shields.io/discord/1079074933008781362.svg?label=Discord&logo=Discord&colorB=7289da&style=shield" alt="Support">
   </a>
-
-  <a href="https://patreon.com/kyber">
-    <img src="https://img.shields.io/badge/patreon-donate-orange.svg?style=for-the-badge&logo=Patreon" alt="Python 3.8">
+  <a href="https://ko-fi.com/raidensakura">
+    <img src="https://img.shields.io/badge/kofi-donate-gold.svg?style=shield&logo=Ko-fi" alt="Ko-fi">
   </a>
-
   <a href="https://www.python.org/downloads/">
-    <img src="https://img.shields.io/badge/Made%20With-Python%203.8-blue.svg?style=for-the-badge&logo=Python" alt="Made with Python 3.8">
+    <img src="https://img.shields.io/badge/Compatible%20With-Python%203.8%20|%203.9%20|%203.10-blue.svg?style=shield&logo=Python" alt="Made with Python 3.8">
   </a>
-
   <a href="https://github.com/ambv/black">
-    <img src="https://img.shields.io/badge/Code%20Style-Black-black?style=for-the-badge">
+    <img src="https://img.shields.io/badge/Code%20Style-Black-black?style=shield">
   </a>
-
   <a href="https://github.com/modmail-dev/modmail/blob/master/LICENSE">
-    <img src="https://img.shields.io/badge/license-agpl-e74c3c.svg?style=for-the-badge" alt="MIT License">
+    <img src="https://img.shields.io/badge/license-agpl-e74c3c.svg?style=shield" alt="MIT License">
   </a>
 
 <img src='https://github.com/raidensakura/modmail/assets/38610216/106e8fa3-6f8e-4b00-9968-f5c2f3108da0' align='center' width=500>
@@ -47,13 +32,13 @@
 
 Modmail is similar to Reddit's Modmail, both in functionality and purpose. It serves as a shared inbox for server staff to communicate with their users in a seamless way.
 
-This bot is free for everyone and always will be. If you like this project and would like to show your appreciation, you can support us on **[Patreon](https://www.patreon.com/kyber)**, cool benefits included! 
+This bot is free for everyone and always will be. If you like this project and would like to show your appreciation, you can support the original developers on their **[Patreon](https://www.patreon.com/kyber)**, cool benefits included! 
 
 ## How does it work?
 
 When a member sends a direct message to the bot, Modmail will create a channel or "thread" into a designated category. All further DM messages will automatically relay to that channel; any available staff can respond within the channel.
 
-Our Logviewer will save the threads so you can view previous threads through their corresponding log link. Here is an [**example**](https://logs.modmail.dev/example).
+Logviewer will save the threads so you can view previous threads through their corresponding log link.
 
 ## Features
 
@@ -69,7 +54,7 @@ Our Logviewer will save the threads so you can view previous threads through the
   * When you close a thread, Modmail will generate a [log link](https://logs.modmail.dev/example) and post it to your log channel.
   * Native Discord dark-mode feel.
   * Markdown/formatting support.
-  * Login via Discord to protect your logs ([premium Patreon feature](https://patreon.com/kyber)).
+  * Login via Discord to protect your logs (optional feature).
   * See past logs of a user with `?logs`.
   * Searchable by text queries using `?logs search`.
 
@@ -95,11 +80,11 @@ There are a few options for hosting your very own dedicated Modmail bot.
 
 ### Patreon Hosting
 
-If you don't want the trouble of renting and configuring your server to host Modmail, we got a solution for you! We offer hosting and maintenance of your own, private Modmail bot (including a Logviewer) through [**Patreon**](https://patreon.com/kyber). Join our [Modmail Discord Server](https://discord.gg/cnUpwrnpYb) for more info! 
+If you don't want the trouble of renting and configuring your server to host Modmail, the original developers offer hosting and maintenance of your own, private Modmail bot (including a Logviewer) through [**Patreon**](https://patreon.com/kyber). Join our [Modmail Discord Server](https://discord.gg/cnUpwrnpYb) for more info! 
 
 ### Local hosting (General Guide)
 
-Modmail can be hosted on any modern hardware, including your PC. For stability and reliability, we suggest purchasing a cloud server (VPS) for under $10/mo. If you need recommendations on choosing a VPS, join our [Discord server](https://discord.gg/cnUpwrnpYb), and we'll send you a list of non-affiliated hosting providers. Alternatively, we can host Modmail for you when you're subscribed to our [Patreon](https://patreon.com/kyber).
+Modmail can be hosted on any modern hardware, including your PC. For stability and reliability, we suggest purchasing a cloud server (VPS) for under $10/mo. If you need recommendations on choosing a VPS, join the [Discord server](https://discord.gg/cnUpwrnpYb), and we'll send you a list of non-affiliated hosting providers. Alternatively, we can host Modmail for you when you're subscribed to the [Patreon](https://patreon.com/kyber).
 
 This guide assumes you've downloaded [`Python 3.10`](https://www.python.org/downloads/release/python-376/) and added python and pip to PATH.
 
@@ -141,34 +126,34 @@ We assume you already have Docker and Docker Compose Plugin installed, if not, s
    - For older Docker versions, you may need to run `docker-compose up -d` instead
 5. View the status of your bot, using `docker ps` and `docker logs [container-id]`
 
-Our Docker images are hosted on [GitHub Container Registry](ghcr.io), you can build your own image if you wish:
+Docker images are hosted on [GitHub Container Registry](ghcr.io), you can build your own image if you wish:
 ```console
-$ docker build --tag=modmail:master .
+$ docker build --tag=modmail:stable .
 ```
 
 Then simply remove `ghcr.io/modmail-dev/` from the `docker-compose.yml` file.
 
 ### Local Hosting (OS-Specific)
 
-This guide is a WIP. Join our [Discord server](https://discord.gg/cnUpwrnpYb) for more info.
+Refer to our [documentation](https://modmail-docs.netlify.app) for more info.
 
 ### Platform as a Service (PaaS)
 
-You can host this bot on Heroku (no longer free).
+You can host this bot on various PaaS such as Heroku, Railway, and others.
 
 Installation via Heroku is possible with your web browser alone. 
-The [**installation guide**](https://github.com/modmail-dev/modmail/wiki/Installation) (which includes a video tutorial!) will guide you through the entire installation process. If you run into any problems, join our [Modmail Discord Server](https://discord.gg/cnUpwrnpYb) for help and support.
+The [**installation guide**](https://github.com/modmail-dev/modmail/wiki/Installation) (which includes a video tutorial!) will guide you through the entire installation process. If you run into any problems, join the [Modmail Discord Server](https://discord.gg/cnUpwrnpYb) for help and support.
 
 When using Heroku, you can configure automatic updates:
  - Login to [GitHub](https://github.com/) and verify your account.
  - [Fork the repo](https://github.com/modmail-dev/modmail/fork).
  - Install the [Pull app](https://github.com/apps/pull) for your fork. 
  - Then go to the Deploy tab in your [Heroku account](https://dashboard.heroku.com/apps) of your bot app, select GitHub and connect your fork (usually by typing "Modmail"). 
- - Turn on auto-deploy for the `master` branch.
+ - Turn on auto-deploy for the `stable` branch.
 
 ## Sponsors
 
-Special thanks to our sponsors for supporting the project.
+Special thanks to the sponsors for supporting the project.
 
 SirReddit:
 <br>
@@ -216,16 +201,16 @@ You can find a list of third-party plugins using the `?plugins registry`  comman
 
 To develop your own, check out the [plugins documentation](https://github.com/modmail-dev/modmail/wiki/Plugins).
 
-Plugins requests and support are available in our [Modmail Support Server](https://discord.gg/cnUpwrnpYb).
+Plugins requests and support are available in the [Modmail Support Server](https://discord.gg/cnUpwrnpYb).
 
 ## Contributing
 
-Contributions to Modmail are always welcome, whether it be improvements to the documentation or new functionality, please feel free to make the change. Check out our [contributing guidelines](https://github.com/modmail-dev/modmail/blob/master/.github/CONTRIBUTING.md) before you get started.
+Contributions to Modmail are always welcome, whether it be improvements to the documentation or new functionality, please feel free to make the change. Check out the [contributing guidelines](https://github.com/raidensakura/modmail/blob/stable/.github/CONTRIBUTING.md) before you get started.
 
 If you like this project and would like to show your appreciation, support us on **[Patreon](https://www.patreon.com/kyber)**!
 
 ## Beta Testing
 
-Our [development](https://github.com/modmail-dev/modmail/tree/development) branch is where most of our features are tested before public release. Be warned that there could be bugs in various commands so keep it away from any large servers you manage.
+The [develop](https://github.com/raidensakura/modmail/tree/develop) branch is where most of the features are tested before stable release. Be warned that there could be bugs in various commands so keep it away from any large servers you manage.
 
-If you wish to test the new features and play around with them, feel free to join our [Public Test Server](https://discord.gg/v5hTjKC). Bugs can be raised within that server or in our Github issues (state that you are using the development branch though).
+If you wish to test the new features and play around with them, feel free to join the [Public Test Server](https://discord.gg/v5hTjKC). Bugs can be raised within that server or in our Github issues (state that you are using the development branch though).
