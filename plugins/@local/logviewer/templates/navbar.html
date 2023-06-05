@@ -36,7 +36,6 @@
                 </li>
                 {% endif %}
             </ul>
-
             <a href="#!" data-target="nav-mobile" class="button-collapse sidenav-trigger right"><i class="material-icons">menu</i></a>
         </div>
     </nav>
@@ -69,9 +68,19 @@
 <div class='navbar-fixed'>
     <nav class="lighten-1">
         <div class="nav-wrapper container">
-            <a id="logo-container" href="/" class="brand-logo">
+            <a id="logo-container" href="/" class="brand-logo center">
                 <i class="material-icons" id='dash'>home</i>
             </a>
+			<a id="logo-container" href="{{ config.log_prefix }}" class="brand-logo left">
+                <i class="material-icons" id='dash'>speaker_notes</i>
+            </a>
+			<ul class="right">
+                <li>
+                    <a href="#" class="waves-effect"><i class="right material-icons" id='dash'>person_off</i>
+						<span class="hide-on-med-and-down">OAuth not enabled</span>
+					</a>
+                </li>
+			</ul>
         </div>
     </nav>
 </div>

@@ -24,7 +24,7 @@ def format_content_html(content: str, allow_links: bool = False) -> str:
 
     # Encode inline blockquotes (> test)
     # Multiline blockquotes (>>> test) are saved as single in Mongo (> test)
-    content = re.sub(r"(^(&gt;[^\n]*){1,3})", r"<blockquote>\1</blockquote>", content, flags=re.MULTILINE)
+    content = re.sub(r"^(?:(?:&gt;){1,3})(.*)", r"<blockquote>\1</blockquote>", content, flags=re.MULTILINE)
 
     # Markdown heading level 1
     content = re.sub(r'^#\s+(.+)$', r'<h1>\1</h1>', content, flags=re.MULTILINE)
