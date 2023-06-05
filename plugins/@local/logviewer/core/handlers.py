@@ -73,16 +73,19 @@ class AIOHTTPMethodHandler(web.View):
 
         log_prefix = os.getenv("LOG_URL_PREFIX", "/logs")
 
-        if path in (log_prefix):
+        if log_prefix == "/" and path == "/":
+            return await server.render_loglist(self.request)
+
+        if path == log_prefix:
             return await server.render_loglist(self.request)
         
-        if path in ("/login"):
+        if path == "/login":
             return await login(self.request)
         
-        if path in ("/callback"):
+        if path == "/callback":
             return await oauth_callback(self.request)
         
-        if path in ("/logout"):
+        if path == "/logout":
             return await logout(self.request)
         
         if path == "/":

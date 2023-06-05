@@ -126,7 +126,6 @@ class LogviewerServer:
             for path in ("/", "/{key}", "/raw/{key}"):
                 self.app.router.add_route("GET", path, AIOHTTPMethodHandler)
         else:
-            self.app.router.add_route("GET", prefix, AIOHTTPMethodHandler)
             for path in ("/", prefix, prefix + "/{key}", prefix + "/raw/{key}"):
                 self.app.router.add_route("GET", path, AIOHTTPMethodHandler)
 
