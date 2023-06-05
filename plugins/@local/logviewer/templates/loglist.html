@@ -36,7 +36,7 @@
 					onerror="this.src='/static/img/avatar_default.png'" alt="avatar">
 			</div>
 			<div class="info__metadata">
-				<div class="info__guild-name">Greetings, <span style='color:white'>{{ user.global_name or user.username | e}}.</span>
+				<div class="info__guild-name">Greetings, <span style='color:white'>{{ user.global_name or user.username or "visitor" | e}}.</span>
 				</div>
 				<div class="info__channel-topic tooltip">Displaying
 					<span style="color:white"><b>{{ data.logs | length }}</b> out of <b>{{ data.count_all }}</b> threads</span> in
