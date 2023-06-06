@@ -25,6 +25,4 @@ print("Stopping Modmail")
 
 proc.terminate()
 
-print(f"Modmail stopped with exit code {proc.returncode()}")
-
-sys.exit(proc.returncode())
+sys.exit()
