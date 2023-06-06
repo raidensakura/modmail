@@ -4,15 +4,15 @@
     "title": "About",
     "type": "page"
   },
-  "getting-started": "Getting Started",
+  "getting-started": "Getting started",
   "installation": "Installing Modmail",
   "logviewer-installation": "Installing Logviewer",
   "configuration": "Configuring Modmail",
   "updating": "Updating Modmail",
   "updating-logviewer": "Updating Logviewer",
-  "setting-up-auto-restart": "Set Up Auto-restart",
+  "setting-up-auto-restart": "Set up auto-restart",
   "contact": {
-    "title": "Contact ↗",
+    "title": "Discord ↗",
     "type": "page",
     "href": "https://dsc.gg/transience",
     "newWindow": true
