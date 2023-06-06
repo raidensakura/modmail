@@ -49,7 +49,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
-.ruff_cache
+.ruff_cache/
 
 # Translations
 *.mo
@@ -148,8 +148,10 @@ Procfile
 pyproject.toml
 *.md
 .*.json
-docs/
 Dockerfile
 docker-compose.yml
 LICENSE
 PRIVACY.md
+
+# Docs
+docs/
