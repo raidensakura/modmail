@@ -24,6 +24,11 @@ const config: DocsThemeConfig = {
       className="white-logo"
     />
   </>,
+  useNextSeoProps() {
+    return {
+      titleTemplate: 'Modmail - %s',
+    }
+  },
   head: () => {
     const { frontMatter } = useConfig();
 

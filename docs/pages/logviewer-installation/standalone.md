@@ -1,5 +1,5 @@
 ---
-description: Hosting the logviewer on the cloud or on your own computer.
+title: Standalone
 ---
 
 # Logviewer

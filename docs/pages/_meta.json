@@ -4,7 +4,7 @@
     "title": "About",
     "type": "page"
   },
-  "get-started": "Getting Started",
+  "getting-started": "Getting Started",
   "installation": "Installing Modmail",
   "logviewer-installation": "Installing Logviewer",
   "configuration": "Configuring Modmail",

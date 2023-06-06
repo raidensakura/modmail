@@ -1,0 +1,26 @@
+import { Steps } from 'nextra-theme-docs'
+
+# Frequently Asked Questions
+
+<Steps>
+
+### Error installing from Pipfile and Pipfile.lock
+
+First, make sure you have a compatible Python version.
+
+Second, remove the broken `Pipfile` and `Pipfile.lock` with:
+```bash
+rm Pipfile && rm Pipfile.lock
+```
+
+Fetch in the changes from the remote repository:
+```bash
+git fetch origin
+```
+
+And then, fetch the original files with:
+```bash
+git checkout FETCH_HEAD -- Pipfile && git checkout FETCH_HEAD -- Pipfile.lock
+```
+
+</Steps>

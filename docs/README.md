@@ -1,18 +1,18 @@
-# Nextra Docs Template 
+# Modmail Docs
 
-This is a template for creating documentation with [Nextra](https://nextra.site).
+This is the documentation directory for Modmail bot, powered by [Nextra](https://nextra.site).
 
-[**Live Demo →**](https://nextra-docs-template.vercel.app)
+The page is live at https://modmail-docs.netlify.app.
 
-[![](.github/screenshot.png)](https://nextra-docs-template.vercel.app)
+## Deploying your own site
 
-## Quick Start
-
-Click the button to clone this repository and deploy it on Vercel:
+Click the button to clone the official nextra repository and deploy it on Vercel:
 
 [![](https://vercel.com/button)](https://vercel.com/new/clone?s=https%3A%2F%2Fgithub.com%2Fshuding%2Fnextra-docs-template&showOptionalTeamCreation=false)
 
-## Local Development
+## Development & Contributing
+
+[Node.js](https://nodejs.org/en) and [pnpm](https://pnpm.io/installation) must be installed.
 
 First, run `pnpm i` to install the dependencies.
 
@@ -20,4 +20,4 @@ Then, run `pnpm dev` to start the development server and visit localhost:3000.
 
 ## License
 
-This project is licensed under the MIT License.
+This project directory is licensed under the MIT License.
