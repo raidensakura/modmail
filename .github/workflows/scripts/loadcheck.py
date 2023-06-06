@@ -21,8 +21,10 @@ proc = subprocess.Popen(
 # let Modmail boot up
 time.sleep(10)
 
+exit_code = 1 if proc.poll() else 0
+
 print("Stopping Modmail")
 
 proc.terminate()
 
-sys.exit()
+sys.exit(exit_code)
