@@ -19,7 +19,7 @@ proc = subprocess.Popen(
 )
 
 # let Modmail boot up
-time.sleep(10)
+time.sleep(15)
 
 exit_code = 1 if proc.poll() else 0
 
