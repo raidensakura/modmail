@@ -1,3 +1,5 @@
+import os
+import signal
 import subprocess
 import sys
 import time
@@ -12,7 +14,7 @@ print(f"Starting Modmail with {python_version}")
 
 file = open("modmail.log", "w")
 proc = subprocess.Popen(
-    f"pipenv run bot",
+    "pipenv run bot",
     stdout=file,
     stderr=subprocess.STDOUT,
     shell=True,
@@ -25,6 +27,8 @@ exit_code = 1 if proc.poll() else 0
 
 print("Stopping Modmail")
 
-proc.terminate()
+os.kill(proc.pid, signal.SIGINT)
+
+time.sleep(5)
 
 sys.exit(exit_code)
