@@ -6,7 +6,7 @@ The page is live at https://modmail-docs.netlify.app.
 
 ## Deploying your own site
 
-Click the button to clone the official nextra repository and deploy it on Vercel:
+Click the button to clone the official nextra template repository and deploy it on Vercel:
 
 [![](https://vercel.com/button)](https://vercel.com/new/clone?s=https%3A%2F%2Fgithub.com%2Fshuding%2Fnextra-docs-template&showOptionalTeamCreation=false)
 
