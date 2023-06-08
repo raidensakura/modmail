@@ -1,27 +1,27 @@
-FROM python:3.10-alpine as base
+FROM python:3.11-alpine as base
 
-RUN apk update && apk add git cairo-dev cairo cairo-tools \
+RUN apk update && apk add git \
+	# cairosvg dependencies
+	cairo-dev cairo cairo-tools \
 	# pillow dependencies
-    jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev tk-dev tcl-dev
+	jpeg-dev zlib-dev
 
-FROM base AS python-deps
+FROM base as python-deps
 
-RUN apk add --virtual build-dependencies build-base gcc libffi-dev
+RUN apk add --virtual build-deps build-base gcc libffi-dev
+COPY requirements.txt /
+RUN pip install --prefix=/inst -U -r /requirements.txt
 
-COPY Pipfile Pipfile.lock /
-RUN pip install pipenv && PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
-
-FROM base AS runtime
-
-COPY --from=python-deps /.venv /.venv
-ENV PATH="/.venv/bin:$PATH"
+FROM base as runtime
 
 ENV USING_DOCKER yes
+COPY --from=python-deps /inst /usr/local
+
 COPY . /modmail
 WORKDIR /modmail
 
-CMD ["python", "-m", "bot"]
+CMD ["python", "bot.py"]
 
 RUN adduser --disabled-password --gecos '' app && \
-    chown -R app /modmail && chown -R app /.venv
+    chown -R app /modmail
 USER app
