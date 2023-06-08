@@ -56,11 +56,6 @@
 		
 		<div class="chatlog">
 			{% for log in data.logs %}
-			{% if not log.creator.discriminator or log.creator.discriminator == '0' %}
-				{% set c_discrim = ' ✨' %}
-			{% else %}
-				{% set c_discrim = '#' + log.creator.discriminator %}
-			{% endif %}
 			<div class="chatlog__message-group active_hover" onclick="hoverIt(this)">
 				<div class="chatlog__author-avatar-container">
 					<img class="chatlog__author-avatar" src="{{ log.creator.avatar_url }}"
@@ -68,7 +63,7 @@
 				</div>
 				<div class="chatlog__messages">
 					<span class="chatlog__author-name" title="{{ log.creator.id }}">
-						<b>{{ log.creator.name | e }}</b></span>{{ c_discrim }}
+						<b>{{ log.creator.name | e }}</b></span>{{ '' if log.creator.discriminator == '0' else '#' ~ log.creator.discriminator }}
 					{% if log.open %} <span class="mod-tag">Open</span>
 					{% else %} <span class='red-tag'>Closed</span>
 					{% endif %}
@@ -90,13 +85,8 @@
 							<tr class="tr-nbb">
 								<td class="td-npy">Recipient:</td>
 								<td class="td-npy">
-									{% if not log.recipient.discriminator or log.recipient.discriminator == '0' %}
-										{% set r_discrim = ' ✨' %}
-									{% else %}
-										{% set r_discrim = '#' + log.recipient.discriminator %}
-									{% endif %}
 									<div title="{{ log.recipient.id }}" class="info__channel-topic tooltip">
-										<span style="color:white">{{ log.recipient.name | e }}</span>{{ r_discrim }}
+										<span style="color:white">{{ log.recipient.name | e }}</span>{{ '' if log.recipient.discriminator == '0' else '#' ~ log.recipient.discriminator }}
 										<span class="tooltiptext pre pre--inline">{{ log.recipient.id }}</span>
 									</div>
 								</td>

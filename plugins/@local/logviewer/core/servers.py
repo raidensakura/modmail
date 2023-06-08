@@ -47,12 +47,7 @@ jinja_env = Environment(
 OAUTH2_CLIENT_ID = os.getenv("OAUTH2_CLIENT_ID")
 OAUTH2_CLIENT_SECRET = os.getenv("OAUTH2_CLIENT_SECRET")
 OAUTH2_REDIRECT_URI = os.getenv("OAUTH2_REDIRECT_URI")
-
-API_BASE = "https://discordapp.com/api/"
-AUTHORIZATION_BASE_URL = f"{API_BASE}/oauth2/authorize"
-TOKEN_URL = f"{API_BASE}/oauth2/token"
-ROLE_URL = f"{API_BASE}/guilds/{{guild_id}}/members/{{user_id}}"
-
+oauth_enabled = all((OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI))
 
 class Config:
     """
@@ -66,7 +61,7 @@ class Config:
         self.port = int(os.getenv("PORT", 8000))
         self.pagination = os.getenv("LOGVIEWER_PAGINATION", 25)
 
-        self.using_oauth = all((OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI))
+        self.using_oauth = oauth_enabled
         if self.using_oauth:
             logger.info(f"Enabling Logviewer Oauth: {self.using_oauth}")
             self.guild_id = os.getenv("GUILD_ID")
@@ -318,7 +313,7 @@ class LogviewerServer:
         kwargs["user"] = session.get("user")
         kwargs["app"] = request.app
         kwargs["config"] = self.config
-        kwargs["using_oauth"] = all((OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI))
+        kwargs["using_oauth"] = oauth_enabled
         kwargs["logged_in"] = kwargs["user"] is not None
         kwargs["favicon"] = self.bot.user.display_avatar.replace(size=32, format="webp")
 

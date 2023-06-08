@@ -25,12 +25,7 @@
                 </li>
                 {% else %}
                 <li>
-					{% if not user.discriminator or user.discriminator == '0' %}
-						{% set discrim = ' ✨' %}
-					{% else %}
-						{% set discrim = '#' + user.discriminator %}
-					{% endif %}
-                    <a class="dropdown-trigger" href="#!" data-target="dropdown1"><b>{{ user.username | e }}</b>{{ discrim }}
+                    <a class="dropdown-trigger" href="#!" data-target="dropdown1"><b>{{ user.username | e }}</b>{{ '' if user.discriminator == '0' else '#' ~ user.discriminator }}
                         <img class='circle nav-icon' width='35px' src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.webp?size=80">
                     </a>
                 </li>
@@ -56,7 +51,7 @@
         <div class="background" style='background-color:#2D2F33'>
         </div>
         <a><img class="circle" src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.webp?size=80"></a>
-        <a><span class="grey-text name"><b style='color:white'>{{ user.username | e }}</b>{{ discrim }}</span></a>
+        <a><span class="grey-text name"><b style='color:white'>{{ user.username | e }}</b>{{ '' if user.discriminator == '0' else '#' ~ user.discriminator }}</span></a>
         <br>
     </div> 
     <li><a href="/logout" class="waves-effect"><span class="grey-text">Logout</span></a></li>
