@@ -8,6 +8,26 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+### Added
+- New .env config option: `REGISTRY_PLUGINS_ONLY`, restricts to only allow adding registry plugins. ([PR #3247](https://github.com/modmail-dev/modmail/pull/3247))
+- New config option: `mention_message`, this will include an additional configurable message next to role mention on thread creation. Defaults to None.
+- Added custom database name detection in `CONNECTION_URI` .env config option. You can now specify custom database name by appending /db_name in your `CONNECTION_URI`.
+- Added discord.py and python version info in `?about` embed and credit for contributors.
+- Support for trailing space in `?prefix` command, example: `?prefix "mm "` for `mm ping`.
+- Added logviewer as built-in local plugin `?plugin load @local/logviewer`.
+
+### Changed
+- Guild icons in embed footers and author urls now have a fixed size of 128. ([PR #3261](https://github.com/modmail-dev/modmail/pull/3261))
+- Official repo moved to https://github.com/modmail-dev/modmail.
+- Optimized Dockerfile build steps for smaller overall image size. (900MB -> under 400MB)
+- Edited .env.example to only include required variables.
+- Changed `confirm_thread_creation` reactions to buttons.
+- Bumped motor, python-dotenv, attrs, and discord.py version to support Python 3.11.
+- Updated requirements.txt to be in sync with Pipfile.
+
+### Removed
+- Removed bandit from dev dependencies as it's no longer used in develop workflow.
+
 ### Fixed
 - `?alias make/create` as aliases to `?alias add`. This improves continuity between the bot and its command structure. ([PR #3195](https://github.com/kyb3r/modmail/pull/3195))
 - Loading the blocked list with the `?blocked` command takes a long time when the list is large. ([PR #3242](https://github.com/kyb3r/modmail/pull/3242))
@@ -17,31 +37,11 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Fixed typo for silent close command
 - Fixed uncached member issue in large guild for react_to_contact and ticket creation
 
-### Added
-- New .env config option: `REGISTRY_PLUGINS_ONLY`, restricts to only allow adding registry plugins. ([PR #3247](https://github.com/modmail-dev/modmail/pull/3247))
-- Added custom database name detection in `CONNECTION_URI`
-- Added dpy and python version info in `?about` embed and credit for contributors
-- New config option: `mention_message`, this will include an additional configurable message next to role mention on thread creation. Defaults to None.
-- Support for trailing space in `?prefix` command, `?prefix "mm "
-- Added logviewer as built-in local plugin `?plugin load @local/logviewer`
-
-### Changed
-- Guild icons in embed footers and author urls now have a fixed size of 128. ([PR #3261](https://github.com/modmail-dev/modmail/pull/3261))
-- Repo moved to https://github.com/modmail-dev/modmail.
-- Optimized Dockerfile for smaller overall image size
-- Removed unused dependencies from requirements.txt
-- Migrated all dependencies from `requirements.txt` to `Pipfile`
-- Edited .env.example to only include what's necessary
-- Changed `confirm_thread_creation` reactions to buttons
-- Removed bandit from dev dependencies
-- Bumped dpy to 2.2.3
-
 # v4.0.2
 
 ### Breaking
 
 - Presence intent is now by-default OFF. You can turn it on by setting `ENABLE_PRESENCE_INTENT=true` in the environment variables.
-- Using Buttons instead of reactions in ´´confirm_thread_creation``.
 
 ### Fixed
 
