@@ -4,9 +4,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-black = "==23.3.0"
-typing-extensions = "==4.2.0"
+black = "*"
 ruff = "*"
+typing-extensions = "==4.6.3"
 
 # Anytime the requirements change, please sync with requirements.txt:
 # pipenv run pip freeze > requirements.txt
