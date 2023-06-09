@@ -179,7 +179,7 @@ class Author:
         return "https://cdn.discordapp.com/embed/avatars/{}.png".format(int(self.discriminator) % 5)
 
     def __str__(self) -> str:
-        return f"{self.name}#{self.discriminator}"
+        return f"{self.name}" if self.discriminator == "0" else f"{self.name}#{self.discriminator}"
 
     def __eq__(self, other: Author) -> bool:
         return self.id == other.id and self.mod is other.mod

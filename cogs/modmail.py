@@ -729,8 +729,10 @@ class Modmail(commands.Cog):
                 f"{self.bot.config['log_url'].strip('/')}{'/' + prefix if prefix else ''}/{entry['key']}"
             )
 
-            username = entry["recipient"]["name"] + "#"
-            username += entry["recipient"]["discriminator"]
+            recipient = entry["recipient"]
+            discriminator = recipient.get("discriminator")
+            username = recipient["name"]
+            username += "" if discriminator == "0" else f"#{discriminator}"
 
             embed = discord.Embed(color=self.bot.main_color, timestamp=created_at)
             embed.set_author(name=f"{title} - {username}", icon_url=avatar_url, url=log_url)
