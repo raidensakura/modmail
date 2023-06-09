@@ -46,7 +46,7 @@ class LogEntry:
 
     @property
     def system_avatar_url(self) -> str:
-        return "https://i.imgur.com/2fMgWZT.png"
+        return "/static/img/avatar_self.png"
 
     @property
     def human_closed_at(self) -> str:
@@ -176,7 +176,7 @@ class Author:
 
     @property
     def default_avatar_url(self) -> str:
-        return "https://cdn.discordapp.com/embed/avatars/{}.png".format(int(self.discriminator) % 5)
+        return f"https://cdn.discordapp.com/embed/avatars/{int(self.id) % 5}.png"
 
     def __str__(self) -> str:
         return f"{self.name}" if self.discriminator == "0" else f"{self.name}#{self.discriminator}"
