@@ -7,10 +7,11 @@ verify_ssl = true
 black = "*"
 ruff = "*"
 typing-extensions = "==4.6.3"
+pre-commit = "*"
 
+[packages]
 # Anytime the requirements change, please sync with requirements.txt:
 # pipenv run pip freeze > requirements.txt
-[packages]
 aiohttp = "~=3.8.1"
 colorama = "~=0.4.5"
 emoji = "~=1.7.0"
