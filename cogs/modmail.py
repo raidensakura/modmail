@@ -1169,7 +1169,7 @@ class Modmail(commands.Cog):
             user = thread.recipient or await self.bot.get_or_fetch_user(thread.id)
 
         default_avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
-        icon_url = getattr(user, "avatar_url", default_avatar)
+        icon_url = user.display_avatar.replace(size=32, format="webp") or default_avatar
 
         logs = await self.bot.api.get_user_logs(user.id)
 
