@@ -27,19 +27,6 @@
 <img src='https://github.com/raidensakura/modmail/assets/38610216/106e8fa3-6f8e-4b00-9968-f5c2f3108da0' align='center' width=500>
 </div>
 
-
-## What is Modmail?
-
-Modmail is similar to Reddit's Modmail, both in functionality and purpose. It serves as a shared inbox for server staff to communicate with their users in a seamless way.
-
-This bot is free for everyone and always will be. If you like this project and would like to show your appreciation, you can support the original developers on their **[Patreon](https://www.patreon.com/kyber)**, cool benefits included! 
-
-## How does it work?
-
-When a member sends a direct message to the bot, Modmail will create a channel or "thread" into a designated category. All further DM messages will automatically relay to that channel; any available staff can respond within the channel.
-
-Logviewer will save the threads so you can view previous threads through their corresponding log link.
-
 ## Features
 
 * **Highly Customisable:**
@@ -68,37 +55,18 @@ This list is ever-growing thanks to active development and our exceptional contr
 
 ## Installation
 
-Q: Where can I find the Modmail bot invite link?
+This is a general installation guide. Refer to the [documentation](https://modmail-docs.netlify.app) for detailed user guide.
 
-A: Unfortunately, due to how this bot functions, it cannot be invited. The lack of an invite link is to ensure an individuality to your server and grant you full control over your bot and data. Nonetheless, you can quickly obtain a free copy of Modmail for your server by following one of the methods listed below (roughly takes 15 minutes of your time).
+This guide assumes you have git, and a supported Python version installed and added to system PATH.
 
-There are a few options for hosting your very own dedicated Modmail bot.
-
-1. Patreon hosting
-2. Local hosting (VPS, Dedicated Server, RPi, your computer, etc.)
-3. PaaS (Currently tested are Heroku, Railway, Northflank, Zeabur & Koyeb)
-
-### Patreon Hosting
-
-If you don't want the trouble of renting and configuring your server to host Modmail, the original developers offer hosting and maintenance of your own, private Modmail bot (including a Logviewer) through [**Patreon**](https://patreon.com/kyber). Join the official [Modmail Discord Server](https://discord.gg/cnUpwrnpYb) for more info! 
-
-### Local hosting (General Guide)
-
-Modmail can be hosted on any modern hardware, including your PC. For stability and reliability, we suggest purchasing a cloud server (VPS) for under $10/mo. If you need recommendations on choosing a VPS, join the [Discord server](https://discord.gg/cnUpwrnpYb), and we'll send you a list of non-affiliated hosting providers. Alternatively, we can host Modmail for you when you're subscribed to the [Patreon](https://patreon.com/kyber).
-
-This guide assumes you've downloaded [`Python 3.10`](https://www.python.org/downloads/release/python-376/) and added python and pip to PATH.
-
-1. Clone this repo
+1. Clone the repository
     ```console
-    $ git clone https://github.com/modmail-dev/modmail
+    $ git clone https://github.com/raidensakura/modmail
     $ cd modmail
     ```
 2. Create a Discord bot account, grant the necessary intents, and invite the bot.
 3. Create a free MongoDB database.
 4. Rename the file `.env.example` to `.env` and fill it with appropriate values
-   - If you can't find `.env.example` because it's hidden, create a new text file named `.env`, then copy the contents of [this file](https://raw.githubusercontent.com/raidensakura/modmail/stable/.env.example) and replace the placeholders with their values
-   - If you're on Windows and cannot save the file as `.env`, save it as `.env.` instead (this only applies to Windows!)
-   - If you do not have a Logviewer yet, leave the `LOG_URL` field as-is
 5. Update pip, install pipenv, and install dependencies using pipenv
     ```console
     $ pip install -U pip
@@ -109,51 +77,21 @@ This guide assumes you've downloaded [`Python 3.10`](https://www.python.org/down
     ```console
     $ pipenv run bot
     ```
-7. Set up the Logviewer.
+7. Load the logviewer plugin include in Modmail with `?plugin load @local/logviewer`
 
-### Local Hosting (Docker)
+### Running the Docker Image
 
-We provide support for Docker to simplify the deployment of Modmail and Logviewer. 
-We assume you already have Docker and Docker Compose Plugin installed, if not, see [here](https://docs.docker.com/get-docker/).
+This guide assume you already have Docker or Docker Compose installed.
 
-1. Create a Discord bot account, grant the necessary intents, and invite the bot ([guide](https://github.com/modmail-dev/modmail/wiki/Installation#2-discord-bot-account))
-2. Create a file named `.env`, then copy the contents of [this file](https://raw.githubusercontent.com/modmail-dev/modmail/master/.env.example) and replace the placeholders with their values
-3. Create a file named `docker-compose.yml`, then copy the contents of [this file](https://raw.githubusercontent.com/modmail-dev/modmail/master/docker-compose.yml), do not change anything!
-4. Start the bot
+- Running with docker:
+  ```console
+  $ docker run --env-file=.env --name=modmail ghcr.io/raidensakura/modmail:stable
+  ```
+- Running with Docker Compose:
     ```console
     $ docker compose up -d
     ```
-   - For older Docker versions, you may need to run `docker-compose up -d` instead
-5. View the status of your bot, using `docker ps` and `docker logs [container-id]`
-
-Docker images are hosted on [GitHub Container Registry](ghcr.io), you can build your own image if you wish:
-```console
-$ docker build --tag=modmail:stable .
-```
-
-Then simply remove `ghcr.io/raidensakura/` from the `docker-compose.yml` file.
-
-### Local Hosting (OS-Specific)
-
-Refer to the [documentation](https://modmail-docs.netlify.app) for more info.
-
-### Platform as a Service (PaaS)
-
-You can host this bot on various PaaS such as Heroku, Railway, and others.
-
-When using Heroku, you can configure automatic updates:
- - Login to [GitHub](https://github.com/) and verify your account.
- - [Fork the repo](https://github.com/raidensakura/modmail/fork).
- - Install the [Pull app](https://github.com/apps/pull) for your fork. 
- - Then go to the Deploy tab in your [Heroku account](https://dashboard.heroku.com/apps) of your bot app, select GitHub and connect your fork (usually by typing "Modmail"). 
- - Turn on auto-deploy for the `stable` branch.
-
-## Sponsors
-
-For list of official sponsors, refer to the original repository [here](https://github.com/modmail-dev/modmail).
-
-Become a sponsor on [Patreon](https://patreon.com/kyber).
-
+    
 ## Plugins
 
 Modmail supports the use of third-party plugins to extend or add functionalities to the bot.
@@ -174,8 +112,24 @@ As I don't have a dedicated team to answer questions and provide help, it will b
 
 ## Contributing
 
-Contributions to Modmail are always welcome, whether it be improvements to the documentation or new functionality, please feel free to make the change. Check out the [contributing guidelines](https://github.com/raidensakura/modmail/blob/stable/.github/CONTRIBUTING.md) before you get started.
+Check out the [contributing guidelines](https://github.com/raidensakura/modmail/blob/stable/.github/CONTRIBUTING.md) before you get started.
 
-The [develop](https://github.com/raidensakura/modmail/tree/develop) branch is where most of the features are tested before stable release. Be warned that there could be bugs in various commands so keep it away from any large servers you manage.
+The [develop](https://github.com/raidensakura/modmail/tree/develop) branch is where most of the features are tested before stable release.
 
-If you like the original project and would like to show your appreciation, support the authors on **[Patreon](https://www.patreon.com/kyber)**!
+This project has included pre-commit script that automatically runs black and ruff linter on every commit.
+
+1. Install development dependencies inside pipenv
+    ```console
+    $ pipenv install --dev
+    ```
+2. Install the pre-commit hook
+    ```console
+    $ pre-commit install
+    ```
+    
+Alternatively, you can also lint the codebase manually
+
+```console
+$ black .
+$ ruff .
+```
