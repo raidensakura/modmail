@@ -77,7 +77,7 @@ This guide assumes you have git, and a supported Python version installed and ad
     ```console
     $ pipenv run bot
     ```
-7. Load the logviewer plugin include in Modmail with `?plugin load @local/logviewer`
+7. Load the logviewer plugin included with Modmail with `?plugin load @local/logviewer`
 
 ### Running the Docker Image
 
