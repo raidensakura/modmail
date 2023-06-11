@@ -18,6 +18,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Added discord.py and python version info in `?about` embed and credit for contributors.
 - Support for trailing space in `?prefix` command, example: `?prefix "mm "` for `mm ping`.
 - Added logviewer as built-in local plugin `?plugin load @local/logviewer`.
+- `?plugin uninstall` is now an alias for `?plugin remove` ([GH #3260](https://github.com/modmail-dev/modmail/issues/3260))
 
 ### Changed
 - Guild icons in embed footers and author urls now have a fixed size of 128. ([PR #3261](https://github.com/modmail-dev/modmail/pull/3261))

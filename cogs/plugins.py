@@ -416,7 +416,7 @@ class Plugins(commands.Cog):
             )
         return await msg.edit(embed=embed)
 
-    @plugins.command(name="remove", aliases=["del", "delete"])
+    @plugins.command(name="remove", aliases=["del", "delete", "uninstall"])
     @checks.has_permissions(PermissionLevel.OWNER)
     async def plugins_remove(self, ctx, *, plugin_name: str):
         """
