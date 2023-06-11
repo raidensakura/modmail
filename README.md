@@ -15,7 +15,7 @@
     <img src="https://img.shields.io/badge/kofi-donate-gold.svg?style=shield&logo=Ko-fi" alt="Ko-fi">
   </a>
   <a href="https://www.python.org/downloads/">
-    <img src="https://img.shields.io/badge/Compatible%20With-Python%203.8%20|%203.9%20|%203.10-blue.svg?style=shield&logo=Python" alt="Made with Python 3.8">
+    <img src="https://img.shields.io/badge/Compatible%20With-Python%203.8%20|%203.9%20|%203.10%20|%203.11-blue.svg?style=shield&logo=Python" alt="Made with Python 3.8">
   </a>
   <a href="https://github.com/ambv/black">
     <img src="https://img.shields.io/badge/Code%20Style-Black-black?style=shield">
