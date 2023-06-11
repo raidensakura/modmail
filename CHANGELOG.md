@@ -8,6 +8,9 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+### Breaking
+- The block functionality has been overhauled to fix major performance issues and issues with the saving of blocked users and roles. This unfortunately introduces backward-incompatible config schema changes. If you have blocked users stored in your MongoDB or use the `account_age` and `guild_age` functionality in Modmail, you must migrate manually by exporting and deleting the `blocked` field in your `config` collection and manually add them back using the `?block` command.
+
 ### Added
 - New .env config option: `REGISTRY_PLUGINS_ONLY`, restricts to only allow adding registry plugins. ([PR #3247](https://github.com/modmail-dev/modmail/pull/3247))
 - New config option: `mention_message`, this will include an additional configurable message next to role mention on thread creation. Defaults to None.

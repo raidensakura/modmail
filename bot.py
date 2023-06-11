@@ -48,7 +48,7 @@ from core.models import (
 )
 from core.thread import ThreadManager
 from core.time import human_timedelta
-from core.utils import extract_block_timestamp, normalize_alias, parse_alias, truncate, tryint
+from core.utils import normalize_alias, parse_alias, truncate, tryint
 
 logger = getLogger(__name__)
 
@@ -694,13 +694,7 @@ class ModmailBot(commands.Bot):
 
         if min_account_age > now:
             # User account has not reached the required time
-            delta = human_timedelta(min_account_age)
             logger.debug("Blocked due to account age, user %s.", author.name)
-
-            if str(author.id) not in self.blocked_users:
-                new_reason = f"System Message: New Account. User can try again {delta}."
-                self.blocked_users[str(author.id)] = new_reason
-
             return False
         return True
 
@@ -720,63 +714,37 @@ class ModmailBot(commands.Bot):
 
         if min_guild_age > now:
             # User has not stayed in the guild for long enough
-            delta = human_timedelta(min_guild_age)
             logger.debug("Blocked due to guild age, user %s.", author.name)
-
-            if str(author.id) not in self.blocked_users:
-                new_reason = f"System Message: Recently Joined. User can try again {delta}."
-                self.blocked_users[str(author.id)] = new_reason
-
             return False
         return True
 
     def check_manual_blocked_roles(self, author: discord.Member) -> bool:
-        if isinstance(author, discord.Member):
-            for r in author.roles:
-                if str(r.id) in self.blocked_roles:
-                    blocked_reason = self.blocked_roles.get(str(r.id)) or ""
+        for role in author.roles:
+            if str(role.id) not in self.blocked_roles:
+                continue
 
-                    try:
-                        end_time, after = extract_block_timestamp(blocked_reason, author.id)
-                    except ValueError:
-                        return False
-
-                    if end_time is not None:
-                        if after <= 0:
-                            # No longer blocked
-                            self.blocked_roles.pop(str(r.id))
-                            logger.debug("No longer blocked, role %s.", r.name)
-                            return True
-                    logger.debug("User blocked, role %s.", r.name)
-                    return False
-
+            blocked_until = self.blocked_roles[str(role.id)].get("until")
+            if blocked_until and blocked_until < datetime.now():
+                self.bot.blocked_roles.pop(str(role.id_))
+                logger.debug("No longer blocked, role %s.", role.id_)
+            else:
+                logger.debug("User blocked, role %s.", role.name)
+                return False
         return True
 
     def check_manual_blocked(self, author: discord.Member) -> bool:
         if str(author.id) not in self.blocked_users:
             return True
 
-        blocked_reason = self.blocked_users.get(str(author.id)) or ""
+        blocked_until = self.blocked_roles[str(author.id)].get("until")
 
-        if blocked_reason.startswith("System Message:"):
-            # Met the limits already, otherwise it would've been caught by the previous checks
-            logger.debug("No longer internally blocked, user %s.", author.name)
-            self.blocked_users.pop(str(author.id))
+        if blocked_until and blocked_until < datetime.now():
+            self.bot.blocked_roles.pop(str(author.id))
+            logger.debug("No longer blocked, role %s.", author.id_)
             return True
-
-        try:
-            end_time, after = extract_block_timestamp(blocked_reason, author.id)
-        except ValueError:
+        else:
+            logger.debug("User blocked, role %s.", author.name)
             return False
-
-        if end_time is not None:
-            if after <= 0:
-                # No longer blocked
-                self.blocked_users.pop(str(author.id))
-                logger.debug("No longer blocked, user %s.", author.name)
-                return True
-        logger.debug("User blocked, user %s.", author.name)
-        return False
 
     async def _process_blocked(self, message):
         _, blocked_emoji = await self.retrieve_emoji()
@@ -812,20 +780,25 @@ class ModmailBot(commands.Bot):
                 await self.config.update()
             return False
 
-        blocked_reason = self.blocked_users.get(str(author.id)) or ""
+        is_blocked = self.blocked_users.get(str(author.id))
+        blocked_reason = is_blocked.get("reason") if is_blocked else None
 
-        if not self.check_account_age(author) or not self.check_guild_age(author):
-            new_reason = self.blocked_users.get(str(author.id))
-            if new_reason != blocked_reason:
-                if send_message:
-                    await channel.send(
-                        embed=discord.Embed(
-                            title="Message not sent!",
-                            description=new_reason,
-                            color=self.error_color,
-                        )
-                    )
-            return True
+        if not self.check_account_age(author):
+            is_blocked = True
+            blocked_reason = "Sorry, your account is too new to initiate a ticket."
+
+        if not self.check_guild_age(author):
+            is_blocked = True
+            blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
+
+        if is_blocked and send_message:
+            emb = discord.Embed(
+                title="Message not sent!",
+                description=blocked_reason or "You have been blocked from contacting Modmail.",
+                color=self.error_color,
+            )
+            await channel.send(embed=emb)
+            return is_blocked
 
         if not self.check_manual_blocked(author):
             return True
@@ -833,7 +806,6 @@ class ModmailBot(commands.Bot):
         if not self.check_manual_blocked_roles(author):
             return True
 
-        await self.config.update()
         return False
 
     async def get_thread_cooldown(self, author: discord.Member):
