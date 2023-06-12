@@ -6,10 +6,8 @@ import copy
 import hashlib
 import logging
 import os
-import platform
 import re
 import string
-import struct
 import sys
 import typing
 from datetime import datetime, timezone
@@ -1744,29 +1742,6 @@ def main():
         uvloop.install()
     except ImportError:
         pass
-
-    try:
-        import cairosvg  # noqa: F401
-    except OSError:
-        if os.name == "nt":
-            if struct.calcsize("P") * 8 != 64:
-                logger.error(
-                    "Unable to import cairosvg, ensure your Python is a 64-bit version: https://www.python.org/downloads/"
-                )
-            else:
-                logger.error(
-                    "Unable to import cairosvg, install GTK Installer for Windows and restart your system (https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/latest)"
-                )
-        else:
-            if "ubuntu" in platform.version().lower() or "debian" in platform.version().lower():
-                logger.error(
-                    "Unable to import cairosvg, try running `sudo apt-get install libpangocairo-1.0-0` or report on our support server with your OS details: https://discord.gg/etJNHCQ"
-                )
-            else:
-                logger.error(
-                    "Unable to import cairosvg, report on our support server with your OS details: https://discord.gg/etJNHCQ"
-                )
-        sys.exit(0)
 
     # check discord version
     discord_version = "2.2.3"

@@ -31,6 +31,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 ### Removed
 - Removed bandit from dev dependencies as it's no longer used in develop workflow.
+- Removed CairoSVG from Python dependencies.
 
 ### Fixed
 - `?alias make/create` as aliases to `?alias add`. This improves continuity between the bot and its command structure. ([PR #3195](https://github.com/kyb3r/modmail/pull/3195))
