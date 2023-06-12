@@ -1645,26 +1645,26 @@ class Modmail(commands.Cog):
     async def blocked(self, ctx):
         """Retrieve a list of blocked users."""
 
-        roles, users, now = [], [], datetime.datetime.now()
+        roles, users, now = [], [], discord.utils.utcnow()
 
         blocked_users = list(self.bot.blocked_users.items())
         for id_, data in blocked_users:
             blocked_by_id = data["blocked_by"]
-            human_blocked_at = discord.utils.format_dt(data["blocked_at"], style="R")
-            blocked_until = data.get("until")
-            if blocked_until and blocked_until < now:
+            blocked_at = parser.parse(data["blocked_at"])
+            human_blocked_at = discord.utils.format_dt(blocked_at, style="R")
+            if "until" in data:
+                blocked_until = parser.parse(data["until"])
+                human_blocked_until = discord.utils.format_dt(blocked_until, style="R")
+            else:
+                blocked_until = human_blocked_until = "Permanent"
+
+            if isinstance(blocked_until, datetime.datetime) and blocked_until < now:
                 self.bot.blocked_users.pop(str(id_))
                 logger.debug("No longer blocked, user %s.", id_)
                 continue
-            if blocked_until:
-                human_blocked_until = discord.utils.format_dt(data["until"], style="R")
-            else:
-                human_blocked_until = None
 
-            string = f"<@{id_}> ({human_blocked_until or 'Permanent'})"
+            string = f"<@{id_}> ({human_blocked_until})"
             string += f"\n- Issued {human_blocked_at} by <@{blocked_by_id}>"
-            if human_blocked_until:
-                string += f"\n- Expires {human_blocked_until}"
 
             reason = data.get("reason")
             if reason:
@@ -1675,21 +1675,21 @@ class Modmail(commands.Cog):
         blocked_roles = list(self.bot.blocked_roles.items())
         for id_, data in blocked_roles:
             blocked_by_id = data["blocked_by"]
-            human_blocked_at = discord.utils.format_dt(data["blocked_at"], style="R")
-            blocked_until = data.get("until")
-            if blocked_until and blocked_until < now:
-                self.bot.blocked_roles.pop(str(id_))
-                logger.debug("No longer blocked, role %s.", id_)
-                continue
-            if blocked_until:
-                human_blocked_until = discord.utils.format_dt(data["until"], style="R")
+            blocked_at = parser.parse(data["blocked_at"])
+            human_blocked_at = discord.utils.format_dt(blocked_at, style="R")
+            if "until" in data:
+                blocked_until = parser.parse(data["until"])
+                human_blocked_until = discord.utils.format_dt(blocked_until, style="R")
             else:
-                human_blocked_until = None
+                blocked_until = human_blocked_until = "Permanent"
 
-            string = f"<@&{id_}> ({human_blocked_until or 'Permanent'})"
+            if isinstance(blocked_until, datetime.datetime) and blocked_until < now:
+                self.bot.blocked_users.pop(str(id_))
+                logger.debug("No longer blocked, user %s.", id_)
+                continue
+
+            string = f"<@&{id_}> ({human_blocked_until})"
             string += f"\n- Issued {human_blocked_at} by <@{blocked_by_id}>"
-            if human_blocked_until:
-                string += f"\n- Expires {human_blocked_until}"
 
             reason = data.get("reason")
             if reason:
@@ -1843,7 +1843,7 @@ class Modmail(commands.Cog):
         ):
             return await send_embed("Error", f"Cannot block {mention}, user is whitelisted.")
 
-        now, blocked = datetime.datetime.now(), dict()
+        now, blocked = discord.utils.utcnow(), dict()
 
         desc = f"{mention} is now blocked."
         if duration:
@@ -1852,10 +1852,12 @@ class Modmail(commands.Cog):
         if reason:
             desc += f"\n- Reason: {reason}"
 
-        blocked["blocked_at"] = now
+        blocked["blocked_at"] = str(now)
         blocked["blocked_by"] = ctx.author.id
-        blocked["until"] = duration.dt if duration else None
-        blocked["reason"] = reason
+        if duration:
+            blocked["until"] = str(duration.dt)
+        if reason:
+            blocked["reason"] = reason
 
         if isinstance(user_or_role, discord.Role):
             self.bot.blocked_roles[str(user_or_role.id)] = blocked

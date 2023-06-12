@@ -19,6 +19,7 @@ from types import SimpleNamespace
 import discord
 import isodate
 from aiohttp import ClientResponseError, ClientSession
+from dateutil import parser
 from discord.ext import commands, tasks
 from discord.ext.commands import MemberConverter
 from discord.ext.commands.view import StringView
@@ -723,8 +724,9 @@ class ModmailBot(commands.Bot):
             if str(role.id) not in self.blocked_roles:
                 continue
 
-            blocked_until = self.blocked_roles[str(role.id)].get("until")
-            if blocked_until and blocked_until < datetime.now():
+            str_blocked_until = self.blocked_roles[str(role.id)].get("until")
+            blocked_until = parser.parse(str_blocked_until)
+            if blocked_until and blocked_until < discord.utils.utcnow():
                 self.bot.blocked_roles.pop(str(role.id_))
                 logger.debug("No longer blocked, role %s.", role.id_)
             else:
@@ -736,9 +738,10 @@ class ModmailBot(commands.Bot):
         if str(author.id) not in self.blocked_users:
             return True
 
-        blocked_until = self.blocked_roles[str(author.id)].get("until")
+        str_blocked_until = self.blocked_roles[str(author.id)].get("until")
+        blocked_until = parser.parse(str_blocked_until)
 
-        if blocked_until and blocked_until < datetime.now():
+        if blocked_until and blocked_until < discord.utils.utcnow():
             self.bot.blocked_roles.pop(str(author.id))
             logger.debug("No longer blocked, role %s.", author.id_)
             return True
