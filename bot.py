@@ -740,7 +740,7 @@ class ModmailBot(commands.Bot):
         blocked_until = parser.parse(str_blocked_until)
 
         if blocked_until and blocked_until < discord.utils.utcnow():
-            self.bot.blocked_roles.pop(str(author.id))
+            self.bot.blocked_users.pop(str(author.id))
             logger.debug("No longer blocked, role %s.", author.id_)
             return True
         else:
