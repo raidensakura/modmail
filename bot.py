@@ -785,8 +785,6 @@ class ModmailBot(commands.Bot):
                 color=self.error_color if "not sent" in title.lower() else self.main_color,
             )
 
-            logger.debug(f"{self._block_msg_cooldown}")
-
             if not send_message:
                 return
             now = discord.utils.utcnow()
