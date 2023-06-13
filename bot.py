@@ -10,7 +10,7 @@ import re
 import string
 import sys
 import typing
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from subprocess import PIPE
 from types import SimpleNamespace
 
@@ -681,7 +681,7 @@ class ModmailBot(commands.Bot):
 
         return sent_emoji, blocked_emoji
 
-    def check_account_age(self, author: discord.Member) -> bool:
+    def check_account_age(self, author: discord.User) -> bool:
         account_age = self.config.get("account_age")
         now = discord.utils.utcnow()
 
@@ -693,7 +693,7 @@ class ModmailBot(commands.Bot):
 
         if min_account_age > now:
             # User account has not reached the required time
-            logger.debug("Blocked due to account age, user %s.", author.name)
+            logger.debug(f"{str(author)} blocked due to minimum account age.")
             return False
         return True
 
@@ -713,7 +713,7 @@ class ModmailBot(commands.Bot):
 
         if min_guild_age > now:
             # User has not stayed in the guild for long enough
-            logger.debug("Blocked due to guild age, user %s.", author.name)
+            logger.debug(f"{str(author)} blocked due to minimum guild age.")
             return False
         return True
 
@@ -727,25 +727,25 @@ class ModmailBot(commands.Bot):
 
             if blocked_until and blocked_until < discord.utils.utcnow():
                 self.bot.blocked_roles.pop(str(role.id_))
-                logger.debug("No longer blocked, role %s.", role.id_)
+                logger.debug(f"{str(role)} no longer blocked for {str(author)}.")
             else:
-                logger.debug("User blocked, role %s.", role.name)
+                logger.debug(f"{str(author)} blocked by {str(role)} role.")
                 return False
         return True
 
-    def check_manual_blocked(self, author: discord.Member) -> bool:
+    def check_manual_blocked(self, author: discord.User) -> bool:
         if str(author.id) not in self.blocked_users:
             return True
 
         str_blocked_until = self.blocked_users[str(author.id)].get("until")
-        blocked_until = parser.parse(str_blocked_until)
+        blocked_until = parser.parse(str_blocked_until) if str_blocked_until else None
 
         if blocked_until and blocked_until < discord.utils.utcnow():
             self.bot.blocked_users.pop(str(author.id))
-            logger.debug("No longer blocked, role %s.", author.id_)
+            logger.debug(f"{str(author)} no longer blocked.")
             return True
         else:
-            logger.debug("User blocked, role %s.", author.name)
+            logger.debug(f"{str(author)} blocked by blacklist.")
             return False
 
     async def _process_blocked(self, message):
@@ -754,6 +754,9 @@ class ModmailBot(commands.Bot):
             await self.add_reaction(message, blocked_emoji)
             return True
         return False
+
+    # This is to store blocked message cooldown in memory
+    _block_msg_cooldown = dict()
 
     async def is_blocked(
         self,
@@ -771,10 +774,27 @@ class ModmailBot(commands.Bot):
                     break
 
             if member is None:
-                logger.debug("User not in guild, %s.", author.id)
+                logger.debug(f"{str(author)} not in any of my guilds, unable to check guild age and roles.")
+            else:
+                author = member
 
-        if member is not None:
-            author = member
+        async def send_embed(title=None, desc=None):
+            emb = discord.Embed(
+                title=title,
+                description=desc,
+                color=self.error_color if "not sent" in title.lower() else self.main_color,
+            )
+
+            logger.debug(f"{self._block_msg_cooldown}")
+
+            if not send_message:
+                return
+            now = discord.utils.utcnow()
+            if str(author) in self._block_msg_cooldown:
+                if self._block_msg_cooldown[str(author)] > now:
+                    return logger.debug(f"Not sending block message to {str(author)}.")
+            self._block_msg_cooldown[str(author)] = now + timedelta(minutes=5)
+            return await channel.send(embed=emb)
 
         if str(author.id) in self.blocked_whitelisted_users:
             if str(author.id) in self.blocked_users:
@@ -782,30 +802,24 @@ class ModmailBot(commands.Bot):
                 await self.config.update()
             return False
 
-        is_blocked = self.blocked_users.get(str(author.id))
-        blocked_reason = is_blocked.get("reason") if is_blocked else None
-
         if not self.check_account_age(author):
-            is_blocked = True
             blocked_reason = "Sorry, your account is too new to initiate a ticket."
-
-        if not self.check_guild_age(author):
-            is_blocked = True
-            blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
-
-        if is_blocked and send_message:
-            emb = discord.Embed(
-                title="Message not sent!",
-                description=blocked_reason or "You have been blocked from contacting Modmail.",
-                color=self.error_color,
-            )
-            await channel.send(embed=emb)
-            return is_blocked
-
-        if not self.check_manual_blocked(author):
+            await send_embed(title="Message not sent!", desc=blocked_reason)
             return True
 
-        if not self.check_manual_blocked_roles(author):
+        if not self.check_manual_blocked(author):
+            blocked_reason = "You have been blocked from contacting Modmail."
+            await send_embed(title="Message not sent!", desc=blocked_reason)
+            return True
+
+        if not self.check_guild_age(member):
+            blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
+            await send_embed(title="Message not sent!", desc=blocked_reason)
+            return True
+
+        if not self.check_manual_blocked_roles(member):
+            blocked_reason = "Sorry, your role(s) has been blacklisted from contacting Modmail."
+            await send_embed(title="Message not sent!", desc=blocked_reason)
             return True
 
         return False
