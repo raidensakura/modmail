@@ -736,7 +736,7 @@ class ModmailBot(commands.Bot):
         if str(author.id) not in self.blocked_users:
             return True
 
-        str_blocked_until = self.blocked_roles[str(author.id)].get("until")
+        str_blocked_until = self.blocked_users[str(author.id)].get("until")
         blocked_until = parser.parse(str_blocked_until)
 
         if blocked_until and blocked_until < discord.utils.utcnow():
