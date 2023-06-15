@@ -333,7 +333,7 @@ class Utility(commands.Cog):
         if app_info.team:
             owner = app_info.team.name
         else:
-            owner = app_info.owner
+            owner = str(app_info.owner)
 
         embed.add_field(
             name="Bot Owner (Team)" if app_info.team else "Bot Owner",
