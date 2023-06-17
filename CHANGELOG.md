@@ -8,6 +8,8 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+# v4.1.0
+
 ### Breaking
 - The block functionality has been overhauled to fix major performance issues and issues with the saving of blocked users and roles. This unfortunately introduces backward-incompatible config schema changes. If you have blocked users stored in your MongoDB or use the `account_age` and `guild_age` functionality in Modmail, you must migrate manually by exporting and deleting the `blocked` field in your `config` collection and manually add them back using the `?block` command.
 
