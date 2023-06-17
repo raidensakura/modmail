@@ -6,7 +6,7 @@
   <br>
 
   <a href="#">
-    <img src="https://img.shields.io/badge/Version-4.0.2-7d5edd?style=shield&logo=https://modmail-docs.netlify.app/favicon.png">
+    <img src="https://img.shields.io/badge/Version-4.1.0-7d5edd?style=shield&logo=https://modmail-docs.netlify.app/favicon.png">
   </a>
   <a href="https://discord.gg/cnUpwrnpYb">
     <img src="https://img.shields.io/discord/1079074933008781362.svg?label=Discord&logo=Discord&colorB=7289da&style=shield" alt="Support">
