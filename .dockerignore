@@ -49,6 +49,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+.ruff_cache/
 
 # Translations
 *.mo
@@ -140,11 +141,17 @@ test.py
 # Other stuff
 .env.example
 .gitignore
+.dockerignore
 .github/
 app.json
-CHANGELOG.md
 Procfile
 pyproject.toml
-README.md
-Pipfile
-Pipfile.lock
+*.md
+.*.json
+Dockerfile
+docker-compose.yml
+LICENSE
+PRIVACY.md
+
+# Docs
+docs/

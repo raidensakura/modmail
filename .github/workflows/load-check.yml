@@ -1,0 +1,55 @@
+name: Load test
+
+on:
+  push:
+    branches:
+      - stable
+      - develop
+
+jobs:
+  load-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+      fail-fast: false
+
+    name: Load Modmail - Python ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache venv
+        id: cache-venv
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: ${{ matrix.python-version }}-${{ hashFiles('Pipfile') }}-${{ secrets.CACHE_V }}
+
+      - name: Maybe make pipenv
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: |
+          pip install pipenv && PIPENV_VENV_IN_PROJECT=1
+          pipenv install --deploy
+
+      - name: Run script loadcheck.py
+        run: |
+          pipenv run python .github/workflows/scripts/loadcheck.py
+        env:
+          TOKEN: ${{ secrets.DISCORD_TEST_BOT }}
+          CONNECTION_URI: ${{ secrets.CONNECTION_URI }}
+          LOG_URL: https://domain.example
+          GUILD_ID: "616969119685935162"
+          OWNERS: "243316261264556032,505386507440488458"
+          DATA_COLLECTION: off
+          LOG_LEVEL: DEBUG
+
+      - name: Save Modmail output as Artifact
+        if: always() # still run if prev step failed
+        uses: actions/upload-artifact@v3
+        with:
+          name: "Modmail log - Python ${{ matrix.python-version }}"
+          path: modmail.log

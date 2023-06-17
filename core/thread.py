@@ -11,24 +11,25 @@ import warnings
 from datetime import timedelta
 from types import SimpleNamespace
 
-import isodate
-
 import discord
-from discord.ext.commands import MissingRequiredArgument, CommandError
-from lottie.importers import importers as l_importers
+import isodate
+from discord.ext.commands import CommandError, MissingRequiredArgument
 from lottie.exporters import exporters as l_exporters
+from lottie.importers import importers as l_importers
 
 from core.models import DMDisabled, DummyMessage, getLogger
-from core.time import human_timedelta
 from core.utils import (
-    is_image_url,
-    parse_channel_topic,
-    match_title,
-    match_user_id,
-    truncate,
-    get_top_role,
+    AcceptButton,
+    ConfirmThreadCreationView,
+    DenyButton,
     create_thread_channel,
     get_joint_id,
+    get_top_role,
+    is_image_url,
+    match_title,
+    match_user_id,
+    parse_channel_topic,
+    truncate,
 )
 
 logger = getLogger(__name__)
@@ -197,6 +198,10 @@ class Thread:
 
         self.ready = True
 
+        mention_msg = self.bot.config["mention_message"]
+        if mention_msg:
+            mention_msg = mention_msg.replace("[prefix]", self.bot.prefix)
+
         if creator is not None and creator != recipient:
             mention = None
         else:
@@ -205,7 +210,10 @@ class Thread:
         async def send_genesis_message():
             info_embed = self._format_info_embed(recipient, log_url, log_count, self.bot.main_color)
             try:
-                msg = await channel.send(mention, embed=info_embed)
+                if mention_msg:
+                    msg = await channel.send((mention + " " + mention_msg), embed=info_embed)
+                else:
+                    msg = await channel.send(mention, embed=info_embed)
                 self.bot.loop.create_task(msg.pin())
                 self._genesis_message = msg
             except Exception:
@@ -228,7 +236,9 @@ class Thread:
             else:
                 footer = self.bot.config["thread_creation_footer"]
 
-            embed.set_footer(text=footer, icon_url=self.bot.get_guild_icon(guild=self.bot.modmail_guild))
+            embed.set_footer(
+                text=footer, icon_url=self.bot.get_guild_icon(guild=self.bot.modmail_guild, size=128)
+            )
             embed.title = self.bot.config["thread_creation_title"]
 
             if creator is None or creator == recipient:
@@ -521,7 +531,7 @@ class Thread:
 
         embed.description = message
         footer = self.bot.config["thread_close_footer"]
-        embed.set_footer(text=footer, icon_url=self.bot.get_guild_icon(guild=self.bot.guild))
+        embed.set_footer(text=footer, icon_url=self.bot.get_guild_icon(guild=self.bot.guild, size=128))
 
         if not silent:
             for user in self.recipients:
@@ -716,7 +726,6 @@ class Thread:
     async def find_linked_message_from_dm(
         self, message, either_direction=False, get_thread_channel=False
     ) -> typing.List[discord.Message]:
-
         joint_id = None
         if either_direction:
             joint_id = get_joint_id(message)
@@ -909,7 +918,6 @@ class Thread:
         persistent_note: bool = False,
         thread_creation: bool = False,
     ) -> None:
-
         if not note and from_mod:
             self.bot.loop.create_task(self._restart_close_timer())  # Start or restart thread auto close
 
@@ -957,7 +965,7 @@ class Thread:
                     name = tag
                 avatar_url = self.bot.config["anon_avatar_url"]
                 if avatar_url is None:
-                    avatar_url = self.bot.get_guild_icon(guild=self.bot.guild)
+                    avatar_url = self.bot.get_guild_icon(guild=self.bot.guild, size=128)
                 embed.set_author(
                     name=name,
                     icon_url=avatar_url,
@@ -1416,30 +1424,19 @@ class ThreadManager:
                 destination = recipient
             else:
                 destination = message.channel
+            view = ConfirmThreadCreationView()
+            view.add_item(AcceptButton(self.bot.config["confirm_thread_creation_accept"]))
+            view.add_item(DenyButton(self.bot.config["confirm_thread_creation_deny"]))
             confirm = await destination.send(
                 embed=discord.Embed(
                     title=self.bot.config["confirm_thread_creation_title"],
                     description=self.bot.config["confirm_thread_response"],
                     color=self.bot.main_color,
-                )
+                ),
+                view=view,
             )
-            accept_emoji = self.bot.config["confirm_thread_creation_accept"]
-            deny_emoji = self.bot.config["confirm_thread_creation_deny"]
-            emojis = [accept_emoji, deny_emoji]
-            for emoji in emojis:
-                await confirm.add_reaction(emoji)
-                await asyncio.sleep(0.2)
-
-            try:
-                r, _ = await self.bot.wait_for(
-                    "reaction_add",
-                    check=lambda r, u: u.id == recipient.id
-                    and r.message.id == confirm.id
-                    and r.message.channel.id == confirm.channel.id
-                    and str(r.emoji) in (accept_emoji, deny_emoji),
-                    timeout=20,
-                )
-            except asyncio.TimeoutError:
+            await view.wait()
+            if view.value is None:
                 thread.cancelled = True
                 self.bot.loop.create_task(
                     destination.send(
@@ -1450,23 +1447,16 @@ class ThreadManager:
                         )
                     )
                 )
-            else:
-                if str(r.emoji) == deny_emoji:
-                    thread.cancelled = True
-                    self.bot.loop.create_task(
-                        destination.send(
-                            embed=discord.Embed(
-                                title=self.bot.config["thread_cancelled"], color=self.bot.error_color
-                            )
+                await confirm.edit(view=None)
+            if view.value is False:
+                thread.cancelled = True
+                self.bot.loop.create_task(
+                    destination.send(
+                        embed=discord.Embed(
+                            title=self.bot.config["thread_cancelled"], color=self.bot.error_color
                         )
                     )
-
-            async def remove_reactions():
-                for emoji in emojis:
-                    await confirm.remove_reaction(emoji, self.bot.user)
-                    await asyncio.sleep(0.2)
-
-            self.bot.loop.create_task(remove_reactions())
+                )
             if thread.cancelled:
                 del self.cache[recipient.id]
                 return thread

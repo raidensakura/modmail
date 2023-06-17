@@ -1,16 +1,19 @@
-name: Modmail Workflow
+name: Lint python
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - stable
+      - develop
+  pull_request:
 
 jobs:
   code-style:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.10']
-
+        python-version: ["3.8"]
     name: Python ${{ matrix.python-version }} on ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -20,13 +23,9 @@ jobs:
         architecture: x64
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip pipenv
-        pipenv install --dev --system
-    # to refresh: bandit -f json -o .bandit_baseline.json -r . 
-    # - name: Bandit syntax check
-    #   run: bandit -r . -b .bandit_baseline.json
-    - name: Pylint
-      run: pylint ./bot.py cogs/*.py core/*.py  --exit-zero -r y
+        python -m pip install black ruff
+    - name: Ruff
+      run: ruff . --no-fix
       continue-on-error: true
     - name: Black
       run: |

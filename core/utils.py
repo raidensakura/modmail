@@ -13,7 +13,6 @@ from discord.ext import commands
 
 from core.models import getLogger
 
-
 __all__ = [
     "strtobool",
     "User",
@@ -39,6 +38,9 @@ __all__ = [
     "get_top_role",
     "get_joint_id",
     "extract_block_timestamp",
+    "AcceptButton",
+    "DenyButton",
+    "ConfirmThreadCreationView",
 ]
 
 
@@ -123,7 +125,9 @@ def format_preview(messages: typing.List[typing.Dict[str, typing.Any]]):
             continue
         author = message["author"]
         content = str(message["content"]).replace("\n", " ")
-        name = author["name"] + "#" + str(author["discriminator"])
+        name = author["name"]
+        discriminator = author.get("discriminator")
+        name += "" if discriminator == "0" else f"#{discriminator}"
         prefix = "[M]" if author["mod"] else "[R]"
         out += truncate(f"`{prefix} {name}:` {content}", max=75) + "\n"
 
@@ -559,3 +563,29 @@ def extract_block_timestamp(reason, id_):
             raise
 
     return end_time, after
+
+
+class AcceptButton(discord.ui.Button):
+    def __init__(self, emoji):
+        super().__init__(style=discord.ButtonStyle.gray, emoji=emoji)
+
+    async def callback(self, interaction: discord.Interaction):
+        self.view.value = True
+        await interaction.response.edit_message(view=None)
+        self.view.stop()
+
+
+class DenyButton(discord.ui.Button):
+    def __init__(self, emoji):
+        super().__init__(style=discord.ButtonStyle.gray, emoji=emoji)
+
+    async def callback(self, interaction: discord.Interaction):
+        self.view.value = False
+        await interaction.response.edit_message(view=None)
+        self.view.stop()
+
+
+class ConfirmThreadCreationView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=20)
+        self.value = None

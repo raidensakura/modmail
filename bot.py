@@ -1,4 +1,4 @@
-__version__ = "4.0.2"
+__version__ = "4.1.0"
 
 
 import asyncio
@@ -8,23 +8,21 @@ import logging
 import os
 import re
 import string
-import struct
 import sys
-import platform
 import typing
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from subprocess import PIPE
 from types import SimpleNamespace
 
 import discord
 import isodate
-from aiohttp import ClientSession, ClientResponseError
+from aiohttp import ClientResponseError, ClientSession
+from dateutil import parser
 from discord.ext import commands, tasks
-from discord.ext.commands.view import StringView
 from discord.ext.commands import MemberConverter
+from discord.ext.commands.view import StringView
 from emoji import UNICODE_EMOJI
 from pkg_resources import parse_version
-
 
 try:
     # noinspection PyUnresolvedReferences
@@ -49,7 +47,7 @@ from core.models import (
 )
 from core.thread import ThreadManager
 from core.time import human_timedelta
-from core.utils import extract_block_timestamp, normalize_alias, parse_alias, truncate, tryint
+from core.utils import normalize_alias, parse_alias, truncate, tryint
 
 logger = getLogger(__name__)
 
@@ -91,12 +89,16 @@ class ModmailBot(commands.Bot):
         self.plugin_db = PluginDatabaseClient(self)  # Deprecated
         self.startup()
 
-    def get_guild_icon(self, guild: typing.Optional[discord.Guild]) -> str:
+    def get_guild_icon(
+        self, guild: typing.Optional[discord.Guild], *, size: typing.Optional[int] = None
+    ) -> str:
         if guild is None:
             guild = self.guild
         if guild.icon is None:
             return "https://cdn.discordapp.com/embed/avatars/0.png"
-        return guild.icon.url
+        if size is None:
+            return guild.icon.url
+        return guild.icon.with_size(size)
 
     def _resolve_snippet(self, name: str) -> typing.Optional[str]:
         """
@@ -658,7 +660,6 @@ class ModmailBot(commands.Bot):
         return self.get_user(id) or await self.fetch_user(id)
 
     async def retrieve_emoji(self) -> typing.Tuple[str, str]:
-
         sent_emoji = self.config["sent_emoji"]
         blocked_emoji = self.config["blocked_emoji"]
 
@@ -680,7 +681,7 @@ class ModmailBot(commands.Bot):
 
         return sent_emoji, blocked_emoji
 
-    def check_account_age(self, author: discord.Member) -> bool:
+    def check_account_age(self, author: discord.User) -> bool:
         account_age = self.config.get("account_age")
         now = discord.utils.utcnow()
 
@@ -692,13 +693,7 @@ class ModmailBot(commands.Bot):
 
         if min_account_age > now:
             # User account has not reached the required time
-            delta = human_timedelta(min_account_age)
-            logger.debug("Blocked due to account age, user %s.", author.name)
-
-            if str(author.id) not in self.blocked_users:
-                new_reason = f"System Message: New Account. User can try again {delta}."
-                self.blocked_users[str(author.id)] = new_reason
-
+            logger.debug(f"{str(author)} blocked due to minimum account age.")
             return False
         return True
 
@@ -718,64 +713,40 @@ class ModmailBot(commands.Bot):
 
         if min_guild_age > now:
             # User has not stayed in the guild for long enough
-            delta = human_timedelta(min_guild_age)
-            logger.debug("Blocked due to guild age, user %s.", author.name)
-
-            if str(author.id) not in self.blocked_users:
-                new_reason = f"System Message: Recently Joined. User can try again {delta}."
-                self.blocked_users[str(author.id)] = new_reason
-
+            logger.debug(f"{str(author)} blocked due to minimum guild age.")
             return False
         return True
 
     def check_manual_blocked_roles(self, author: discord.Member) -> bool:
-        if isinstance(author, discord.Member):
-            for r in author.roles:
-                if str(r.id) in self.blocked_roles:
+        for role in author.roles:
+            if str(role.id) not in self.blocked_roles:
+                continue
 
-                    blocked_reason = self.blocked_roles.get(str(r.id)) or ""
+            str_blocked_until = self.blocked_roles[str(role.id)].get("until")
+            blocked_until = parser.parse(str_blocked_until) if str_blocked_until else None
 
-                    try:
-                        end_time, after = extract_block_timestamp(blocked_reason, author.id)
-                    except ValueError:
-                        return False
-
-                    if end_time is not None:
-                        if after <= 0:
-                            # No longer blocked
-                            self.blocked_roles.pop(str(r.id))
-                            logger.debug("No longer blocked, role %s.", r.name)
-                            return True
-                    logger.debug("User blocked, role %s.", r.name)
-                    return False
-
+            if blocked_until and blocked_until < discord.utils.utcnow():
+                self.bot.blocked_roles.pop(str(role.id_))
+                logger.debug(f"{str(role)} no longer blocked for {str(author)}.")
+            else:
+                logger.debug(f"{str(author)} blocked by {str(role)} role.")
+                return False
         return True
 
-    def check_manual_blocked(self, author: discord.Member) -> bool:
+    def check_manual_blocked(self, author: discord.User) -> bool:
         if str(author.id) not in self.blocked_users:
             return True
 
-        blocked_reason = self.blocked_users.get(str(author.id)) or ""
+        str_blocked_until = self.blocked_users[str(author.id)].get("until")
+        blocked_until = parser.parse(str_blocked_until) if str_blocked_until else None
 
-        if blocked_reason.startswith("System Message:"):
-            # Met the limits already, otherwise it would've been caught by the previous checks
-            logger.debug("No longer internally blocked, user %s.", author.name)
-            self.blocked_users.pop(str(author.id))
+        if blocked_until and blocked_until < discord.utils.utcnow():
+            self.bot.blocked_users.pop(str(author.id))
+            logger.debug(f"{str(author)} no longer blocked.")
             return True
-
-        try:
-            end_time, after = extract_block_timestamp(blocked_reason, author.id)
-        except ValueError:
+        else:
+            logger.debug(f"{str(author)} blocked by blacklist.")
             return False
-
-        if end_time is not None:
-            if after <= 0:
-                # No longer blocked
-                self.blocked_users.pop(str(author.id))
-                logger.debug("No longer blocked, user %s.", author.name)
-                return True
-        logger.debug("User blocked, user %s.", author.name)
-        return False
 
     async def _process_blocked(self, message):
         _, blocked_emoji = await self.retrieve_emoji()
@@ -784,6 +755,9 @@ class ModmailBot(commands.Bot):
             return True
         return False
 
+    # This is to store blocked message cooldown in memory
+    _block_msg_cooldown = dict()
+
     async def is_blocked(
         self,
         author: discord.User,
@@ -791,7 +765,6 @@ class ModmailBot(commands.Bot):
         channel: discord.TextChannel = None,
         send_message: bool = False,
     ) -> bool:
-
         member = self.guild.get_member(author.id) or await MemberConverter.convert(author)
         if member is None:
             # try to find in other guilds
@@ -801,10 +774,25 @@ class ModmailBot(commands.Bot):
                     break
 
             if member is None:
-                logger.debug("User not in guild, %s.", author.id)
+                logger.debug(f"{str(author)} not in any of my guilds, unable to check guild age and roles.")
+            else:
+                author = member
 
-        if member is not None:
-            author = member
+        async def send_embed(title=None, desc=None):
+            emb = discord.Embed(
+                title=title,
+                description=desc,
+                color=self.error_color if "not sent" in title.lower() else self.main_color,
+            )
+
+            if not send_message:
+                return
+            now = discord.utils.utcnow()
+            if str(author) in self._block_msg_cooldown:
+                if self._block_msg_cooldown[str(author)] > now:
+                    return logger.debug(f"Not sending block message to {str(author)}.")
+            self._block_msg_cooldown[str(author)] = now + timedelta(minutes=5)
+            return await channel.send(embed=emb)
 
         if str(author.id) in self.blocked_whitelisted_users:
             if str(author.id) in self.blocked_users:
@@ -812,28 +800,26 @@ class ModmailBot(commands.Bot):
                 await self.config.update()
             return False
 
-        blocked_reason = self.blocked_users.get(str(author.id)) or ""
-
-        if not self.check_account_age(author) or not self.check_guild_age(author):
-            new_reason = self.blocked_users.get(str(author.id))
-            if new_reason != blocked_reason:
-                if send_message:
-                    await channel.send(
-                        embed=discord.Embed(
-                            title="Message not sent!",
-                            description=new_reason,
-                            color=self.error_color,
-                        )
-                    )
+        if not self.check_account_age(author):
+            blocked_reason = "Sorry, your account is too new to initiate a ticket."
+            await send_embed(title="Message not sent!", desc=blocked_reason)
             return True
 
         if not self.check_manual_blocked(author):
+            blocked_reason = "You have been blocked from contacting Modmail."
+            await send_embed(title="Message not sent!", desc=blocked_reason)
             return True
 
-        if not self.check_manual_blocked_roles(author):
+        if not self.check_guild_age(member):
+            blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
+            await send_embed(title="Message not sent!", desc=blocked_reason)
             return True
 
-        await self.config.update()
+        if not self.check_manual_blocked_roles(member):
+            blocked_reason = "Sorry, your role(s) has been blacklisted from contacting Modmail."
+            await send_embed(title="Message not sent!", desc=blocked_reason)
+            return True
+
         return False
 
     async def get_thread_cooldown(self, author: discord.Member):
@@ -913,7 +899,7 @@ class ModmailBot(commands.Bot):
                 )
                 embed.set_footer(
                     text=self.config["disabled_new_thread_footer"],
-                    icon_url=self.get_guild_icon(guild=message.guild),
+                    icon_url=self.get_guild_icon(guild=message.guild, size=128),
                 )
                 logger.info("A new thread was blocked from %s due to disabled Modmail.", message.author)
                 await self.add_reaction(message, blocked_emoji)
@@ -929,7 +915,7 @@ class ModmailBot(commands.Bot):
                 )
                 embed.set_footer(
                     text=self.config["disabled_current_thread_footer"],
-                    icon_url=self.get_guild_icon(guild=message.guild),
+                    icon_url=self.get_guild_icon(guild=message.guild, size=128),
                 )
                 logger.info("A message was blocked from %s due to disabled Modmail.", message.author)
                 await self.add_reaction(message, blocked_emoji)
@@ -1338,7 +1324,7 @@ class ModmailBot(commands.Bot):
             )
             embed.set_footer(
                 text=self.config["disabled_new_thread_footer"],
-                icon_url=self.get_guild_icon(guild=channel.guild),
+                icon_url=self.get_guild_icon(guild=channel.guild, size=128),
             )
             logger.info(
                 "A new thread using react to contact was blocked from %s due to disabled Modmail.",
@@ -1745,8 +1731,11 @@ class ModmailBot(commands.Bot):
                     name = "null"
 
                 name = new_name = (
-                    "".join(l for l in name if l not in string.punctuation and l.isprintable()) or "null"
-                ) + f"-{author.discriminator}"
+                    ("".join(l for l in name if l not in string.punctuation and l.isprintable()) or "null")
+                    + ""
+                    if author.discriminator == "0"
+                    else f"-{author.discriminator}"
+                )
 
         counter = 1
         existed = set(c.name for c in guild.text_channels if c != exclude_channel)
@@ -1767,31 +1756,8 @@ def main():
     except ImportError:
         pass
 
-    try:
-        import cairosvg  # noqa: F401
-    except OSError:
-        if os.name == "nt":
-            if struct.calcsize("P") * 8 != 64:
-                logger.error(
-                    "Unable to import cairosvg, ensure your Python is a 64-bit version: https://www.python.org/downloads/"
-                )
-            else:
-                logger.error(
-                    "Unable to import cairosvg, install GTK Installer for Windows and restart your system (https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/latest)"
-                )
-        else:
-            if "ubuntu" in platform.version().lower() or "debian" in platform.version().lower():
-                logger.error(
-                    "Unable to import cairosvg, try running `sudo apt-get install libpangocairo-1.0-0` or report on our support server with your OS details: https://discord.gg/etJNHCQ"
-                )
-            else:
-                logger.error(
-                    "Unable to import cairosvg, report on our support server with your OS details: https://discord.gg/etJNHCQ"
-                )
-        sys.exit(0)
-
     # check discord version
-    discord_version = "2.0.1"
+    discord_version = "2.3.0"
     if discord.__version__ != discord_version:
         logger.error(
             "Dependencies are not updated, run pipenv install. discord.py version expected %s, received %s",

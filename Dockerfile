@@ -1,16 +1,27 @@
-FROM python:3.10 as py
+FROM python:3.11-alpine as base
 
-FROM py as build
+RUN apk update && apk add git \
+	# cairosvg dependencies
+	cairo-dev cairo cairo-tools \
+	# pillow dependencies
+	jpeg-dev zlib-dev
 
-RUN apt update && apt install -y g++ git
+FROM base as python-deps
+
+RUN apk add --virtual build-deps build-base gcc libffi-dev
 COPY requirements.txt /
 RUN pip install --prefix=/inst -U -r /requirements.txt
 
-FROM py
+FROM base as runtime
 
 ENV USING_DOCKER yes
-COPY --from=build /inst /usr/local
+COPY --from=python-deps /inst /usr/local
 
-WORKDIR /modmailbot
+COPY . /modmail
+WORKDIR /modmail
+
 CMD ["python", "bot.py"]
-COPY . /modmailbot
+
+RUN adduser --disabled-password --gecos '' app && \
+    chown -R app /modmail
+USER app

@@ -6,8 +6,8 @@ import shutil
 import sys
 import typing
 import zipfile
-from importlib import invalidate_caches
 from difflib import get_close_matches
+from importlib import invalidate_caches
 from pathlib import Path, PurePath
 from re import match
 from site import USER_SITE
@@ -15,13 +15,12 @@ from subprocess import PIPE
 
 import discord
 from discord.ext import commands
-
 from pkg_resources import parse_version
 
 from core import checks
 from core.models import PermissionLevel, getLogger
 from core.paginator import EmbedPaginatorSession
-from core.utils import truncate, trigger_typing
+from core.utils import trigger_typing, truncate
 
 logger = getLogger(__name__)
 
@@ -45,7 +44,7 @@ class Plugin:
             self.repo = repo
             self.name = name
             self.local = False
-            self.branch = branch if branch is not None else "master"
+            self.branch = branch if branch is not None else "stable"
             self.url = f"https://github.com/{user}/{repo}/archive/{self.branch}.zip"
             self.link = f"https://github.com/{user}/{repo}/tree/{self.branch}/{name}"
 
@@ -265,7 +264,6 @@ class Plugins(commands.Cog):
             raise InvalidPluginError("Cannot load extension, plugin invalid.") from exc
 
     async def parse_user_input(self, ctx, plugin_name, check_version=False):
-
         if not self.bot.config["enable_plugins"]:
             embed = discord.Embed(
                 description="Plugins are disabled, enable them by setting `ENABLE_PLUGINS=true`",
@@ -388,7 +386,6 @@ class Plugins(commands.Cog):
         await self.bot.config.update()
 
         if self.bot.config.get("enable_plugins"):
-
             invalidate_caches()
 
             try:
@@ -419,7 +416,7 @@ class Plugins(commands.Cog):
             )
         return await msg.edit(embed=embed)
 
-    @plugins.command(name="remove", aliases=["del", "delete"])
+    @plugins.command(name="remove", aliases=["del", "delete", "uninstall"])
     @checks.has_permissions(PermissionLevel.OWNER)
     async def plugins_remove(self, ctx, *, plugin_name: str):
         """

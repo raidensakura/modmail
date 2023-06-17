@@ -1,7 +1,7 @@
 {
     "name": "Modmail",
     "description": "An easy to install Modmail bot for Discord - DM to contact mods!",
-    "repository": "https://github.com/modmail-dev/modmail",
+    "repository": "https://github.com/raidensakura/modmail",
     "env": {
         "TOKEN": {
             "description": "Your discord bot's token.",
@@ -31,12 +31,40 @@
             "description": "The url of the log viewer app for viewing self-hosted logs.",
             "required": true
         },
+		"LOG_URL_PREFIX": {
+            "description": "The path to your log viewer extending from your `LOG_URL`, defaults to \"/logs\".",
+            "required": false
+        },
         "GITHUB_TOKEN": {
             "description": "A github personal access token with the repo scope.",
             "required": false
         },
         "REGISTRY_PLUGINS_ONLY": {
             "description": "If set to true, only plugins that are in the registry can be loaded.",
+            "required": false
+        },
+		"OAUTH2_CLIENT_ID": {
+            "description": "Client ID for your application, used for built-in logviewer plugin.",
+            "required": false
+        },
+		"OAUTH2_CLIENT_SECRET": {
+            "description": "Client Secret for your application, used for built-in logviewer plugin.",
+            "required": false
+        },
+		"OAUTH2_REDIRECT_URI": {
+            "description": "The redirect URL for logviewer OAuth. You must also add this URL in your application's Redirects section.",
+            "required": false
+        },
+		"HOST": {
+            "description": "The host address logviewer plugin will bind itself to. Defaults to 0.0.0.0",
+            "required": false
+        },
+		"PORT": {
+            "description": "The port logviewer plugin will listen to. Defaults to 8000.",
+            "required": false
+        },
+		"LOGVIEWER_PAGINATION": {
+            "description": "The number of logs to display per page on logviewer. Defaults to 25.",
             "required": false
         }
     }

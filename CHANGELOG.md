@@ -8,18 +8,41 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+### Breaking
+- The block functionality has been overhauled to fix major performance issues and issues with the saving of blocked users and roles. This unfortunately introduces backward-incompatible config schema changes. If you have blocked users stored in your MongoDB or use the `account_age` and `guild_age` functionality in Modmail, you must migrate manually by exporting and deleting the `blocked` field in your `config` collection and manually add them back using the `?block` command.
+
+### Added
+- New .env config option: `REGISTRY_PLUGINS_ONLY`, restricts to only allow adding registry plugins. ([PR #3247](https://github.com/modmail-dev/modmail/pull/3247))
+- New config option: `mention_message`, this will include an additional configurable message next to role mention on thread creation. Defaults to None.
+- Added custom database name detection in `CONNECTION_URI` .env config option. You can now specify custom database name by appending /db_name in your `CONNECTION_URI`.
+- Added discord.py and python version info in `?about` embed and credit for contributors.
+- Support for trailing space in `?prefix` command, example: `?prefix "mm "` for `mm ping`.
+- Added logviewer as built-in local plugin `?plugin load @local/logviewer`.
+- `?plugin uninstall` is now an alias for `?plugin remove` ([GH #3260](https://github.com/modmail-dev/modmail/issues/3260))
+
+### Changed
+- Guild icons in embed footers and author urls now have a fixed size of 128. ([PR #3261](https://github.com/modmail-dev/modmail/pull/3261))
+- Official repo moved to https://github.com/modmail-dev/modmail.
+- Optimized Dockerfile build steps for smaller overall image size. (900MB -> under 400MB)
+- Edited .env.example to only include required variables.
+- Changed `confirm_thread_creation` reactions to buttons.
+- Bumped motor, python-dotenv, attrs, and discord.py version to support Python 3.11.
+- Updated requirements.txt to be in sync with Pipfile.
+
+### Removed
+- Removed bandit from dev dependencies as it's no longer used in develop workflow.
+- Removed CairoSVG from Python dependencies.
+
 ### Fixed
 - `?alias make/create` as aliases to `?alias add`. This improves continuity between the bot and its command structure. ([PR #3195](https://github.com/kyb3r/modmail/pull/3195))
 - Loading the blocked list with the `?blocked` command takes a long time when the list is large. ([PR #3242](https://github.com/kyb3r/modmail/pull/3242))
 - Reply not being forwarded from DM. (PR [#3239](https://github.com/modmail-dev/modmail/pull/3239))
-
-# [UNRELEASED]
-
-### Added
-- New .env config option: `REGISTRY_PLUGINS_ONLY`, restricts to only allow adding registry plugins. ([PR #3247](https://github.com/modmail-dev/modmail/pull/3247))
-
-### Changed
-- Repo moved to https://github.com/modmail-dev/modmail.
+- Fix changing from disabling all threads (`?disable all`) to new threads only (`?disable new`) not updating `dm_disabled` config.
+- A few typo in `config_help.json` and corrected its formatting.
+- Fixed typo for silent close command.
+- Fixed uncached member issue in large guild for react_to_contact and ticket creation.
+- Fixed blocked roles improperly saving in `blocked_users` config.
+- Fixed `?block` command improperly parsing reason as timestamp. 
 
 # v4.0.2
 

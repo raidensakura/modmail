@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 # Introduction
 
 Modmail is a self-hosted Discord bot for your server. It works similar to [Reddit](https://reddit.zendesk.com/hc/en-us/articles/210896606-What-is-Modmail-)'s Modmail—both in functionality and purpose. It serves as a shared inbox for server staff to communicate with their users in a seamless way.
@@ -8,7 +10,7 @@ This bot is free for everyone and always will be. If you like this project and w
 
 When a member sends a direct message to Modmail, the bot will create a channel (we call it a "thread") into a designated category. All further DM messages will automatically relay to that channel, then any available staff can respond within the channel. Compared to ticketing bots, Modmail allows easier and more organised discussions among staff.
 
-![](https://i.imgur.com/fru5Q07.png)
+<Image src="/header-pic.png" alt="Hello" width={500} height={500} />
 
 Our Logviewer will save the threads so your staff can view previous threads through their corresponding log link. Here is an [example](https://publicmodmail.logs.vodka/logs/example).
 
@@ -23,7 +25,7 @@ Our Logviewer will save the threads so your staff can view previous threads thro
 * Minimum duration for accounts to be created before allowed to contact Modmail (`account_age`).
 * Minimum length for members to be in the guild before allowed to contact Modmail (`guild_age`).
 
-**Advanced logging functionality**
+#### **Advanced logging functionality**
 
 * When you close a thread, Modmail will generate a log link and post it to your log channel.
 * Native Discord dark-mode feel.
@@ -41,10 +43,6 @@ Our Logviewer will save the threads so your staff can view previous threads thro
 * Paginated commands interfaces via reactions.
 
 This list is ever-growing thanks to active development by our exceptional contributors. See a full list of available commands by using the `?help` command.
-
-## Installation
-
-Visit our [installation page](/installation) for detailed instructions on setting up Modmail for your server.
 
 ## Supporting the project
 

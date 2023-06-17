@@ -1,15 +1,15 @@
 import secrets
 import sys
 from json import JSONDecodeError
-from typing import Any, Dict, Union, Optional
+from typing import Any, Dict, Optional, Union
 
 import discord
-from discord import Member, DMChannel, TextChannel, Message
+from aiohttp import ClientResponse, ClientResponseError
+from discord import DMChannel, Member, Message, TextChannel
 from discord.ext import commands
-
-from aiohttp import ClientResponseError, ClientResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ConfigurationError
+from pymongo.uri_parser import parse_uri
 
 from core.models import InvalidConfigError, getLogger
 
@@ -63,10 +63,10 @@ class GitHub:
     """
 
     BASE = "https://api.github.com"
-    REPO = BASE + "/repos/modmail-dev/modmail"
+    REPO = BASE + "/repos/raidensakura/modmail"
     MERGE_URL = BASE + "/repos/{username}/modmail/merges"
     FORK_URL = REPO + "/forks"
-    STAR_URL = BASE + "/user/starred/modmail-dev/modmail"
+    STAR_URL = BASE + "/user/starred/raidensakura/modmail"
 
     def __init__(self, bot, access_token: str = "", username: str = "", **kwargs):
         self.bot = bot
@@ -81,7 +81,7 @@ class GitHub:
 
     @property
     def BRANCH(self) -> str:
-        return "master" if not self.bot.version.is_prerelease else "development"
+        return "stable" if not self.bot.version.is_prerelease else "develop"
 
     async def request(
         self,
@@ -445,7 +445,8 @@ class MongoDBClient(ApiClient):
                 raise RuntimeError
 
         try:
-            db = AsyncIOMotorClient(mongo_uri).modmail_bot
+            database = parse_uri(mongo_uri).get("database") or "modmail_bot"
+            db = AsyncIOMotorClient(mongo_uri)[database]
         except ConfigurationError as e:
             logger.critical(
                 "Your MongoDB CONNECTION_URI might be copied wrong, try re-copying from the source again. "
@@ -497,7 +498,8 @@ class MongoDBClient(ApiClient):
                     'run "Certificate.command" on MacOS, '
                     'and check certifi is up to date "pip3 install --upgrade certifi".'
                 )
-                self.db = AsyncIOMotorClient(mongo_uri, tlsAllowInvalidCertificates=True).modmail_bot
+                database = parse_uri(mongo_uri).get("database") or "modmail_bot"
+                self.db = AsyncIOMotorClient(mongo_uri, tlsAllowInvalidCertificates=True)[database]
                 return await self.validate_database_connection(ssl_retry=False)
             if "ServerSelectionTimeoutError" in message:
                 logger.critical(
@@ -568,6 +570,8 @@ class MongoDBClient(ApiClient):
     async def create_log_entry(self, recipient: Member, channel: TextChannel, creator: Member) -> str:
         key = secrets.token_hex(6)
 
+        dm_channel = await recipient.create_dm()
+
         await self.logs.insert_one(
             {
                 "_id": key,
@@ -578,6 +582,7 @@ class MongoDBClient(ApiClient):
                 "channel_id": str(channel.id),
                 "guild_id": str(self.bot.guild_id),
                 "bot_id": str(self.bot.user.id),
+                "dm_channel_id": str(dm_channel.id),
                 "recipient": {
                     "id": str(recipient.id),
                     "name": recipient.name,

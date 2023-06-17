@@ -116,7 +116,7 @@ If you wish to opt out of any of this data collection, please view their own pri
 
 For a maximum privacy setup, we recommend the following hosting procedure. We have included links to various help articles for each relevant step. We will not provide support for such a procedure.
 - [Creating a local mongodb instance](https://zellwk.com/blog/local-mongodb/)
-- [Hosting Modmail on your personal computer](https://taaku18.github.io/modmail/local-hosting/)
+- [Hosting Modmail on your personal computer](https://docs.modmail.dev/)
 - Ensuring `data_collection` is set to `no` in the `.env` file.
 - [Opt out of discord data collection](https://support.discord.com/hc/en-us/articles/360004109911-Data-Privacy-Controls)
 - Do not use any plugins, setting `enable_plugins` to `no`.

@@ -3,6 +3,7 @@ import inspect
 import os
 import random
 import re
+import sys
 import traceback
 from contextlib import redirect_stdout
 from difflib import get_close_matches
@@ -23,16 +24,9 @@ from pkg_resources import parse_version
 
 from core import checks, utils
 from core.changelog import Changelog
-from core.models import (
-    HostingMethod,
-    InvalidConfigError,
-    PermissionLevel,
-    UnseenFormatter,
-    getLogger,
-)
-from core.utils import trigger_typing, truncate
+from core.models import HostingMethod, InvalidConfigError, PermissionLevel, UnseenFormatter, getLogger
 from core.paginator import EmbedPaginatorSession, MessagePaginatorSession
-
+from core.utils import trigger_typing, truncate
 
 logger = getLogger(__name__)
 
@@ -142,7 +136,7 @@ class ModmailHelpCommand(commands.HelpCommand):
             perm_level = "NONE"
 
         embed = discord.Embed(
-            title=f"`{self.get_command_signature(topic)}`",
+            title=f"`{self.get_command_signature(topic).strip()}`",
             color=self.context.bot.main_color,
             description=self.process_help_msg(topic.help),
         )
@@ -332,10 +326,27 @@ class Utility(commands.Cog):
         desc += "an organised manner."
         embed.description = desc
 
+        python_version = "{}.{}.{}".format(*sys.version_info[:3])
+        dpy_version = discord.__version__
+
+        app_info = await self.bot.application_info()
+        if app_info.team:
+            owner = app_info.team.name
+        else:
+            owner = str(app_info.owner)
+
+        embed.add_field(
+            name="Bot Owner (Team)" if app_info.team else "Bot Owner",
+            value=str(owner),
+        )
         embed.add_field(name="Uptime", value=self.bot.uptime)
         embed.add_field(name="Latency", value=f"{self.bot.latency * 1000:.2f} ms")
-        embed.add_field(name="Version", value=f"`{self.bot.version}`")
-        embed.add_field(name="Authors", value="`kyb3r`, `Taki`, `fourjr`")
+        embed.add_field(name="Python Version", value=f"`{python_version}`")
+        embed.add_field(name="discord.py Version", value=f"`{dpy_version}`")
+        embed.add_field(name="Bot Version", value=f"`{self.bot.version}`")
+        _c_url = "https://github.com/modmail-dev/modmail/graphs/contributors"
+        _c = f"[and many other contributors]({_c_url})"
+        embed.add_field(name="Authors", value=f"`kyb3r`, `Taki`, `fourjr`, {_c}")
         embed.add_field(name="Hosting Method", value=self.bot.hosting_method.name)
 
         changelog = await Changelog.from_url(self.bot)
@@ -352,7 +363,7 @@ class Utility(commands.Cog):
         embed.add_field(
             name="Want Modmail in Your Server?",
             value="Follow the installation guide on [GitHub](https://github.com/modmail-dev/modmail/) "
-            "and join our [Discord server](https://discord.gg/F34cRU8)!",
+            "and join our [Discord server](https://discord.gg/zmdYe3ZVHG)!",
             inline=False,
         )
 
@@ -599,7 +610,6 @@ class Utility(commands.Cog):
         return await ctx.send(embed=embed)
 
     async def set_presence(self, *, status=None, activity_type=None, activity_message=None):
-
         if status is None:
             status = self.bot.config.get("status")
 
@@ -692,6 +702,13 @@ class Utility(commands.Cog):
 
         Do not ping `@everyone` to set mention to everyone, use "everyone" or "all" instead.
 
+        You can also additionally configure a custom message to show after the mention.
+        You can use `[prefix]` as placeholder for bot prefix.
+
+        Examples:
+        - `{prefix}mention message Use [prefix]reply to reply`
+        - `{prefix}mention message disable`
+
         Notes:
         - Type only `{prefix}mention` to retrieve your current "mention" message.
         - `{prefix}mention disable` to disable mention.
@@ -702,6 +719,24 @@ class Utility(commands.Cog):
             embed = discord.Embed(
                 title="Current mention:", color=self.bot.main_color, description=str(current)
             )
+        elif isinstance(user_or_role[0], str) and user_or_role[0].lower() in ("message", "msg"):
+            option = user_or_role[1].lower()
+            if option == "disable":
+                embed = discord.Embed(
+                    description="Disabled mention message on thread creation.",
+                    color=self.bot.main_color,
+                )
+                self.bot.config["mention_message"] = None
+            else:
+                msg = " ".join(user_or_role[1:])
+                mention_msg = msg.replace("[prefix]", self.bot.prefix)
+                embed = discord.Embed(
+                    title="Changed mention message!",
+                    description=f'On thread creation the bot now says "{current} {mention_msg}".',
+                    color=self.bot.main_color,
+                )
+                self.bot.config["mention_message"] = msg
+            await self.bot.config.update()
         elif (
             len(user_or_role) == 1
             and isinstance(user_or_role[0], str)
@@ -750,17 +785,23 @@ class Utility(commands.Cog):
         Change the prefix of the bot.
 
         Type only `{prefix}prefix` to retrieve your current bot prefix.
+        Enclose your prefix in doublequotes to include trailing spaces.
+
+        Example: `{prefix}prefix "mm "`
         """
 
         current = self.bot.prefix
-        embed = discord.Embed(title="Current prefix", color=self.bot.main_color, description=f"{current}")
+        embed = discord.Embed(title="Current prefix", color=self.bot.main_color, description=f"`{current}`")
 
         if prefix is None:
             await ctx.send(embed=embed)
         else:
+            pattern = r'"([^"]{1,19})"'
+            match = re.search(pattern, prefix)
+
             embed.title = "Changed prefix!"
-            embed.description = f"Set prefix to `{prefix}`"
-            self.bot.config["prefix"] = prefix
+            embed.description = f"Set prefix to `{match.group(1) if match else prefix}`"
+            self.bot.config["prefix"] = match.group(1) if match else prefix
             await self.bot.config.update()
             await ctx.send(embed=embed)
 
@@ -1020,7 +1061,7 @@ class Utility(commands.Cog):
                 color=self.bot.error_color, description="You dont have any aliases at the moment."
             )
             embed.set_footer(text=f'Do "{self.bot.prefix}help alias" for more commands.')
-            embed.set_author(name="Aliases", icon_url=self.bot.get_guild_icon(guild=ctx.guild))
+            embed.set_author(name="Aliases", icon_url=self.bot.get_guild_icon(guild=ctx.guild, size=128))
             return await ctx.send(embed=embed)
 
         embeds = []
@@ -1028,7 +1069,9 @@ class Utility(commands.Cog):
         for i, names in enumerate(zip_longest(*(iter(sorted(self.bot.aliases)),) * 15)):
             description = utils.format_description(i, names)
             embed = discord.Embed(color=self.bot.main_color, description=description)
-            embed.set_author(name="Command Aliases", icon_url=self.bot.get_guild_icon(guild=ctx.guild))
+            embed.set_author(
+                name="Command Aliases", icon_url=self.bot.get_guild_icon(guild=ctx.guild, size=128)
+            )
             embeds.append(embed)
 
         session = EmbedPaginatorSession(ctx, *embeds)
@@ -1612,7 +1655,8 @@ class Utility(commands.Cog):
                             )
                             embed = discord.Embed(color=self.bot.main_color, description=description)
                             embed.set_author(
-                                name="Permission Overrides", icon_url=self.bot.get_guild_icon(guild=ctx.guild)
+                                name="Permission Overrides",
+                                icon_url=self.bot.get_guild_icon(guild=ctx.guild, size=128),
                             )
                             embeds.append(embed)
 
@@ -1941,7 +1985,7 @@ class Utility(commands.Cog):
 
         desc = (
             f"The latest version is [`{self.bot.version}`]"
-            "(https://github.com/modmail-dev/modmail/blob/master/bot.py#L1)"
+            "(https://github.com/raidensakura/modmail/blob/stable/bot.py#L1)"
         )
 
         if self.bot.version >= parse_version(latest.version) and flag.lower() != "force":

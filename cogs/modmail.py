@@ -1,24 +1,22 @@
 import asyncio
+import datetime
 import re
-from datetime import datetime, timezone
+from datetime import timezone
 from itertools import zip_longest
-from typing import Optional, Union, List, Tuple, Literal
 from types import SimpleNamespace
+from typing import List, Literal, Optional, Tuple, Union
 
 import discord
-from discord.ext import commands
-from discord.ext.commands.view import StringView
-from discord.ext.commands.cooldowns import BucketType
-from discord.role import Role
-from discord.utils import escape_markdown
-
 from dateutil import parser
+from discord.ext import commands
+from discord.ext.commands.cooldowns import BucketType
+from discord.ext.commands.view import StringView
 
 from core import checks
 from core.models import DMDisabled, PermissionLevel, SimilarCategoryConverter, getLogger
 from core.paginator import EmbedPaginatorSession
 from core.thread import Thread
-from core.time import UserFriendlyTime, human_timedelta
+from core.time import ShortTime, UserFriendlyTime, human_timedelta
 from core.utils import *
 
 logger = getLogger(__name__)
@@ -160,7 +158,7 @@ class Modmail(commands.Cog):
                 color=self.bot.error_color, description="You dont have any snippets at the moment."
             )
             embed.set_footer(text=f'Check "{self.bot.prefix}help snippet add" to add a snippet.')
-            embed.set_author(name="Snippets", icon_url=self.bot.get_guild_icon(guild=ctx.guild))
+            embed.set_author(name="Snippets", icon_url=self.bot.get_guild_icon(guild=ctx.guild, size=128))
             return await ctx.send(embed=embed)
 
         embeds = []
@@ -168,7 +166,7 @@ class Modmail(commands.Cog):
         for i, names in enumerate(zip_longest(*(iter(sorted(self.bot.snippets)),) * 15)):
             description = format_description(i, names)
             embed = discord.Embed(color=self.bot.main_color, description=description)
-            embed.set_author(name="Snippets", icon_url=self.bot.get_guild_icon(guild=ctx.guild))
+            embed.set_author(name="Snippets", icon_url=self.bot.get_guild_icon(guild=ctx.guild, size=128))
             embeds.append(embed)
 
         session = EmbedPaginatorSession(ctx, *embeds)
@@ -444,11 +442,9 @@ class Modmail(commands.Cog):
     async def send_scheduled_close_message(self, ctx, after, silent=False):
         human_delta = human_timedelta(after.dt)
 
-        silent = "*silently* " if silent else ""
-
         embed = discord.Embed(
             title="Scheduled close",
-            description=f"This thread will close {silent}{human_delta}.",
+            description=f"This thread will{' silently' if silent else ''} close in {human_delta}.",
             color=self.bot.error_color,
         )
 
@@ -732,8 +728,10 @@ class Modmail(commands.Cog):
                 f"{self.bot.config['log_url'].strip('/')}{'/' + prefix if prefix else ''}/{entry['key']}"
             )
 
-            username = entry["recipient"]["name"] + "#"
-            username += entry["recipient"]["discriminator"]
+            recipient = entry["recipient"]
+            discriminator = recipient.get("discriminator")
+            username = recipient["name"]
+            username += "" if discriminator == "0" else f"#{discriminator}"
 
             embed = discord.Embed(color=self.bot.main_color, timestamp=created_at)
             embed.set_author(name=f"{title} - {username}", icon_url=avatar_url, url=log_url)
@@ -1031,7 +1029,7 @@ class Modmail(commands.Cog):
                 name = tag
             avatar_url = self.bot.config["anon_avatar_url"]
             if avatar_url is None:
-                avatar_url = self.bot.get_guild_icon(guild=ctx.guild)
+                avatar_url = self.bot.get_guild_icon(guild=ctx.guild, size=128)
             em.set_footer(text=name, icon_url=avatar_url)
 
             for u in users:
@@ -1120,7 +1118,7 @@ class Modmail(commands.Cog):
                 name = tag
             avatar_url = self.bot.config["anon_avatar_url"]
             if avatar_url is None:
-                avatar_url = self.bot.get_guild_icon(guild=ctx.guild)
+                avatar_url = self.bot.get_guild_icon(guild=ctx.guild, size=128)
             em.set_footer(text=name, icon_url=avatar_url)
 
             for u in users:
@@ -1170,7 +1168,7 @@ class Modmail(commands.Cog):
             user = thread.recipient or await self.bot.get_or_fetch_user(thread.id)
 
         default_avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
-        icon_url = getattr(user, "avatar_url", default_avatar)
+        icon_url = user.display_avatar.replace(size=32, format="webp") or default_avatar
 
         logs = await self.bot.api.get_user_logs(user.id)
 
@@ -1647,58 +1645,69 @@ class Modmail(commands.Cog):
     async def blocked(self, ctx):
         """Retrieve a list of blocked users."""
 
-        roles = []
-        users = []
-        now = ctx.message.created_at
+        roles, users, now = [], [], discord.utils.utcnow()
 
         blocked_users = list(self.bot.blocked_users.items())
-        for id_, reason in blocked_users:
-            # parse "reason" and check if block is expired
-            try:
-                end_time, after = extract_block_timestamp(reason, id_)
-            except ValueError:
+        for id_, data in blocked_users:
+            blocked_by_id = data["blocked_by"]
+            blocked_at = parser.parse(data["blocked_at"])
+            human_blocked_at = discord.utils.format_dt(blocked_at, style="R")
+            if "until" in data:
+                blocked_until = parser.parse(data["until"])
+                human_blocked_until = discord.utils.format_dt(blocked_until, style="R")
+            else:
+                blocked_until = human_blocked_until = "Permanent"
+
+            if isinstance(blocked_until, datetime.datetime) and blocked_until < now:
+                self.bot.blocked_users.pop(str(id_))
+                logger.debug("No longer blocked, user %s.", id_)
                 continue
 
-            if end_time is not None:
-                if after <= 0:
-                    # No longer blocked
-                    self.bot.blocked_users.pop(str(id_))
-                    logger.debug("No longer blocked, user %s.", id_)
-                    continue
-            users.append((f"<@{id_}>", reason))
+            string = f"<@{id_}> ({human_blocked_until})"
+            string += f"\n- Issued {human_blocked_at} by <@{blocked_by_id}>"
+
+            reason = data.get("reason")
+            if reason:
+                string += f"\n- Blocked for {reason}"
+
+            users.append(string + "\n")
 
         blocked_roles = list(self.bot.blocked_roles.items())
-        for id_, reason in blocked_roles:
-            # parse "reason" and check if block is expired
-            # etc "blah blah blah... until 2019-10-14T21:12:45.559948."
-            try:
-                end_time, after = extract_block_timestamp(reason, id_)
-            except ValueError:
+        for id_, data in blocked_roles:
+            blocked_by_id = data["blocked_by"]
+            blocked_at = parser.parse(data["blocked_at"])
+            human_blocked_at = discord.utils.format_dt(blocked_at, style="R")
+            if "until" in data:
+                blocked_until = parser.parse(data["until"])
+                human_blocked_until = discord.utils.format_dt(blocked_until, style="R")
+            else:
+                blocked_until = human_blocked_until = "Permanent"
+
+            if isinstance(blocked_until, datetime.datetime) and blocked_until < now:
+                self.bot.blocked_users.pop(str(id_))
+                logger.debug("No longer blocked, user %s.", id_)
                 continue
 
-            if end_time is not None:
-                if after <= 0:
-                    # No longer blocked
-                    self.bot.blocked_roles.pop(str(id_))
-                    logger.debug("No longer blocked, role %s.", id_)
-                    continue
+            string = f"<@&{id_}> ({human_blocked_until})"
+            string += f"\n- Issued {human_blocked_at} by <@{blocked_by_id}>"
 
-            role = self.bot.guild.get_role(int(id_))
-            if role:
-                roles.append((role.mention, reason))
+            reason = data.get("reason")
+            if reason:
+                string += f"\n- Blocked for {reason}"
+
+            roles.append(string + "\n")
 
         user_embeds = [discord.Embed(title="Blocked Users", color=self.bot.main_color, description="")]
 
         if users:
             embed = user_embeds[0]
 
-            for mention, reason in users:
-                line = mention + f" - {reason or 'No Reason Provided'}\n"
-                if len(embed.description) + len(line) > 2048:
+            for line in users:
+                if len(embed.description) + len(users) > 2048:
                     embed = discord.Embed(
                         title="Blocked Users",
                         color=self.bot.main_color,
-                        description=line,
+                        description=users,
                     )
                     user_embeds.append(embed)
                 else:
@@ -1715,8 +1724,7 @@ class Modmail(commands.Cog):
         if roles:
             embed = role_embeds[-1]
 
-            for mention, reason in roles:
-                line = mention + f" - {reason or 'No Reason Provided'}\n"
+            for line in roles:
                 if len(embed.description) + len(line) > 2048:
                     role_embeds[-1].set_author()
                     embed = discord.Embed(
@@ -1793,157 +1801,122 @@ class Modmail(commands.Cog):
 
         return await ctx.send(embed=embed)
 
-    @commands.command(usage="[user] [duration] [reason]")
+    @commands.command(usage="[user_or_role] [duration] [reason]")
     @checks.has_permissions(PermissionLevel.MODERATOR)
     @trigger_typing
     async def block(
         self,
         ctx,
-        user_or_role: Optional[Union[User, discord.Role]] = None,
+        user_or_role: Union[discord.User, discord.Role, None],
+        duration: Optional[ShortTime],
         *,
-        after: UserFriendlyTime = None,
+        reason: Optional[str],
     ):
         """
         Block a user or role from using Modmail.
 
         You may choose to set a time as to when the user will automatically be unblocked.
 
-        Leave `user` blank when this command is used within a
+        Leave `user_or_role` blank when this command is used within a
         thread channel to block the current recipient.
-        `user` may be a user ID, mention, or name.
-        `duration` may be a simple "human-readable" time text. See `{prefix}help close` for examples.
+        `user_or_role` may be an ID, mention, or name.
+        `duration` may be a simple "human-readable" time text. Example: `1d`, `30m`, `5h`.
         """
+        user_or_role = ctx.thread.recipient if (ctx.thread and not user_or_role) else user_or_role
 
-        if user_or_role is None:
-            thread = ctx.thread
-            if thread:
-                user_or_role = thread.recipient
-            elif after is None:
-                raise commands.MissingRequiredArgument(SimpleNamespace(name="user or role"))
-            else:
-                raise commands.BadArgument(f'User or role "{after.arg}" not found.')
+        if not user_or_role:
+            raise commands.MissingRequiredArgument(SimpleNamespace(name="user"))
 
         mention = getattr(user_or_role, "mention", f"`{user_or_role.id}`")
+
+        async def send_embed(title: str, message: str):
+            embed = discord.Embed(
+                title=title,
+                description=message,
+                color=self.bot.error_color if "error" in title.lower() else self.bot.main_color,
+            )
+            return await ctx.send(embed=embed)
 
         if (
             not isinstance(user_or_role, discord.Role)
             and str(user_or_role.id) in self.bot.blocked_whitelisted_users
         ):
-            embed = discord.Embed(
-                title="Error",
-                description=f"Cannot block {mention}, user is whitelisted.",
-                color=self.bot.error_color,
-            )
-            return await ctx.send(embed=embed)
+            return await send_embed("Error", f"Cannot block {mention}, user is whitelisted.")
 
-        reason = f"by {escape_markdown(ctx.author.name)}#{ctx.author.discriminator}"
+        now, blocked = discord.utils.utcnow(), dict()
 
-        if after is not None:
-            if "%" in reason:
-                raise commands.BadArgument('The reason contains illegal character "%".')
+        desc = f"{mention} is now blocked."
+        if duration:
+            desc += f"\n- Expires: {discord.utils.format_dt(duration.dt, style='R')}"
+        desc += f"\n- By: {ctx.author.mention}"
+        if reason:
+            desc += f"\n- Reason: {reason}"
 
-            if after.arg:
-                fmt_dt = discord.utils.format_dt(after.dt, "R")
-            if after.dt > after.now:
-                fmt_dt = discord.utils.format_dt(after.dt, "f")
-
-            reason += f" until {fmt_dt}"
-
-        reason += "."
+        blocked["blocked_at"] = str(now)
+        blocked["blocked_by"] = ctx.author.id
+        if duration:
+            blocked["until"] = str(duration.dt)
+        if reason:
+            blocked["reason"] = reason
 
         if isinstance(user_or_role, discord.Role):
-            msg = self.bot.blocked_roles.get(str(user_or_role.id))
+            self.bot.blocked_roles[str(user_or_role.id)] = blocked
+        elif isinstance(user_or_role, discord.User):
+            blocked_users = self.bot.blocked_users
+            blocked_users[str(user_or_role.id)] = blocked
         else:
-            msg = self.bot.blocked_users.get(str(user_or_role.id))
-
-        if msg is None:
-            msg = ""
-
-        if msg:
-            old_reason = msg.strip().rstrip(".")
-            embed = discord.Embed(
-                title="Success",
-                description=f"{mention} was previously blocked {old_reason}.\n"
-                f"{mention} is now blocked {reason}",
-                color=self.bot.main_color,
-            )
-        else:
-            embed = discord.Embed(
-                title="Success",
-                color=self.bot.main_color,
-                description=f"{mention} is now blocked {reason}",
+            return logger.warning(
+                f"{__name__}: cannot block user, user is neither an instance of Discord Role or User"
             )
 
-        if isinstance(user_or_role, discord.Role):
-            self.bot.blocked_roles[str(user_or_role.id)] = reason
-        else:
-            self.bot.blocked_users[str(user_or_role.id)] = reason
         await self.bot.config.update()
 
-        return await ctx.send(embed=embed)
+        return await send_embed("Success", desc)
 
     @commands.command()
     @checks.has_permissions(PermissionLevel.MODERATOR)
     @trigger_typing
-    async def unblock(self, ctx, *, user_or_role: Union[User, Role] = None):
+    async def unblock(self, ctx, *, user_or_role: Union[discord.User, discord.Role, None]):
         """
-        Unblock a user from using Modmail.
+        Unblock a user or role from using Modmail.
 
-        Leave `user` blank when this command is used within a
+        Leave `user_or_role` blank when this command is used within a
         thread channel to unblock the current recipient.
-        `user` may be a user ID, mention, or name.
+        `user_or_role` may be an ID, mention, or name.
         """
+        user_or_role = ctx.thread.recipient if (ctx.thread and not user_or_role) else user_or_role
 
-        if user_or_role is None:
-            thread = ctx.thread
-            if thread:
-                user_or_role = thread.recipient
-            else:
-                raise commands.MissingRequiredArgument(SimpleNamespace(name="user"))
+        if not user_or_role:
+            raise commands.MissingRequiredArgument(SimpleNamespace(name="user"))
 
         mention = getattr(user_or_role, "mention", f"`{user_or_role.id}`")
-        name = getattr(user_or_role, "name", f"`{user_or_role.id}`")
 
-        if not isinstance(user_or_role, discord.Role) and str(user_or_role.id) in self.bot.blocked_users:
-            msg = self.bot.blocked_users.pop(str(user_or_role.id)) or ""
-            await self.bot.config.update()
-
-            if msg.startswith("System Message: "):
-                # If the user is blocked internally (for example: below minimum account age)
-                # Show an extended message stating the original internal message
-                reason = msg[16:].strip().rstrip(".") or "no reason"
-                embed = discord.Embed(
-                    title="Success",
-                    description=f"{mention} was previously blocked internally {reason}.\n"
-                    f"{mention} is no longer blocked.",
-                    color=self.bot.main_color,
-                )
-                embed.set_footer(
-                    text="However, if the original system block reason still applies, "
-                    f"{name} will be automatically blocked again. "
-                    f'Use "{self.bot.prefix}blocked whitelist {user_or_role.id}" to whitelist the user.'
-                )
-            else:
-                embed = discord.Embed(
-                    title="Success",
-                    color=self.bot.main_color,
-                    description=f"{mention} is no longer blocked.",
-                )
-        elif isinstance(user_or_role, discord.Role) and str(user_or_role.id) in self.bot.blocked_roles:
-            msg = self.bot.blocked_roles.pop(str(user_or_role.id)) or ""
-            await self.bot.config.update()
-
+        async def send_embed(title: str, message: str):
             embed = discord.Embed(
-                title="Success",
-                color=self.bot.main_color,
-                description=f"{mention} is no longer blocked.",
+                title=title,
+                description=message,
+                color=self.bot.error_color if "error" in title.lower() else self.bot.main_color,
             )
+            return await ctx.send(embed=embed)
+
+        title, desc = "Error", f"{mention} is not blocked."
+
+        if isinstance(user_or_role, discord.Role):
+            if str(user_or_role.id) not in self.bot.blocked_roles:
+                return await send_embed(title, desc)
+            self.bot.blocked_roles.pop(str(user_or_role.id))
+        elif isinstance(user_or_role, discord.User):
+            if str(user_or_role.id) not in self.bot.blocked_users:
+                return await send_embed(title, desc)
+            self.bot.blocked_users.pop(str(user_or_role.id))
         else:
-            embed = discord.Embed(
-                title="Error", description=f"{mention} is not blocked.", color=self.bot.error_color
+            return logger.warning(
+                f"{__name__}: cannot unblock, user is neither an instance of Discord Role or User"
             )
 
-        return await ctx.send(embed=embed)
+        await self.bot.config.update()
+
+        return await send_embed("Success", f"{mention} has been unblocked.")
 
     @commands.command()
     @checks.has_permissions(PermissionLevel.SUPPORTER)
@@ -2132,7 +2105,7 @@ class Modmail(commands.Cog):
             description="Modmail will not create any new threads.",
             color=self.bot.main_color,
         )
-        if self.bot.config["dm_disabled"] < DMDisabled.NEW_THREADS:
+        if self.bot.config["dm_disabled"] != DMDisabled.NEW_THREADS:
             self.bot.config["dm_disabled"] = DMDisabled.NEW_THREADS
             await self.bot.config.update()
 

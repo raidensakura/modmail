@@ -1,15 +1,20 @@
 {
   "index": "Introduction",
-  "another": "Another Page",
-  "advanced": "Advanced (A Folder)",
   "about": {
     "title": "About",
     "type": "page"
   },
+  "getting-started": "Getting started",
+  "installation": "Installing Modmail",
+  "logviewer-installation": "Installing Logviewer",
+  "configuration": "Configuring Modmail",
+  "updating": "Updating Modmail",
+  "updating-logviewer": "Updating Logviewer",
+  "setting-up-auto-restart": "Set up auto-restart",
   "contact": {
-    "title": "Contact ↗",
+    "title": "Discord ↗",
     "type": "page",
-    "href": "https://twitter.com/shuding_",
+    "href": "https://dsc.gg/transience",
     "newWindow": true
   }
 }

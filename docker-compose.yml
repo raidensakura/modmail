@@ -1,7 +1,8 @@
 version: "3.7"
 services:
   bot:
-    image: ghcr.io/modmail-dev/modmail:master
+    image: ghcr.io/raidensakura/modmail:stable
+    container_name: modmail
     restart: always
     env_file:
       - .env
@@ -9,17 +10,9 @@ services:
       - CONNECTION_URI=mongodb://mongo
     depends_on:
       - mongo
-  logviewer:
-    image: ghcr.io/modmail-dev/logviewer:master
-    restart: always
-    depends_on:
-      - mongo
-    environment:
-      - MONGO_URI=mongodb://mongo
-    ports:
-      - 80:8000
   mongo:
     image: mongo
+    container_name: mongodb
     restart: always
     volumes:
       - mongodb:/data/db
