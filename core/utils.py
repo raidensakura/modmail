@@ -11,7 +11,7 @@ from urllib import parse
 import discord
 from discord.ext import commands
 
-from core.models import getLogger
+from core.models import getLogger, PermissionLevel
 
 __all__ = [
     "strtobool",
@@ -41,6 +41,7 @@ __all__ = [
     "AcceptButton",
     "DenyButton",
     "ConfirmThreadCreationView",
+    "get_permissions_level"
 ]
 
 
@@ -563,6 +564,31 @@ def extract_block_timestamp(reason, id_):
             raise
 
     return end_time, after
+
+
+async def get_permissions_level(bot, user) -> PermissionLevel:
+    """
+    Determines the permission level of a user.
+    First checks if the user is the owner of the bot, then by checking the level permissions
+
+    Parameters
+    ----------
+    bot
+    user
+
+    Returns
+    -------
+    The permission level of the user.
+    """
+    if await bot.is_owner(user) or user.id == bot.user.id:
+        return PermissionLevel.OWNER
+    level_permissions = bot.config["level_permissions"]
+    # todo I don't see any checking for discord roles here
+    # Also not sure if these are ordered correctly,
+    # if they aren't, then more code will be required to get the highest level
+    for level, perms in level_permissions.items():
+        if user.id in perms:
+            return PermissionLevel(level)
 
 
 class AcceptButton(discord.ui.Button):

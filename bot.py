@@ -24,6 +24,8 @@ from discord.ext.commands.view import StringView
 from emoji import UNICODE_EMOJI
 from pkg_resources import parse_version
 
+from core.audit_logger import AuditLogger
+
 try:
     # noinspection PyUnresolvedReferences
     from colorama import init
@@ -87,6 +89,8 @@ class ModmailBot(commands.Bot):
         self._configure_logging()
 
         self.plugin_db = PluginDatabaseClient(self)  # Deprecated
+
+        self.audit_logger = AuditLogger(bot=self)
         self.startup()
 
     def get_guild_icon(
