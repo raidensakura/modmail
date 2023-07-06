@@ -27,13 +27,13 @@ def format_content_html(content: str, allow_links: bool = False) -> str:
     content = re.sub(r"^(?:(?:&gt;){1,3})(.*)", r"<blockquote>\1</blockquote>", content, flags=re.MULTILINE)
 
     # Markdown heading level 1
-    content = re.sub(r'^#\s+(.+)$', r'<h1>\1</h1>', content, flags=re.MULTILINE)
+    content = re.sub(r"^#\s+(.+)$", r"<h1>\1</h1>", content, flags=re.MULTILINE)
 
     # Markdown heading level 2
-    content = re.sub(r'^##\s+(.+)$', r'<h2>\1</h2>', content, flags=re.MULTILINE)
+    content = re.sub(r"^##\s+(.+)$", r"<h2>\1</h2>", content, flags=re.MULTILINE)
 
     # Markdown heading level 3
-    content = re.sub(r'^###\s+(.+)$', r'<h3>\1</h3>', content, flags=re.MULTILINE)
+    content = re.sub(r"^###\s+(.+)$", r"<h3>\1</h3>", content, flags=re.MULTILINE)
 
     # Encode links
     if allow_links:
@@ -107,7 +107,7 @@ def format_content_html(content: str, allow_links: bool = False) -> str:
             lang = "plaintext"
         else:
             lang = lang.strip(" \n\r")
-
+        lang = html.escape(lang)
         result = html.escape(match.group(2))
         return f'<div class="pre pre--multiline {lang}">{result}' "</div>"
 
@@ -121,17 +121,13 @@ def format_content_html(content: str, allow_links: bool = False) -> str:
     content = content.replace("@here", '<span class="mention">@here</span>')
 
     # User mentions (<@id> and <@!id>)
-    content = re.sub(
-        r"(&lt;@!?(\d+)&gt;)", r'<span class="mention" title="\2">\1</span>', content
-    )
+    content = re.sub(r"(&lt;@!?(\d+)&gt;)", r'<span class="mention" title="\2">\1</span>', content)
 
     # Channel mentions (<#id>)
     content = re.sub(r"(&lt;#\d+&gt;)", r'<span class="mention">\1</span>', content)
 
     # Role mentions (<@&id>)
-    content = re.sub(
-        r"(&lt;@&amp;(\d+)&gt;)", r'<span class="mention">\1</span>', content
-    )
+    content = re.sub(r"(&lt;@&amp;(\d+)&gt;)", r'<span class="mention">\1</span>', content)
 
     # Custom emojis (<:name:id>)
     is_jumboable = not re.sub(r"&lt;(:.*?:)(\d*)&gt;", "", content)
