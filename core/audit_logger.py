@@ -61,6 +61,13 @@ def _construct_audit_event_source_from_dict(dict: dict) -> AuditEventSource:
                             source=dict["source"])
 
 
+async def construct_from_ctx(ctx, action: str, description: str) -> AuditEvent:
+    actor = await audit_event_source_from_user(ctx.bot, ctx.author)
+    return AuditEvent(action=action,
+                      description=description,
+                      actor=actor)
+
+
 class AuditLogger:
     audit_log_collection: AsyncIOMotorCollection
 
