@@ -146,12 +146,18 @@ class Thread:
         return thread
 
     async def get_genesis_message(self) -> discord.Message:
-        if self._genesis_message is None:
-            async for m in self.channel.history(limit=5, oldest_first=True):
-                if m.author == self.bot.user:
-                    if m.embeds and m.embeds[0].fields and m.embeds[0].fields[0].name == "Roles":
-                        self._genesis_message = m
-
+        if isinstance(self._genesis_message, discord.Message):
+            return self._genesis_message
+        # TODO: Store genesis message in db and use manual detection for last resort
+        async for m in self.channel.history(limit=5, oldest_first=True):
+            if (
+                m.author == self.bot.user
+                and isinstance(m.embeds, list)
+                and m.embeds[0]
+                and m.embeds[0].footer
+                and "user id:" in m.embeds[0].footer.text.lower()
+            ):
+                self._genesis_message = m
         return self._genesis_message
 
     async def setup(self, *, creator=None, category=None, initial_message=None):
