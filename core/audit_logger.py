@@ -5,7 +5,7 @@ from typing import Self
 from bson import ObjectId, CodecOptions
 from motor.motor_asyncio import AsyncIOMotorCollection
 
-from core.utils import get_permissions_level
+from core.utils import get_permission_level
 
 
 @dataclass(frozen=True)
@@ -25,7 +25,7 @@ async def audit_event_source_from_user(bot: object, user: dict) -> AuditEventSou
                             ip="",
                             country="",
                             user_agent="Discord",
-                            role=await get_permissions_level(bot, user),
+                            role=await get_permission_level(bot, user),
                             source="modmail")
 
 
