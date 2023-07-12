@@ -2272,6 +2272,68 @@ class Utility(commands.Cog):
 
         await self.bot.add_reaction(ctx.message, "\u2705")
 
+    @commands.command(name="audit", usage="[event id]")
+    @checks.has_permissions(PermissionLevel.ADMINISTRATOR)
+    async def print_audit_event(self, ctx: discord.ext.commands.context.Context, event_id: str):
+        if len(event_id) != 24:
+            await ctx.send(embed=discord.Embed(
+                title="Error",
+                color=self.bot.error_color,
+                description="Invalid audit event id. Should be 24 characters long.",
+            ))
+            return
+
+        log: AuditEvent = await self.bot.audit_logger.get_audit_event(event_id)
+
+        if log is None:
+            await ctx.send(embed=discord.Embed(
+                title="404",
+                color=self.bot.error_color,
+                description=f"Audit event of id {event_id} not found."
+            ))
+            return
+
+        embed = discord.Embed(title="Audit log", color=self.bot.main_color)
+
+        for k, v in log.__dict__.items():
+            if v != "" and v is not None and k != "actor":
+                embed.add_field(name=k, value=v, inline=False)
+        for k, v in log.actor.__dict__.items():
+            if v != "" and v is not None:
+                embed.add_field(name=k, value=v, inline=False)
+
+        await ctx.send(content=f"```{pformat(log)}```", embed=embed)
+
+    @permissions.command(name="list", usage="[user]")
+    @checks.has_permissions(PermissionLevel.ADMINISTRATOR)
+    async def get_user_permission_level_command(self, ctx: discord.ext.commands.context.Context, user: discord.Member):
+        """
+        See the permission level of a user.
+        """
+        # copilot wrote this entire method, so it's not my fault if it's bad
+        # wow it wrote broken code
+        level = await get_permission_level(bot=self.bot, user=user)
+        await ctx.send(embed=discord.Embed(
+            title="Permission level",
+            color=self.bot.main_color,
+            description=f"{user.mention} has permission level {level} ({level.name})."
+        ))
+
+    @permissions.command(name="explain", usage="[user]")
+    @checks.has_permissions(PermissionLevel.ADMINISTRATOR)
+    async def explain_user_permission_level_command(self, ctx: discord.ext.commands.context.Context, user: discord.Member):
+        """
+        Explain the permission level of a user.
+        """
+        # copilot wrote this entire method, so it's not my fault if it's bad
+        # wow it wrote broken code
+        level = await explain_permissions_level(bot=self.bot, user=user)
+        await ctx.send(embed=discord.Embed(
+            title="Permission level",
+            color=self.bot.main_color,
+            description=level[1]
+        ).add_field(name="summary", value=level[0], inline=False))
+
 
 async def setup(bot):
     await bot.add_cog(Utility(bot))
