@@ -2,6 +2,8 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from typing import Self
 
+import discord
+import pymongo
 from bson import ObjectId, CodecOptions
 from motor.motor_asyncio import AsyncIOMotorCollection
 
@@ -19,7 +21,8 @@ class AuditEventSource:
     source: str
 
 
-async def audit_event_source_from_user(bot: object, user: dict) -> AuditEventSource:
+async def audit_event_source_from_user(bot: object, user: discord.Member) -> AuditEventSource:
+    """Creates an AuditEventSource object from a discord.Member object with all fields filled out"""
     return AuditEventSource(user_id=user.id,
                             username=user.name,
                             ip="",
@@ -38,6 +41,7 @@ class AuditEvent:
     id: ObjectId = None
 
     def to_short_dict(self) -> dict:
+        """Returns the object as a dictionary, but without the id field"""
         result = asdict(self)
         result.pop("id")
         return result
@@ -61,7 +65,19 @@ def _construct_audit_event_source_from_dict(dict: dict) -> AuditEventSource:
                             source=dict["source"])
 
 
-async def construct_from_ctx(ctx, action: str, description: str) -> AuditEvent:
+async def construct_from_ctx(ctx: discord.ext.commands.context.Context, action: str, description: str) -> AuditEvent:
+    """
+    Constructs a complete audit event from a context object and the given action and description
+    Parameters
+    ----------
+    ctx
+    action
+    description
+
+    Returns
+    -------
+    AuditEvent
+    """
     actor = await audit_event_source_from_user(ctx.bot, ctx.author)
     return AuditEvent(action=action,
                       description=description,
@@ -77,10 +93,11 @@ class AuditLogger:
         self.audit_log_collection = bot.api.db.audit_log.with_options(
             codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
 
-    def push(self, event: AuditEvent):
-        # push the audit log to the database
-        self.audit_log_collection.insert_one(event.to_short_dict())
+    def push(self, event: AuditEvent) -> pymongo.results.InsertOneResult:
+        """Pushes an audit event to the database"""
+        return self.audit_log_collection.insert_one(event.to_short_dict())
 
-    async def get_audit_log(self: Self, event_id: str) -> AuditEvent:
+    async def get_audit_event(self: Self, event_id: str) -> AuditEvent:
+        """Gets an audit event from the database by its id"""
         event = await self.audit_log_collection.find_one({"_id": ObjectId(event_id)})
         return _construct_audit_event_from_dict(event)
