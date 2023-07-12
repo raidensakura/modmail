@@ -373,7 +373,7 @@ class Modmail(commands.Cog):
                 color=self.bot.main_color,
                 description=f'`{name}` will now send "{value}".',
             )
-            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.block", description=f"edited snippet {name}"))
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.snippet.edit", description=f"edited snippet {name}"))
         else:
             embed = create_not_found_embed(name, self.bot.snippets.keys(), "Snippet")
         await ctx.send(embed=embed)
