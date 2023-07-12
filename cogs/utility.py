@@ -10,6 +10,7 @@ from difflib import get_close_matches
 from io import BytesIO, StringIO
 from itertools import takewhile, zip_longest
 from json import JSONDecodeError, loads
+from pprint import pformat
 from subprocess import PIPE
 from textwrap import indent
 from types import SimpleNamespace
@@ -23,10 +24,11 @@ from discord.ext.commands.view import StringView
 from pkg_resources import parse_version
 
 from core import checks, utils
+from core.audit_logger import AuditEvent, audit_event_source_from_user, construct_from_ctx
 from core.changelog import Changelog
 from core.models import HostingMethod, InvalidConfigError, PermissionLevel, UnseenFormatter, getLogger
 from core.paginator import EmbedPaginatorSession, MessagePaginatorSession
-from core.utils import trigger_typing, truncate
+from core.utils import trigger_typing, truncate, get_permission_level, explain_permissions_level
 
 logger = getLogger(__name__)
 
@@ -455,6 +457,8 @@ class Utility(commands.Cog):
         embed = discord.Embed(color=self.bot.main_color)
         embed.set_footer(text="Debug logs - Navigate using the reactions below.")
 
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.debug.show", description=f"viewed debug logs in discord ({ctx.channel.id})"))
+
         session = MessagePaginatorSession(ctx, *messages, embed=embed)
         session.current = len(messages) - 1
         return await session.run()
@@ -485,7 +489,7 @@ class Utility(commands.Cog):
                 embed = discord.Embed(
                     title="Debug Logs",
                     color=self.bot.main_color,
-                    description=f"{haste_url}/" + key,
+                    description=f"{haste_url}/{key}",
                 )
         except (JSONDecodeError, ClientResponseError, IndexError, KeyError):
             embed = discord.Embed(
@@ -494,6 +498,10 @@ class Utility(commands.Cog):
                 description="Something's wrong. We're unable to upload your logs to hastebin.",
             )
             embed.set_footer(text="Go to Heroku to see your logs.")
+
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.debug.hastebin",
+                                                                description=f"uploaded logs to hastebin at ({haste_url + '/' + key})"))
+
         await ctx.send(embed=embed)
 
     @debug.command(name="clear", aliases=["wipe"])
@@ -512,6 +520,8 @@ class Utility(commands.Cog):
         await ctx.send(
             embed=discord.Embed(color=self.bot.main_color, description="Cached logs are now cleared.")
         )
+
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.debug.clear", description=f"cleared local log file"))
 
     @commands.command(aliases=["presence"])
     @checks.has_permissions(PermissionLevel.ADMINISTRATOR)
@@ -570,6 +580,15 @@ class Utility(commands.Cog):
             msg += f"{activity.name}."
 
         embed = discord.Embed(title="Activity Changed", description=msg, color=self.bot.main_color)
+
+        # Push audit log event
+        event : AuditEvent
+        if activity_type == "clear":
+            event = await construct_from_ctx(ctx, action=f"modmail.activity.clear", description=f"removed bot activity")
+        else:
+            event = await construct_from_ctx(ctx, action=f"modmail.activity.set", description=msg)
+        self.bot.audit_logger.push(event)
+
         return await ctx.send(embed=embed)
 
     @commands.command()
@@ -606,6 +625,15 @@ class Utility(commands.Cog):
         await self.bot.config.update()
 
         msg = f"Status set to: {status.value}."
+
+        # Push audit log event
+        event : AuditEvent
+        if status_type == "clear":
+            event = await construct_from_ctx(ctx, action=f"modmail.status.clear", description=f"removed bot activity")
+        else:
+            event = await construct_from_ctx(ctx, action=f"modmail.status.set", description=msg)
+        self.bot.audit_logger.push(event)
+
         embed = discord.Embed(title="Status Changed", description=msg, color=self.bot.main_color)
         return await ctx.send(embed=embed)
 
@@ -727,6 +755,7 @@ class Utility(commands.Cog):
                     color=self.bot.main_color,
                 )
                 self.bot.config["mention_message"] = None
+                self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.mention.disable", description="disabled mention on thread creation"))
             else:
                 msg = " ".join(user_or_role[1:])
                 mention_msg = msg.replace("[prefix]", self.bot.prefix)
@@ -736,6 +765,8 @@ class Utility(commands.Cog):
                     color=self.bot.main_color,
                 )
                 self.bot.config["mention_message"] = msg
+                self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.mention.set", description=f"set thread creation message to {current} {mention_msg}"))
+
             await self.bot.config.update()
         elif (
             len(user_or_role) == 1
@@ -749,12 +780,15 @@ class Utility(commands.Cog):
                     color=self.bot.main_color,
                 )
                 self.bot.config["mention"] = None
+                self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.mention.disable", description="disabled mention on thread creation"))
             else:
                 embed = discord.Embed(
                     description="`mention` is reset to default.",
                     color=self.bot.main_color,
                 )
                 self.bot.config.remove("mention")
+                self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.mention.set", description="reset mention to default"))
+
             await self.bot.config.update()
         else:
             mention = []
@@ -774,6 +808,9 @@ class Utility(commands.Cog):
                 color=self.bot.main_color,
             )
             self.bot.config["mention"] = mention
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.mention.set",
+                                                                description=f"set mention to {mention}"))
+
             await self.bot.config.update()
 
         return await ctx.send(embed=embed)
@@ -804,6 +841,9 @@ class Utility(commands.Cog):
             self.bot.config["prefix"] = match.group(1) if match else prefix
             await self.bot.config.update()
             await ctx.send(embed=embed)
+
+            # Push audit event
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.prefix.set", description=f"Set prefix to {match.group(1) if match else prefix}"))
 
     @commands.group(aliases=["configuration"], invoke_without_command=True)
     @checks.has_permissions(PermissionLevel.OWNER)
@@ -858,6 +898,8 @@ class Utility(commands.Cog):
                     color=self.bot.main_color,
                     description=f"Set `{key}` to `{self.bot.config[key]}`.",
                 )
+                # Push audit event
+                self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.config.set", description=f"Set {key} to {self.bot.config[key]}."))
             except InvalidConfigError as exc:
                 embed = exc.embed
         else:
@@ -882,6 +924,7 @@ class Utility(commands.Cog):
                 color=self.bot.main_color,
                 description=f"`{key}` had been reset to default.",
             )
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.config.remove", description=f"reset {key} to default."))
         else:
             embed = discord.Embed(
                 title="Error", color=self.bot.error_color, description=f"{key} is an invalid key."
@@ -1205,6 +1248,10 @@ class Utility(commands.Cog):
 
         if embed is None:
             embed = await self.make_alias(name, value, "Added")
+
+        # Push audit event
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.alias.add", description=f"added alias {name} for {value}"))
+
         return await ctx.send(embed=embed)
 
     @alias.command(name="remove", aliases=["del", "delete"])
@@ -1221,6 +1268,11 @@ class Utility(commands.Cog):
                 color=self.bot.main_color,
                 description=f"Successfully deleted `{name}`.",
             )
+
+            # Push audit event
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.alias.remove",
+                                                                description=f"removed alias {name}"))
+
         else:
             embed = utils.create_not_found_embed(name, self.bot.aliases.keys(), "Alias")
 
@@ -1237,6 +1289,10 @@ class Utility(commands.Cog):
             return await ctx.send(embed=embed)
 
         embed = await self.make_alias(name, value, "Edited")
+
+        # Push audit event
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.alias.edit", description=f"edited alias {name} for {value}"))
+
         return await ctx.send(embed=embed)
 
     @commands.group(aliases=["perms"], invoke_without_command=True)
@@ -1336,11 +1392,15 @@ class Utility(commands.Cog):
             self.bot.config["override_command_level"][command.qualified_name] = level.name
 
             await self.bot.config.update()
+
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.permissions.override",
+                                                                description=f"Updated command permission level for '{command.qualified_name}' to '{level.name}'"))
+
             embed = discord.Embed(
                 title="Success",
                 color=self.bot.main_color,
                 description="Successfully set command permission level for "
-                f"`{command.qualified_name}` to `{level.name}`.",
+                            f"`{command.qualified_name}` to `{level.name}`.",
             )
         return await ctx.send(embed=embed)
 
@@ -1406,6 +1466,9 @@ class Utility(commands.Cog):
                 if key is not None:
                     logger.info("Granting %s access to Modmail category.", key.name)
                     await self.bot.main_category.set_permissions(key, read_messages=True)
+
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.permissions.add", description=f"Updated '{user_or_role}' {type_} permissions for {name}"))
+
 
         embed = discord.Embed(
             title="Success",
@@ -1507,6 +1570,8 @@ class Utility(commands.Cog):
                     if member is not None and member != self.bot.modmail_guild.me:
                         logger.info("Denying %s access to Modmail category.", member.name)
                         await self.bot.main_category.set_permissions(member, overwrite=None)
+
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.permissions.remove", description=f"Updated '{user_or_role}' {type_} permissions for {name}"))
 
         embed = discord.Embed(
             title="Success",
@@ -1760,6 +1825,12 @@ class Utility(commands.Cog):
             target = self.bot.get_user(target.id) or self.bot.modmail_guild.get_role(target.id)
 
         embed.description = f"{'Un-w' if removed else 'W'}hitelisted {target.mention} to view logs."
+        if removed:
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.oauth.whitelist.remove",
+                                                                description=f"Removed {target.name}({target.id}) from the oauth whitelist."))
+        else:
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.oauth.whitelist.add",
+                                                                description=f"Added {target.name}({target.id}) to the whitelist."))
 
         await ctx.send(embed=embed)
 
@@ -1823,11 +1894,16 @@ class Utility(commands.Cog):
                 self.bot.auto_triggers[keyword] = command
                 await self.bot.config.update()
 
+                # Push audit event
+                self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.autotrigger.add",
+                                                                    description=f"added autotrigger {keyword} for {command}."))
+
                 embed = discord.Embed(
                     title="Success",
                     color=self.bot.main_color,
                     description=f"Keyword `{keyword}` has been linked to `{command}`.",
                 )
+
             else:
                 embed = discord.Embed(
                     title="Error",
@@ -1867,6 +1943,11 @@ class Utility(commands.Cog):
                     color=self.bot.main_color,
                     description=f"Keyword `{keyword}` has been linked to `{command}`.",
                 )
+
+                # Push audit event
+                self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.autotrigger.edit",
+                                                                    description=f"edited autotrigger {keyword} to {command}."))
+
             else:
                 embed = discord.Embed(
                     title="Error",
@@ -1897,6 +1978,11 @@ class Utility(commands.Cog):
                 color=self.bot.main_color,
                 description=f"Keyword `{keyword}` has been removed.",
             )
+
+            # Push audit event
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.autotrigger.remove",
+                                                                description=f"removed autotrigger {keyword}"))
+
             await ctx.send(embed=embed)
 
     @autotrigger.command(name="test")
@@ -1966,6 +2052,8 @@ class Utility(commands.Cog):
             embed.set_author(name=user["username"], icon_url=user["avatar_url"], url=user["url"])
             embed.set_thumbnail(url=user["avatar_url"])
             await ctx.send(embed=embed)
+
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.github.show", description=f"showed github user info in channel {ctx.channel.id}"))
         else:
             await ctx.send(embed=discord.Embed(title="Invalid Github Token", color=self.bot.error_color))
 
@@ -1982,6 +2070,9 @@ class Utility(commands.Cog):
 
         changelog = await Changelog.from_url(self.bot)
         latest = changelog.latest_version
+
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.update",
+                                                            description=f"ran update command in channel {ctx.channel.id}"))
 
         desc = (
             f"The latest version is [`{self.bot.version}`]"
@@ -2103,6 +2194,10 @@ class Utility(commands.Cog):
         """Evaluates Python code."""
 
         logger.warning("Running eval command:\n%s", body)
+
+        #Push audit event
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.eval",
+                                                            description=f"evaled {body}"))
 
         env = {
             "ctx": ctx,
