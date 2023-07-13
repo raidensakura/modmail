@@ -62,6 +62,9 @@ const config: DocsThemeConfig = {
   project: {
     link: 'https://github.com/raidensakura/modmail',
   },
+  sidebar: {
+    defaultMenuCollapseLevel: 1,
+  },
   chat: {
     link: 'https://dsc.gg/transience',
   },

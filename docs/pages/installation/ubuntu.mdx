@@ -1,15 +1,7 @@
----
-description: Deploy Modmail on an Ubuntu server.
-title: Ubuntu
----
-
 import { Callout } from 'nextra-theme-docs'
+import Image from 'next/image'
 
-# Ubuntu
-
-<Callout emoji="⚠️" type="warning">
-For safety reasons, **DO NOT** install Modmail with a root user. A misbehaving or malicious plugin installed on your Modmail bot can easily access your entire system. If you are unsure how to create a new user on Linux, see [DigitalOcean’s tutorial: How To Create a New Sudo-enabled User](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-sudo-enabled-user-on-ubuntu-20-04-quickstart).
-</Callout>
+# Installing Modmail on Ubuntu
 
 ## Prerequisites
 
@@ -101,7 +93,7 @@ Create a file named `.env` with `nano` and paste all the environmental variables
 nano .env
 ```
 
-![](../../assets/vps-env.png)
+<Image src="/vps-env.png" alt="Hello" width={500} height={500} />
 
 After that, press `Ctrl+O` and `Enter` to save your changes. Exit the `nano` editor with `Ctrl+X`.
 

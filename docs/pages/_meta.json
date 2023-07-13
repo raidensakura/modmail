@@ -1,20 +1,17 @@
 {
-  "index": "Introduction",
-  "about": {
-    "title": "About",
-    "type": "page"
-  },
-  "getting-started": "Getting started",
-  "installation": "Installing Modmail",
-  "logviewer-installation": "Installing Logviewer",
-  "configuration": "Configuring Modmail",
-  "updating": "Updating Modmail",
-  "updating-logviewer": "Updating Logviewer",
-  "setting-up-auto-restart": "Set up auto-restart",
-  "contact": {
-    "title": "Discord ↗",
-    "type": "page",
-    "href": "https://dsc.gg/transience",
-    "newWindow": true
+	"index": "Introduction",
+	"getting-started": "Getting started",
+	"installation": "Installing Modmail",
+	"logviewer-installation": "Installing Logviewer",
+	"configuration": "Configuring Modmail",
+	"updating": "Updating Modmail",
+	"updating-logviewer": "Updating Logviewer",
+	"setting-up-auto-restart": "Set up auto-restart",
+	"contact": {
+	  "title": "Discord ↗",
+	  "type": "page",
+	  "href": "https://dsc.gg/transience",
+	  "newWindow": true
+	}
   }
-}
+  

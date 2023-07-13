@@ -1,10 +1,7 @@
----
-description: Deploy Modmail on a Windows machine.
----
-
 import { Callout } from 'nextra-theme-docs'
+import Image from 'next/image'
 
-# Windows
+# Installing Modmail on Windows
 
 ## Prerequisites
 
@@ -67,12 +64,12 @@ cd modmail
 Install project dependencies inside Modmail's pipenv with:
 
 ```powershell
-py -3.10 -m pipenv install
+py -3.10 -m pipenv install --python 3.10
 ```
 
 Create a new file in the modmail folder named `.env` and paste in your environmental variables needed to run Modmail. Refer to the steps in the [parent Installation page](../#preparing-your-environmental-variables) to find where to obtain these.
 
-![](../../assets/windows-env.png)
+<Image src="/windows-env.png" alt="Hello" width={500} height={500} />
 Lastly, in your PowerShell window simply enter the command below to run your Modmail bot:
 
 ```powershell

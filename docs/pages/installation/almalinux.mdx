@@ -1,5 +1,5 @@
 ---
-title: Alma Linux / RHEL / CentOS
+title: Red Hat
 ---
 
 import { Callout } from 'nextra-theme-docs'
@@ -8,11 +8,7 @@ import { Steps } from 'nextra-theme-docs'
 import { Card, Cards } from 'nextra-theme-docs'
 import Link from 'next/link'
 
-# Alma Linux
-
-<Callout emoji="⚠️" type="warning">
-	For safety reasons, **DO NOT** install Modmail with a root user. A misbehaving or malicious plugin installed on your Modmail bot can easily access your entire system. If you are unsure how to create a new user on Linux, see [DigitalOcean’s tutorial: How To Create a New Sudo-enabled User](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-sudo-enabled-user-on-ubuntu-20-04-quickstart).
-</Callout>
+# Installing Modmail on RHEL
 
 Alma Linux 8, 9 and CentOS Stream 8, 9 are based on Red Hat Enterprise Linux (RHEL) 8 and 9 respectively so you can essentially follow this guide if you're running any of the OS mentioned above.
 
@@ -84,7 +80,7 @@ Create a file named `.env` with `nano` and paste all the environmental variables
 nano .env
 ```
 
-![](../../assets/vps-env.png)
+<Image src="/vps-env.png" alt="Hello" width={500} height={500} />
 
 After that, press `Ctrl+O` and `Enter` to save your changes. Exit the `nano` editor with `Ctrl+X`.
 

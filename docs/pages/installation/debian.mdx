@@ -1,5 +1,5 @@
 ---
-Title: Debian / Raspberry Pi OS
+title: Debian
 ---
 
 import { Callout } from 'nextra-theme-docs'
@@ -8,11 +8,7 @@ import { Steps } from 'nextra-theme-docs'
 import { Card, Cards } from 'nextra-theme-docs'
 import Link from 'next/link'
 
-# Debian
-
-<Callout emoji="⚠️" type="warning">
-For safety reasons, **DO NOT** install Modmail with a root user. A misbehaving or malicious plugin installed on your Modmail bot can easily access your entire system. If you are unsure how to create a new user on Linux, see [DigitalOcean’s tutorial: How To Create a New Sudo-enabled User](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-sudo-enabled-user-on-ubuntu-20-04-quickstart).
-</Callout>
+# Installing Modmail on Debian
 
 Raspberry Pi OS 11 Bullseye and Raspberry Pi OS 10 Buster are based on Debian 11 Bullseye and Debian 10 Buster respectively so you can essentially follow this guide if you're running any of the OS mentioned above.
 
@@ -101,7 +97,7 @@ Create a file named `.env` with `nano` and paste all the environmental variables
 nano .env
 ```
 
-![](../../assets/vps-env.png)
+<Image src="/vps-env.png" alt="Hello" width={500} height={500} />
 
 After that, press `Ctrl+O` and `Enter` to save your changes. Exit the `nano` editor with `Ctrl+X`.
 
