@@ -1,5 +1,4 @@
 import asyncio
-import datetime
 import re
 from datetime import timezone
 from itertools import zip_longest
@@ -12,7 +11,7 @@ from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 from discord.ext.commands.view import StringView
 
-from core import checks
+from core import blocklist, checks
 from core.blocklist import BlockType
 from core.models import DMDisabled, PermissionLevel, SimilarCategoryConverter, getLogger
 from core.paginator import EmbedPaginatorSession
@@ -1646,57 +1645,34 @@ class Modmail(commands.Cog):
     async def blocked(self, ctx):
         """Retrieve a list of blocked users."""
 
-        roles, users, now = [], [], discord.utils.utcnow()
+        roles, users = [], []
 
-        blocked_users = list(self.bot.blocked_users.items())
-        for id_, data in blocked_users:
-            blocked_by_id = data["blocked_by"]
-            blocked_at = parser.parse(data["blocked_at"])
-            human_blocked_at = discord.utils.format_dt(blocked_at, style="R")
-            if "until" in data:
-                blocked_until = parser.parse(data["until"])
-                human_blocked_until = discord.utils.format_dt(blocked_until, style="R")
+        blocked: list[blocklist.BlocklistItem] = await self.bot.blocklist.get_all_blocks()
+
+        for item in blocked:
+            human_blocked_at = discord.utils.format_dt(item.timestamp, style="R")
+            if item.expires_at is not None:
+                human_blocked_until = discord.utils.format_dt(item.expires_at, style="R")
             else:
-                blocked_until = human_blocked_until = "Permanent"
+                human_blocked_until = "Permanent"
 
-            if isinstance(blocked_until, datetime.datetime) and blocked_until < now:
-                self.bot.blocked_users.pop(str(id_))
-                logger.debug("No longer blocked, user %s.", id_)
-                continue
-
-            string = f"<@{id_}> ({human_blocked_until})"
-            string += f"\n- Issued {human_blocked_at} by <@{blocked_by_id}>"
-
-            reason = data.get("reason")
-            if reason:
-                string += f"\n- Blocked for {reason}"
-
-            users.append(string + "\n")
-
-        blocked_roles = list(self.bot.blocked_roles.items())
-        for id_, data in blocked_roles:
-            blocked_by_id = data["blocked_by"]
-            blocked_at = parser.parse(data["blocked_at"])
-            human_blocked_at = discord.utils.format_dt(blocked_at, style="R")
-            if "until" in data:
-                blocked_until = parser.parse(data["until"])
-                human_blocked_until = discord.utils.format_dt(blocked_until, style="R")
+            if item.type == blocklist.BlockType.USER:
+                string = f"<@{item.id}>"
             else:
-                blocked_until = human_blocked_until = "Permanent"
+                string = f"<@&{item.id}>"
 
-            if isinstance(blocked_until, datetime.datetime) and blocked_until < now:
-                self.bot.blocked_users.pop(str(id_))
-                logger.debug("No longer blocked, user %s.", id_)
-                continue
+            string += f" ({human_blocked_until})"
 
-            string = f"<@&{id_}> ({human_blocked_until})"
-            string += f"\n- Issued {human_blocked_at} by <@{blocked_by_id}>"
+            string += f"\n- Issued {human_blocked_at} by <@{item.blocking_user_id}>"
 
-            reason = data.get("reason")
-            if reason:
-                string += f"\n- Blocked for {reason}"
+            if item.reason is not None:
+                string += f"\n- Blocked for {item.reason}"
+            string += "\n"
 
-            roles.append(string + "\n")
+            if item.type == blocklist.BlockType.USER:
+                users.append(string)
+            elif item.type == blocklist.BlockType.ROLE:
+                roles.append(string)
 
         user_embeds = [discord.Embed(title="Blocked Users", color=self.bot.main_color, description="")]
 
@@ -1714,7 +1690,7 @@ class Modmail(commands.Cog):
                 else:
                     embed.description += line
         else:
-            user_embeds[0].description = "Currently there are no blocked users."
+            user_embeds[0].description = "No users are currently blocked."
 
         if len(user_embeds) > 1:
             for n, em in enumerate(user_embeds):
@@ -1737,7 +1713,7 @@ class Modmail(commands.Cog):
                 else:
                     embed.description += line
         else:
-            role_embeds[-1].description = "Currently there are no blocked roles."
+            role_embeds[-1].description = "No roles are currently blocked."
 
         if len(role_embeds) > 1:
             for n, em in enumerate(role_embeds):
