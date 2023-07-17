@@ -24,7 +24,7 @@ from discord.ext.commands.view import StringView
 from emoji import UNICODE_EMOJI
 from pkg_resources import parse_version
 
-from core.blocklist import Blocklist
+from core.blocklist import Blocklist, BlockReason
 
 try:
     # noinspection PyUnresolvedReferences
@@ -764,7 +764,6 @@ class ModmailBot(commands.Bot):
     # This is to store blocked message cooldown in memory
     _block_msg_cooldown = dict()
 
-
     # This has a bunch of side effects
     async def is_blocked(
         self,
@@ -802,33 +801,36 @@ class ModmailBot(commands.Bot):
             self._block_msg_cooldown[str(author)] = now + timedelta(minutes=5)
             return await channel.send(embed=emb)
 
-        if str(author.id) in self.blocked_whitelisted_users:
-            if str(author.id) in self.blocked_users:
-                self.blocked_users.pop(str(author.id))
-                await self.config.update()
-            return False
+        if member is not None:
+            blocked, block_type = self.blocklist.is_user_blocked(member)
+        else:
+            blocked, block_type = self.blocklist.is_id_blocked(author.id)
+            if not self.blocklist.is_valid_account_age(author):
+                blocked = True
+                block_type = BlockReason.ACCOUNT_AGE
 
-        if not self.check_account_age(author):
-            blocked_reason = "Sorry, your account is too new to initiate a ticket."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+        if blocked:
+            if block_type == BlockReason.ACCOUNT_AGE:
+                blocked_reason = "Sorry, your account is too new to initiate a ticket."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        if not self.check_manual_blocked(author):
-            blocked_reason = "You have been blocked from contacting Modmail."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+            if block_type == BlockReason.BLOCKED_USER:
+                blocked_reason = "You have been blocked from contacting Modmail."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        if not self.check_guild_age(member):
-            blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+            if block_type == BlockReason.GUILD_AGE:
+                blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        if not self.check_manual_blocked_roles(member):
-            blocked_reason = "Sorry, your role(s) has been blacklisted from contacting Modmail."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+            if block_type == BlockReason.BLOCKED_ROLE:
+                blocked_reason = "Sorry, your role(s) has been blacklisted from contacting Modmail."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        return False
+        return blocked
 
     async def get_thread_cooldown(self, author: discord.Member):
         thread_cooldown = self.config.get("thread_cooldown")
