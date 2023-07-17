@@ -173,6 +173,9 @@ class ModmailBot(commands.Bot):
         logger.line()
         logger.info("discord.py: v%s", discord.__version__)
         logger.line()
+        if not self.config["blocked"] or not self.config["blocked_roles"]:
+            logger.warning("Un-migrated blocklists found. Please run the '[p]migrate blocklist' command after backing "
+                           "up your config/database. Blocklist functionality will be disabled until this is done.")
 
     async def load_extensions(self):
         for cog in self.loaded_cogs:
@@ -467,10 +470,14 @@ class ModmailBot(commands.Bot):
 
     @property
     def blocked_users(self) -> typing.Dict[str, str]:
+        """DEPRECATED, used blocklist instead"""
+        logger.warning("blocked_users is deprecated and does not function, its usage is a bug")
         return self.config["blocked"]
 
     @property
     def blocked_roles(self) -> typing.Dict[str, str]:
+        """DEPRECATED, used blocklist instead"""
+        logger.warning("blocked_roles is deprecated and does not function, its usage is a bug")
         return self.config["blocked_roles"]
 
     @property
@@ -724,6 +731,7 @@ class ModmailBot(commands.Bot):
         return True
 
     def check_manual_blocked_roles(self, author: discord.Member) -> bool:
+        logger.error("check_manual_blocked_roles is deprecated, usage is a bug.")
         for role in author.roles:
             if str(role.id) not in self.blocked_roles:
                 continue
@@ -740,6 +748,7 @@ class ModmailBot(commands.Bot):
         return True
 
     def check_manual_blocked(self, author: discord.User) -> bool:
+        logger.error("check_manual_blocked is deprecated, usage is a bug.")
         if str(author.id) not in self.blocked_users:
             return True
 
@@ -772,6 +781,24 @@ class ModmailBot(commands.Bot):
         channel: discord.TextChannel = None,
         send_message: bool = False,
     ) -> bool:
+        """
+        Check if a user is blocked for any reason and send a message if they are (if send_message is true).
+
+        If you are using this method with send_message set to false or not set,
+        You should be using blocklist.is_user_blocked() or blocklist.is_id_blocked()
+        if you only care whether a user is manually blocked then use blocklist.is_id_blocked().
+
+        Parameters
+        ----------
+        author
+        channel
+        send_message
+
+        Returns
+        -------
+        bool
+            Whether the user is blocked or not.
+        """
         member = self.guild.get_member(author.id) or await MemberConverter.convert(author)
         if member is None:
             # try to find in other guilds
