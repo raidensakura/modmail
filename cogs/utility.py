@@ -22,7 +22,7 @@ from discord.ext import commands, tasks
 from discord.ext.commands.view import StringView
 from pkg_resources import parse_version
 
-from core import checks, utils
+from core import checks, migrations, utils
 from core.changelog import Changelog
 from core.models import HostingMethod, InvalidConfigError, PermissionLevel, UnseenFormatter, getLogger
 from core.paginator import EmbedPaginatorSession, MessagePaginatorSession
@@ -1951,6 +1951,19 @@ class Utility(commands.Cog):
             )
 
         await EmbedPaginatorSession(ctx, *embeds).run()
+
+    @commands.command()
+    @checks.has_permissions(PermissionLevel.OWNER)
+    async def migrate(self, ctx, migration: str):
+        """Perform a given database migration"""
+        if migration == "blocklist":
+            try:
+                await migrations.migrate_blocklist(self.bot)
+            except Exception as e:
+                await ctx.send(embed=discord.Embed(title="Error", description=str(e), color=self.bot.error_color))
+                raise e
+
+        await ctx.send(embed=discord.Embed(title="Success", color=self.bot.main_color))
 
     @commands.command()
     @checks.has_permissions(PermissionLevel.OWNER)
