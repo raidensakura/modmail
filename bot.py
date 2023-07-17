@@ -731,6 +731,7 @@ class ModmailBot(commands.Bot):
         return True
 
     def check_manual_blocked_roles(self, author: discord.Member) -> bool:
+        """DEPRECATED"""
         logger.error("check_manual_blocked_roles is deprecated, usage is a bug.")
         for role in author.roles:
             if str(role.id) not in self.blocked_roles:
@@ -748,6 +749,7 @@ class ModmailBot(commands.Bot):
         return True
 
     def check_manual_blocked(self, author: discord.User) -> bool:
+        """DEPRECATED"""
         logger.error("check_manual_blocked is deprecated, usage is a bug.")
         if str(author.id) not in self.blocked_users:
             return True

@@ -1562,7 +1562,7 @@ class Modmail(commands.Cog):
             elif u.bot:
                 errors.append(f"{u} is a bot, cannot add to thread.")
                 users.remove(u)
-            elif await self.bot.is_blocked(u):
+            elif await self.bot.blocklist.is_user_blocked(u):
                 ref = f"{u.mention} is" if ctx.author != u else "You are"
                 errors.append(f"{ref} currently blocked from contacting {self.bot.user.name}.")
                 users.remove(u)
