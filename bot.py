@@ -1229,7 +1229,7 @@ class ModmailBot(commands.Bot):
                     await user.typing()
 
     async def handle_reaction_events(self, payload):
-        user = self.get_user(payload.id)
+        user = self.get_user(payload.user_id)
         if user is None or user.bot:
             return
 
@@ -1315,8 +1315,8 @@ class ModmailBot(commands.Bot):
         if emoji_fmt != react_message_emoji:
             return
         channel = self.get_channel(payload.channel_id)
-        member = channel.guild.get_member(payload.id) or await channel.guild.fetch_member(
-            payload.id
+        member = channel.guild.get_member(payload.user_id) or await channel.guild.fetch_member(
+            payload.user_id
         )
         if member.bot:
             return
