@@ -1740,7 +1740,6 @@ class Modmail(commands.Cog):
                 return await ctx.send_help(ctx.command)
 
         mention = getattr(user, "mention", f"`{user.id}`")
-        msg = ""
 
         if str(user.id) in self.bot.blocked_whitelisted_users:
             embed = discord.Embed(
@@ -1752,21 +1751,20 @@ class Modmail(commands.Cog):
             return await ctx.send(embed=embed)
 
         self.bot.blocked_whitelisted_users.append(str(user.id))
-
-        if str(user.id) in self.bot.blocked_users:
-            msg = self.bot.blocked_users.get(str(user.id)) or ""
-            self.bot.blocked_users.pop(str(user.id))
-
         await self.bot.config.update()
 
-        if msg.startswith("System Message: "):
-            # If the user is blocked internally (for example: below minimum account age)
-            # Show an extended message stating the original internal message
-            reason = msg[16:].strip().rstrip(".")
+        blocked: bool
+        foo: blocklist.BlocklistItem
+
+        blocked, foo = await self.bot.blocklist.is_id_blocked(user.id)
+        if blocked:
+            await self.bot.blocklist.unblock_id(user.id)
             embed = discord.Embed(
                 title="Success",
-                description=f"{mention} was previously blocked internally for "
-                f'"{reason}". {mention} is now whitelisted.',
+                description=f"""
+                {mention} has been whitelisted.
+                They were previously blocked by <@{foo.blocking_user_id}> {" for "+foo.reason if foo.reason is not None else ""}.
+                """,
                 color=self.bot.main_color,
             )
         else:

@@ -81,7 +81,7 @@ class Blocklist:
             return False
         return True
 
-    async def is_id_blocked(self, user_or_role_id: int) -> bool:
+    async def is_id_blocked(self, user_or_role_id: int) -> Tuple[bool, Optional[BlocklistItem]]:
         """
         Checks if the given ID is blocked
 
@@ -100,8 +100,8 @@ class Blocklist:
         """
         result = await self.blocklist_collection.find_one({"id": user_or_role_id})
         if result is None:
-            return False
-        return True
+            return False, None
+        return True, BlocklistItem.from_dict(result)
 
     async def get_all_blocks(self) -> list[BlocklistItem]:
         """
@@ -137,7 +137,7 @@ class Blocklist:
         #
 
         if str(member.id) in self.bot.blocked_whitelisted_users:
-            return False
+            return False, None
 
         blocked = await self.blocklist_collection.find_one({"id": member.id})
         if blocked is not None:
