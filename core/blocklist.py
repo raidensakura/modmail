@@ -22,7 +22,7 @@ class BlockReason(enum.StrEnum):
 
 
 @dataclass(frozen=True)
-class BlocklistItem:
+class BlocklistEntry:
     # _id: ObjectId
     # May be role or user id
     id: int
@@ -35,7 +35,7 @@ class BlocklistItem:
 
     @staticmethod
     def from_dict(data: dict):
-        return BlocklistItem(
+        return BlocklistEntry(
             id=data["id"],
             expires_at=data["expires_at"],
             reason=data["reason"],
@@ -54,19 +54,17 @@ class Blocklist:
         self.bot = bot
 
     async def setup(self):
-        index_info = await self.blocklist_collection.index_information()
-        print(index_info)
         await self.blocklist_collection.create_index("id")
         await self.blocklist_collection.create_index("expires_at", expireAfterSeconds=0)
 
-    async def add_block(self, block: BlocklistItem) -> None:
+    async def add_block(self, block: BlocklistEntry) -> None:
         await self.blocklist_collection.insert_one(block.__dict__)
 
     async def block_id(self, user_id: int, expires_at: Optional[datetime.datetime], reason: str,
                        blocked_by: int, block_type: BlockType) -> None:
         now = datetime.datetime.utcnow()
 
-        await self.add_block(block=BlocklistItem(
+        await self.add_block(block=BlocklistEntry(
             id=user_id,
             expires_at=expires_at,
             reason=reason,
@@ -81,7 +79,7 @@ class Blocklist:
             return False
         return True
 
-    async def is_id_blocked(self, user_or_role_id: int) -> Tuple[bool, Optional[BlocklistItem]]:
+    async def is_id_blocked(self, user_or_role_id: int) -> Tuple[bool, Optional[BlocklistEntry]]:
         """
         Checks if the given ID is blocked
 
@@ -101,9 +99,9 @@ class Blocklist:
         result = await self.blocklist_collection.find_one({"id": user_or_role_id})
         if result is None:
             return False, None
-        return True, BlocklistItem.from_dict(result)
+        return True, BlocklistEntry.from_dict(result)
 
-    async def get_all_blocks(self) -> list[BlocklistItem]:
+    async def get_all_blocks(self) -> list[BlocklistEntry]:
         """
         Returns a list of all active blocks
 
@@ -116,9 +114,9 @@ class Blocklist:
 
         """
         dict_list = await self.blocklist_collection.find().to_list(length=None)
-        dataclass_list: list[BlocklistItem] = []
+        dataclass_list: list[BlocklistEntry] = []
         for i in dict_list:
-            dataclass_list.append(BlocklistItem.from_dict(i))
+            dataclass_list.append(BlocklistEntry.from_dict(i))
         return dataclass_list
 
     # TODO we will probably want to cache these

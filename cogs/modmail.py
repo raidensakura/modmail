@@ -1647,7 +1647,7 @@ class Modmail(commands.Cog):
 
         roles, users = [], []
 
-        blocked: list[blocklist.BlocklistItem] = await self.bot.blocklist.get_all_blocks()
+        blocked: list[blocklist.BlocklistEntry] = await self.bot.blocklist.get_all_blocks()
 
         for item in blocked:
             human_blocked_at = discord.utils.format_dt(item.timestamp, style="R")
@@ -1754,16 +1754,16 @@ class Modmail(commands.Cog):
         await self.bot.config.update()
 
         blocked: bool
-        foo: blocklist.BlocklistItem
+        blocklist_entry: blocklist.BlocklistEntry
 
-        blocked, foo = await self.bot.blocklist.is_id_blocked(user.id)
+        blocked, blocklist_entry = await self.bot.blocklist.is_id_blocked(user.id)
         if blocked:
             await self.bot.blocklist.unblock_id(user.id)
             embed = discord.Embed(
                 title="Success",
                 description=f"""
                 {mention} has been whitelisted.
-                They were previously blocked by <@{foo.blocking_user_id}> {" for "+foo.reason if foo.reason is not None else ""}.
+                They were previously blocked by <@{blocklist_entry.blocking_user_id}> {" for "+blocklist_entry.reason if blocklist_entry.reason is not None else ""}.
                 """,
                 color=self.bot.main_color,
             )
