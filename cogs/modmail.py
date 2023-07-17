@@ -1827,22 +1827,22 @@ class Modmail(commands.Cog):
         if reason:
             desc += f"\n- Reason: {reason}"
 
+        blocktype: BlockType
+
         if isinstance(user_or_role, discord.Role):
-            await self.bot.blocklist.block_user(user_id=user_or_role.id,
-                                                reason=reason,
-                                                expires_at=duration.dt if duration is not None else None,
-                                                blocked_by=ctx.author.id,
-                                                block_type=BlockType.ROLE)
+            blocktype = BlockType.ROLE
         elif isinstance(user_or_role, discord.User):
-            await self.bot.blocklist.block_user(user_id=user_or_role.id,
-                                                reason=reason,
-                                                expires_at=duration.dt if duration is not None else None,
-                                                blocked_by=ctx.author.id,
-                                                block_type=BlockType.USER)
+            blocktype = BlockType.USER
         else:
             return logger.warning(
                 f"{__name__}: cannot block user, user is neither an instance of Discord Role or User"
             )
+
+        await self.bot.blocklist.block_id(user_id=user_or_role.id,
+                                          reason=reason,
+                                          expires_at=duration.dt if duration is not None else None,
+                                          blocked_by=ctx.author.id,
+                                          block_type=blocktype)
 
         return await send_embed("Success", desc)
 
