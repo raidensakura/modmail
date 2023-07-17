@@ -22,7 +22,7 @@ class BlockReason(enum.StrEnum):
 
 
 @dataclass(frozen=True)
-class BlockedUser:
+class BlocklistItem:
     # _id: ObjectId
     # May be role or user id
     id: int
@@ -49,17 +49,32 @@ class Blocklist:
         await self.blocklist_collection.create_index("expires_at", expireAfterSeconds=0)
 
     async def block_user(self, user_id: int, expires_at: Optional[datetime.datetime], reason: str,
-                         blocked_by: int) -> None:
+                         blocked_by: int, block_type: BlockType) -> None:
         now = datetime.datetime.utcnow()
 
-        await self.blocklist_collection.insert_one(BlockedUser(
+        await self.blocklist_collection.insert_one(BlocklistItem(
             id=user_id,
             expires_at=expires_at,
             reason=reason,
             timestamp=now,
             blocking_user_id=blocked_by,
             type=BlockType.USER
-        ))
+        ).__dict__)
+
+    async def add_block(self, block: BlocklistItem) -> None:
+        await self.blocklist_collection.insert_one(block.__dict__)
+
+    async def unblock_id(self, id: int) -> bool:
+        result = await self.blocklist_collection.delete_one({"id": id})
+        if result.deleted_count == 0:
+            return False
+        return True
+
+    async def is_id_blocked(self, user_or_role_id: int) -> bool:
+        result = await self.blocklist_collection.find_one({"id": user_or_role_id})
+        if result is None:
+            return False
+        return True
 
     # we will probably want to cache these
     async def is_user_blocked(self, member: discord.Member) -> Tuple[bool, Optional[BlockReason]]:

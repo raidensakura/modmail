@@ -765,7 +765,7 @@ class ModmailBot(commands.Bot):
     _block_msg_cooldown = dict()
 
 
-    # This has a bunch of side effectr
+    # This has a bunch of side effects
     async def is_blocked(
         self,
         author: discord.User,

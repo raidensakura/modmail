@@ -9,7 +9,7 @@ logger = getLogger(__name__)
 old_format_matcher = re.compile("by ([\w]*#[\d]{1,4})(?: until <t:(\d*):f>)?.")
 
 
-def _convert_legacy_v2_block_format(k, v: dict, block_type: blocklist.BlockType) -> blocklist.BlockedUser:
+def _convert_legacy_v2_block_format(k, v: dict, block_type: blocklist.BlockType) -> blocklist.BlocklistItem:
     blocked_by = int(v["blocked_by"])
     if "until" in v:
         # todo make sure this is the correct from format
@@ -21,7 +21,7 @@ def _convert_legacy_v2_block_format(k, v: dict, block_type: blocklist.BlockType)
     else:
         reason = None
     blocked_ts = datetime.datetime.fromisoformat(v["blocked_at"])
-    return blocklist.BlockedUser(
+    return blocklist.BlocklistItem(
         id=int(k),
         expires_at=blocked_until,
         reason=reason,
@@ -31,14 +31,14 @@ def _convert_legacy_v2_block_format(k, v: dict, block_type: blocklist.BlockType)
     )
 
 
-def _convert_legacy_block_format(k, v: str, block_type: blocklist.BlockType) -> blocklist.BlockedUser:
+def _convert_legacy_block_format(k, v: str, block_type: blocklist.BlockType) -> blocklist.BlocklistItem:
     match = old_format_matcher.match(v)
     # blocked_by = match.group(1)
     blocked_until = match.group(2)
     if blocked_until is not None:
         blocked_until = datetime.datetime.fromtimestamp(int(blocked_until), tz=datetime.timezone.utc)
 
-    return blocklist.BlockedUser(
+    return blocklist.BlocklistItem(
         id=int(k),
         expires_at=blocked_until,
         reason=f"migrated from old format `{v}`",
@@ -49,7 +49,7 @@ def _convert_legacy_block_format(k, v: str, block_type: blocklist.BlockType) -> 
     )
 
 
-async def _convert_legacy_block_list(foo: dict, blocklist_batch: list[blocklist.BlockedUser],
+async def _convert_legacy_block_list(foo: dict, blocklist_batch: list[blocklist.BlocklistItem],
                                      block_type: blocklist.BlockType, bot) -> int:
     skipped = 0
 
@@ -80,7 +80,7 @@ async def _convert_legacy_block_list(foo: dict, blocklist_batch: list[blocklist.
 
         logger.debug(f"migrating id:{k} ts:{blocked_until} blocker:{blocked_by}")
 
-        blocklist_batch.append(blocklist.BlockedUser(
+        blocklist_batch.append(blocklist.BlocklistItem(
             id=int(k),
             expires_at=blocked_until,
             reason=f"migrated from old format `{v}`",
@@ -103,7 +103,7 @@ async def migrate_blocklist(bot):
     logger.info(f"preparing to migrate blocklist")
     skipped = 0
 
-    blocklist_batch: list[blocklist.BlockedUser] = []
+    blocklist_batch: list[blocklist.BlocklistItem] = []
     logger.info(f"preparing to process {len(blocked_users)} blocked users")
     skipped += await _convert_legacy_block_list(foo=blocked_users, blocklist_batch=blocklist_batch,
                                                 block_type=blocklist.BlockType.USER, bot=bot)
