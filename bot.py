@@ -24,6 +24,8 @@ from discord.ext.commands.view import StringView
 from emoji import UNICODE_EMOJI
 from pkg_resources import parse_version
 
+from core.blocklist import Blocklist
+
 try:
     # noinspection PyUnresolvedReferences
     from colorama import init
@@ -87,6 +89,9 @@ class ModmailBot(commands.Bot):
         self._configure_logging()
 
         self.plugin_db = PluginDatabaseClient(self)  # Deprecated
+
+        self.blocklist = Blocklist(bot=self)
+
         self.startup()
 
     def get_guild_icon(
@@ -524,6 +529,7 @@ class ModmailBot(commands.Bot):
         logger.debug("Connected to gateway.")
         await self.config.refresh()
         await self.api.setup_indexes()
+        await self.blocklist.setup()
         await self.load_extensions()
         self._connected.set()
 
@@ -758,6 +764,8 @@ class ModmailBot(commands.Bot):
     # This is to store blocked message cooldown in memory
     _block_msg_cooldown = dict()
 
+
+    # This has a bunch of side effectr
     async def is_blocked(
         self,
         author: discord.User,
@@ -1221,7 +1229,7 @@ class ModmailBot(commands.Bot):
                     await user.typing()
 
     async def handle_reaction_events(self, payload):
-        user = self.get_user(payload.user_id)
+        user = self.get_user(payload.id)
         if user is None or user.bot:
             return
 
@@ -1307,8 +1315,8 @@ class ModmailBot(commands.Bot):
         if emoji_fmt != react_message_emoji:
             return
         channel = self.get_channel(payload.channel_id)
-        member = channel.guild.get_member(payload.user_id) or await channel.guild.fetch_member(
-            payload.user_id
+        member = channel.guild.get_member(payload.id) or await channel.guild.fetch_member(
+            payload.id
         )
         if member.bot:
             return
