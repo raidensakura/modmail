@@ -5,7 +5,7 @@ from typing import Optional, Self, Tuple
 
 import discord
 import isodate
-from bson import CodecOptions, ObjectId
+from bson import CodecOptions
 from motor.core import AgnosticCollection
 
 
@@ -27,11 +27,22 @@ class BlocklistItem:
     # May be role or user id
     id: int
     expires_at: Optional[datetime.datetime]
-    reason: str
+    reason: Optional[str]
     timestamp: datetime.datetime
     blocking_user_id: int
     # specifies if the id is a role or user id
     type: BlockType
+
+    @staticmethod
+    def from_dict(data: dict):
+        return BlocklistItem(
+            id=data["id"],
+            expires_at=data["expires_at"],
+            reason=data["reason"],
+            timestamp=data["timestamp"],
+            blocking_user_id=data["blocking_user_id"],
+            type=data["type"]
+        )
 
 
 class Blocklist:
@@ -48,35 +59,69 @@ class Blocklist:
         await self.blocklist_collection.create_index("id")
         await self.blocklist_collection.create_index("expires_at", expireAfterSeconds=0)
 
-    async def block_user(self, user_id: int, expires_at: Optional[datetime.datetime], reason: str,
-                         blocked_by: int, block_type: BlockType) -> None:
+    async def add_block(self, block: BlocklistItem) -> None:
+        await self.blocklist_collection.insert_one(block.__dict__)
+
+    async def block_id(self, user_id: int, expires_at: Optional[datetime.datetime], reason: str,
+                       blocked_by: int, block_type: BlockType) -> None:
         now = datetime.datetime.utcnow()
 
-        await self.blocklist_collection.insert_one(BlocklistItem(
+        await self.add_block(block=BlocklistItem(
             id=user_id,
             expires_at=expires_at,
             reason=reason,
             timestamp=now,
             blocking_user_id=blocked_by,
-            type=BlockType.USER
-        ).__dict__)
+            type=block_type
+        ))
 
-    async def add_block(self, block: BlocklistItem) -> None:
-        await self.blocklist_collection.insert_one(block.__dict__)
-
-    async def unblock_id(self, id: int) -> bool:
-        result = await self.blocklist_collection.delete_one({"id": id})
+    async def unblock_id(self, user_or_role_id: int) -> bool:
+        result = await self.blocklist_collection.delete_one({"id": user_or_role_id})
         if result.deleted_count == 0:
             return False
         return True
 
     async def is_id_blocked(self, user_or_role_id: int) -> bool:
+        """
+        Checks if the given ID is blocked
+
+        This method only checks to see if there is an active manual block for the given ID.
+        It does not do any checks for whitelisted users or roles, account age, or guild age.
+
+        Parameters
+        ----------
+        user_or_role_id
+
+        Returns
+        -------
+
+        True if there is an active block for the given ID
+
+        """
         result = await self.blocklist_collection.find_one({"id": user_or_role_id})
         if result is None:
             return False
         return True
 
-    # we will probably want to cache these
+    async def get_all_blocks(self) -> list[BlocklistItem]:
+        """
+        Returns a list of all active blocks
+
+        THIS RETRIEVES ALL ITEMS FROM THE DATABASE COLLECTION, USE WITH CAUTION
+
+        Returns
+        -------
+
+        A list of BlockListItems
+
+        """
+        dict_list = await self.blocklist_collection.find().to_list(length=None)
+        dataclass_list: list[BlocklistItem] = []
+        for i in dict_list:
+            dataclass_list.append(BlocklistItem.from_dict(i))
+        return dataclass_list
+
+    # TODO we will probably want to cache these
     async def is_user_blocked(self, member: discord.Member) -> Tuple[bool, Optional[BlockReason]]:
         """
         Side effect free version of is_blocked
