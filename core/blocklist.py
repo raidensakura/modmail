@@ -139,7 +139,6 @@ class Blocklist:
 
         blocked = await self.blocklist_collection.find_one({"id": member.id})
         if blocked is not None:
-            print(blocked)
             return True, BlockReason.BLOCKED_USER
 
         roles = member.roles
@@ -149,10 +148,8 @@ class Blocklist:
             return True, BlockReason.BLOCKED_ROLE
 
         if not self.is_valid_account_age(member):
-            print("account_age")
             return True, BlockReason.ACCOUNT_AGE
         if not self.is_valid_guild_age(member):
-            print("guild_age")
             return True, BlockReason.GUILD_AGE
 
         return False, None
