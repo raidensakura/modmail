@@ -11,7 +11,7 @@ from urllib import parse
 import discord
 from discord.ext import commands
 
-from core.models import getLogger
+from core.models import getLogger, PermissionLevel
 
 __all__ = [
     "strtobool",
@@ -41,6 +41,7 @@ __all__ = [
     "AcceptButton",
     "DenyButton",
     "ConfirmThreadCreationView",
+    "get_permission_level"
 ]
 
 
@@ -563,6 +564,122 @@ def extract_block_timestamp(reason, id_):
             raise
 
     return end_time, after
+
+
+async def get_permission_level(bot, user: discord.member.Member) -> PermissionLevel:
+    """
+    Determines the permission level of a user.
+    First checks if the user is the owner of the bot, then by checking the level permissions
+
+    Parameters
+    ----------
+    bot
+    user
+
+    Returns
+    -------
+    The permission level of the user.
+    """
+    if await bot.is_owner(user) or user.id == bot.user.id:
+        return PermissionLevel.OWNER
+
+    level_permissions = bot.config["level_permissions"]
+    user_permission_level = PermissionLevel.REGULAR
+    roles = user.roles
+    print(roles)
+
+    for level, ids in level_permissions.items():
+        print(level)
+        print(ids)
+        # if the user has a higher permission level, then we don't need to check the rest
+        if user_permission_level < permission_level_from_string(level):
+            for user_or_role_id in ids:
+                if str(user_or_role_id) == str(user.id):
+                    user_permission_level = permission_level_from_string(level)
+                    print(f"{level}, {user.id}, {user_or_role_id}")
+                    continue
+                # check each role the user has against the id
+                for role in roles:
+                    print(f"{role.id} == {user_or_role_id}?")
+                    if str(role.id) == str(user_or_role_id):
+                        print("yes")
+                        user_permission_level = permission_level_from_string(level)
+                        print(f"{level}, DISCORD ROLE {role.id}, {user_or_role_id}")
+                        continue
+
+    return user_permission_level
+
+
+async def explain_permissions_level(bot, user: discord.member.Member) -> typing.Tuple[str, str]:
+    """
+    Explains the permission level of a user.
+    First checks if the user is the owner of the bot, then by checking the level permissions
+
+    Parameters
+    ----------
+    bot
+    user
+
+    Returns
+    -------
+    An explanation of the permissions level of the user.
+    The first string is the summary of all matching roles, the second is the explanation of the role used and why.
+    """
+
+    level_permissions = bot.config["level_permissions"]
+    user_permission_level = PermissionLevel.REGULAR
+    roles = user.roles
+    summary = ""
+    result_explanation = ""
+
+    for level, ids in level_permissions.items():
+        # if the user has a higher permission level, then we don't need to check the rest
+        for user_or_role_id in ids:
+            if str(user_or_role_id) == str(user.id):
+                if user_permission_level < permission_level_from_string(level):
+                    user_permission_level = permission_level_from_string(level)
+                    result_explanation = f"{user.mention} had the level {user_permission_level.name} manually assigned.\n"
+                summary += f"MATCH {level}, USER ID {user.id}\n"
+
+            # check each role the user has against the id
+            for role in roles:
+                if str(role.id) == str(user_or_role_id):
+                    if user_permission_level < permission_level_from_string(level):
+                        user_permission_level = permission_level_from_string(level)
+                        result_explanation = f"User has the role {role.mention} which was assigned to permissions level {user_permission_level} ({user_permission_level.name}).\n"
+                    summary += f"MATCH {level}, ROLE ID {role.mention}\n"
+
+    if await bot.is_owner(user) or user.id == bot.user.id:
+        result_explanation = "The user is the owner of the bot or *is* the bot."
+
+    return summary, result_explanation
+
+
+def permission_level_from_string(level: str) -> PermissionLevel:
+    """
+    Converts a string to a permission level.
+
+    Parameters
+    ----------
+    level
+
+    Returns
+    -------
+    The permission level.
+    """
+    level = level.upper()
+    if level == "OWNER":
+        return PermissionLevel.OWNER
+    elif level == "ADMIN" or level == "ADMINISTRATOR":
+        return PermissionLevel.ADMIN
+    elif level == "MOD" or level == "MODERATOR":
+        return PermissionLevel.MOD
+    elif level == "SUPPORTER" or level == "RESPONDER":
+        return PermissionLevel.SUPPORTER
+    elif level == "REGULAR":
+        return PermissionLevel.REGULAR
+    else:
+        return PermissionLevel.INVALID
 
 
 class AcceptButton(discord.ui.Button):

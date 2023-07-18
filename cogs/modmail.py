@@ -13,6 +13,7 @@ from discord.ext.commands.cooldowns import BucketType
 from discord.ext.commands.view import StringView
 
 from core import checks
+from core.audit_logger import construct_from_ctx
 from core.models import DMDisabled, PermissionLevel, SimilarCategoryConverter, getLogger
 from core.paginator import EmbedPaginatorSession
 from core.thread import Thread
@@ -245,6 +246,7 @@ class Modmail(commands.Cog):
             color=self.bot.main_color,
             description="Successfully created snippet.",
         )
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.snippet.add", description=f"Added snippet {name}"))
         return await ctx.send(embed=embed)
 
     def _fix_aliases(self, snippet_being_deleted: str) -> Tuple[List[str]]:
@@ -347,6 +349,7 @@ class Modmail(commands.Cog):
             )
             self.bot.snippets.pop(name)
             await self.bot.config.update()
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.snippet.remove", description=f"removed snippet {name}"))
         else:
             embed = create_not_found_embed(name, self.bot.snippets.keys(), "Snippet")
         await ctx.send(embed=embed)
@@ -370,6 +373,7 @@ class Modmail(commands.Cog):
                 color=self.bot.main_color,
                 description=f'`{name}` will now send "{value}".',
             )
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.snippet.edit", description=f"edited snippet {name}"))
         else:
             embed = create_not_found_embed(name, self.bot.snippets.keys(), "Snippet")
         await ctx.send(embed=embed)
@@ -419,6 +423,12 @@ class Modmail(commands.Cog):
         await thread.channel.move(
             category=category, end=True, sync_permissions=True, reason=f"{ctx.author} moved this thread."
         )
+
+        self.bot.audit_logger.push(
+            await construct_from_ctx(
+                ctx,
+                action="modmail.thread.move",
+                description=f"{'silently ' if silent else ''}moved thread {thread.id} to {category.name}"))
 
         if self.bot.config["thread_move_notify"] and not silent:
             embed = discord.Embed(
@@ -511,6 +521,14 @@ class Modmail(commands.Cog):
 
         if after and after.dt > after.now:
             await self.send_scheduled_close_message(ctx, after, silent)
+
+        # Generate audit event
+        description = None
+        if close_after == 0:
+            description = f"{'silently ' if silent else ''}closed thread {thread.id}"
+        else:
+            description = f"{'silently ' if silent else ''}scheduled to close thread {thread.id} in {human_timedelta(after.dt)}"
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.thread.close", description=description))
 
         await thread.close(closer=ctx.author, after=close_after, message=message, silent=silent)
 
@@ -677,7 +695,9 @@ class Modmail(commands.Cog):
     @checks.thread_only()
     async def nsfw(self, ctx):
         """Flags a Modmail thread as NSFW (not safe for work)."""
+        # TODO set the thread as NSFW in the database
         await ctx.channel.edit(nsfw=True)
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.thread.set.nsfw", description=f"marked thread as nsfw"))
         sent_emoji, _ = await self.bot.retrieve_emoji()
         await self.bot.add_reaction(ctx.message, sent_emoji)
 
@@ -686,7 +706,9 @@ class Modmail(commands.Cog):
     @checks.thread_only()
     async def sfw(self, ctx):
         """Flags a Modmail thread as SFW (safe for work)."""
+        # TODO unset the thread as NSFW in the database
         await ctx.channel.edit(nsfw=False)
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.thread.set.sfw", description=f"marked thread as sfw"))
         sent_emoji, _ = await self.bot.retrieve_emoji()
         await self.bot.add_reaction(ctx.message, sent_emoji)
 
@@ -769,9 +791,14 @@ class Modmail(commands.Cog):
     @commands.cooldown(1, 600, BucketType.channel)
     async def title(self, ctx, *, name: str):
         """Sets title for a thread"""
+        # todo update database with new title
         await ctx.thread.set_title(name)
         sent_emoji, _ = await self.bot.retrieve_emoji()
         await ctx.message.pin()
+
+        # Push audit event
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.thread.set.title", description=f"set thread title to {name}"))
+
         await self.bot.add_reaction(ctx.message, sent_emoji)
 
     @commands.command(usage="<users_or_roles...> [options]", cooldown_after_parsing=True)
@@ -864,6 +891,12 @@ class Modmail(commands.Cog):
             for i in ctx.thread.recipients:
                 if i not in users:
                     to_exec.append(i.send(embed=em))
+
+        # Push audit event
+        users_string: str = ""
+        for user in users:
+            users_string += f"{user.name}({user.id}),"
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.thread.user.add", description=f"added user(s) {users_string} to thread"))
 
         await ctx.thread.add_users(users)
         if to_exec:
@@ -962,6 +995,12 @@ class Modmail(commands.Cog):
         if to_exec:
             await asyncio.gather(*to_exec)
 
+        # Push audit event
+        users_string: str = ""
+        for user in users:
+            users_string += f"{user.name}({user.id}),"
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.thread.user.remove", description=f"removed user(s) {users_string} to thread"))
+
         sent_emoji, _ = await self.bot.retrieve_emoji()
         await self.bot.add_reaction(ctx.message, sent_emoji)
 
@@ -1051,6 +1090,12 @@ class Modmail(commands.Cog):
             for i in ctx.thread.recipients:
                 if i not in users:
                     to_exec.append(i.send(embed=em))
+
+        users_string: str = ""
+        for user in users:
+            users_string += f"{user.name}({user.id}),"
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.thread.user.add.anon", description=f"anonymously added user(s) {users_string} to thread"))
+
 
         await ctx.thread.add_users(users)
         if to_exec:
@@ -1144,6 +1189,13 @@ class Modmail(commands.Cog):
         await ctx.thread.remove_users(users)
         if to_exec:
             await asyncio.gather(*to_exec)
+
+        # Push audit event
+        users_string: str = ""
+        for user in users:
+            users_string += f"{user.name}({user.id}),"
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.thread.user.remove.anon",
+                                                                description=f"anonymously removed user(s) {users_string} to thread"))
 
         sent_emoji, _ = await self.bot.retrieve_emoji()
         await self.bot.add_reaction(ctx.message, sent_emoji)
@@ -1772,6 +1824,10 @@ class Modmail(commands.Cog):
                 color=self.bot.main_color,
             )
             self.bot.blocked_whitelisted_users.remove(str(user.id))
+
+            self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.whitelist.remove",
+                                                                description=f"removed user {user.name}({user.id}) from whitelist"))
+
             return await ctx.send(embed=embed)
 
         self.bot.blocked_whitelisted_users.append(str(user.id))
@@ -1781,6 +1837,9 @@ class Modmail(commands.Cog):
             self.bot.blocked_users.pop(str(user.id))
 
         await self.bot.config.update()
+
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.whitelist.add", description=f"added user {user.name}({user.id}) to whitelist"))
+
 
         if msg.startswith("System Message: "):
             # If the user is blocked internally (for example: below minimum account age)
@@ -1869,6 +1928,9 @@ class Modmail(commands.Cog):
                 f"{__name__}: cannot block user, user is neither an instance of Discord Role or User"
             )
 
+        desc = f"added {'role' if isinstance(user_or_role, discord.Role) else 'user'} {user_or_role.id} to blocklist"
+        self.bot.audit_logger.push(await construct_from_ctx(ctx, action="modmail.user.block", description=desc))
+
         await self.bot.config.update()
 
         return await send_embed("Success", desc)
@@ -1916,6 +1978,9 @@ class Modmail(commands.Cog):
 
         await self.bot.config.update()
 
+        desc: str = f"removed {'role' if isinstance(user_or_role, discord.Role) else 'user'} {user_or_role.id} from blocklist"
+        self.bot.audit_logger.push(construct_from_ctx(ctx, action="modmail.user.unblock", description=desc))
+
         return await send_embed("Success", f"{mention} has been unblocked.")
 
     @commands.command()
@@ -1943,6 +2008,9 @@ class Modmail(commands.Cog):
                     color=self.bot.error_color,
                 )
             )
+        # Push audit event
+        user = await self.bot.get_or_fetch_user(thread.recipient_id)
+        self.bot.audit_logger.push(construct_from_ctx(ctx, action="modmail.thread.delete_message", description=f"deleted message {message_id} sent by {user.name}({user.id}) from thread {thread.id}"))
 
         sent_emoji, _ = await self.bot.retrieve_emoji()
         await self.bot.add_reaction(ctx.message, sent_emoji)
@@ -2078,6 +2146,8 @@ class Modmail(commands.Cog):
             self.bot.config["dm_disabled"] = DMDisabled.NONE
             await self.bot.config.update()
 
+        self.bot.audit_logger.push(construct_from_ctx(ctx, action="modmail.dm.enable", description=f"enabled inbound direct messages"))
+
         return await ctx.send(embed=embed)
 
     @commands.group(invoke_without_command=True)
@@ -2109,6 +2179,8 @@ class Modmail(commands.Cog):
             self.bot.config["dm_disabled"] = DMDisabled.NEW_THREADS
             await self.bot.config.update()
 
+        self.bot.audit_logger.push(construct_from_ctx(ctx, action="modmail.dm.disable.new", description="disabled new thread creation"))
+
         return await ctx.send(embed=embed)
 
     @disable.command(name="all")
@@ -2128,6 +2200,8 @@ class Modmail(commands.Cog):
         if self.bot.config["dm_disabled"] != DMDisabled.ALL_THREADS:
             self.bot.config["dm_disabled"] = DMDisabled.ALL_THREADS
             await self.bot.config.update()
+
+        self.bot.audit_logger.push(construct_from_ctx(ctx, action="modmail.dm.disable.all", description="disabled inbound direct message handling"))
 
         return await ctx.send(embed=embed)
 
