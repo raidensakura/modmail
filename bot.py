@@ -24,6 +24,8 @@ from discord.ext.commands.view import StringView
 from emoji import UNICODE_EMOJI
 from pkg_resources import parse_version
 
+from core.blocklist import Blocklist, BlockReason
+
 try:
     # noinspection PyUnresolvedReferences
     from colorama import init
@@ -87,6 +89,9 @@ class ModmailBot(commands.Bot):
         self._configure_logging()
 
         self.plugin_db = PluginDatabaseClient(self)  # Deprecated
+
+        self.blocklist = Blocklist(bot=self)
+
         self.startup()
 
     def get_guild_icon(
@@ -168,6 +173,11 @@ class ModmailBot(commands.Bot):
         logger.line()
         logger.info("discord.py: v%s", discord.__version__)
         logger.line()
+        if not self.config["blocked"] or not self.config["blocked_roles"]:
+            logger.warning(
+                "Un-migrated blocklists found. Please run the '[p]migrate blocklist' command after backing "
+                "up your config/database. Blocklist functionality will be disabled until this is done."
+            )
 
     async def load_extensions(self):
         for cog in self.loaded_cogs:
@@ -462,10 +472,14 @@ class ModmailBot(commands.Bot):
 
     @property
     def blocked_users(self) -> typing.Dict[str, str]:
+        """DEPRECATED, used blocklist instead"""
+        logger.warning("blocked_users is deprecated and does not function, its usage is a bug")
         return self.config["blocked"]
 
     @property
     def blocked_roles(self) -> typing.Dict[str, str]:
+        """DEPRECATED, used blocklist instead"""
+        logger.warning("blocked_roles is deprecated and does not function, its usage is a bug")
         return self.config["blocked_roles"]
 
     @property
@@ -524,6 +538,7 @@ class ModmailBot(commands.Bot):
         logger.debug("Connected to gateway.")
         await self.config.refresh()
         await self.api.setup_indexes()
+        await self.blocklist.setup()
         await self.load_extensions()
         self._connected.set()
 
@@ -718,6 +733,8 @@ class ModmailBot(commands.Bot):
         return True
 
     def check_manual_blocked_roles(self, author: discord.Member) -> bool:
+        """DEPRECATED"""
+        logger.error("check_manual_blocked_roles is deprecated, usage is a bug.")
         for role in author.roles:
             if str(role.id) not in self.blocked_roles:
                 continue
@@ -734,6 +751,8 @@ class ModmailBot(commands.Bot):
         return True
 
     def check_manual_blocked(self, author: discord.User) -> bool:
+        """DEPRECATED"""
+        logger.error("check_manual_blocked is deprecated, usage is a bug.")
         if str(author.id) not in self.blocked_users:
             return True
 
@@ -758,6 +777,7 @@ class ModmailBot(commands.Bot):
     # This is to store blocked message cooldown in memory
     _block_msg_cooldown = dict()
 
+    # This has a bunch of side effects
     async def is_blocked(
         self,
         author: discord.User,
@@ -765,6 +785,24 @@ class ModmailBot(commands.Bot):
         channel: discord.TextChannel = None,
         send_message: bool = False,
     ) -> bool:
+        """
+        Check if a user is blocked for any reason and send a message if they are (if send_message is true).
+
+        If you are using this method with send_message set to false or not set,
+        You should be using blocklist.is_user_blocked() or blocklist.is_id_blocked()
+        if you only care whether a user is manually blocked then use blocklist.is_id_blocked().
+
+        Parameters
+        ----------
+        author
+        channel
+        send_message
+
+        Returns
+        -------
+        bool
+            Whether the user is blocked or not.
+        """
         member = self.guild.get_member(author.id) or await MemberConverter.convert(author)
         if member is None:
             # try to find in other guilds
@@ -794,33 +832,36 @@ class ModmailBot(commands.Bot):
             self._block_msg_cooldown[str(author)] = now + timedelta(minutes=5)
             return await channel.send(embed=emb)
 
-        if str(author.id) in self.blocked_whitelisted_users:
-            if str(author.id) in self.blocked_users:
-                self.blocked_users.pop(str(author.id))
-                await self.config.update()
-            return False
+        if member is not None:
+            blocked, block_type = self.blocklist.is_user_blocked(member)
+        else:
+            blocked, block_type = self.blocklist.is_id_blocked(author.id)
+            if not self.blocklist.is_valid_account_age(author):
+                blocked = True
+                block_type = BlockReason.ACCOUNT_AGE
 
-        if not self.check_account_age(author):
-            blocked_reason = "Sorry, your account is too new to initiate a ticket."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+        if blocked:
+            if block_type == BlockReason.ACCOUNT_AGE:
+                blocked_reason = "Sorry, your account is too new to initiate a ticket."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        if not self.check_manual_blocked(author):
-            blocked_reason = "You have been blocked from contacting Modmail."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+            if block_type == BlockReason.BLOCKED_USER:
+                blocked_reason = "You have been blocked from contacting Modmail."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        if not self.check_guild_age(member):
-            blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+            if block_type == BlockReason.GUILD_AGE:
+                blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        if not self.check_manual_blocked_roles(member):
-            blocked_reason = "Sorry, your role(s) has been blacklisted from contacting Modmail."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+            if block_type == BlockReason.BLOCKED_ROLE:
+                blocked_reason = "Sorry, your role(s) has been blacklisted from contacting Modmail."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        return False
+        return blocked
 
     async def get_thread_cooldown(self, author: discord.Member):
         thread_cooldown = self.config.get("thread_cooldown")

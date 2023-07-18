@@ -1,5 +1,4 @@
 import asyncio
-import datetime
 import re
 from datetime import timezone
 from itertools import zip_longest
@@ -12,7 +11,8 @@ from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 from discord.ext.commands.view import StringView
 
-from core import checks
+from core import blocklist, checks
+from core.blocklist import BlockType
 from core.models import DMDisabled, PermissionLevel, SimilarCategoryConverter, getLogger
 from core.paginator import EmbedPaginatorSession
 from core.thread import Thread
@@ -1562,7 +1562,7 @@ class Modmail(commands.Cog):
             elif u.bot:
                 errors.append(f"{u} is a bot, cannot add to thread.")
                 users.remove(u)
-            elif await self.bot.is_blocked(u):
+            elif await self.bot.blocklist.is_user_blocked(u):
                 ref = f"{u.mention} is" if ctx.author != u else "You are"
                 errors.append(f"{ref} currently blocked from contacting {self.bot.user.name}.")
                 users.remove(u)
@@ -1645,57 +1645,34 @@ class Modmail(commands.Cog):
     async def blocked(self, ctx):
         """Retrieve a list of blocked users."""
 
-        roles, users, now = [], [], discord.utils.utcnow()
+        roles, users = [], []
 
-        blocked_users = list(self.bot.blocked_users.items())
-        for id_, data in blocked_users:
-            blocked_by_id = data["blocked_by"]
-            blocked_at = parser.parse(data["blocked_at"])
-            human_blocked_at = discord.utils.format_dt(blocked_at, style="R")
-            if "until" in data:
-                blocked_until = parser.parse(data["until"])
-                human_blocked_until = discord.utils.format_dt(blocked_until, style="R")
+        blocked: list[blocklist.BlocklistEntry] = await self.bot.blocklist.get_all_blocks()
+
+        for item in blocked:
+            human_blocked_at = discord.utils.format_dt(item.timestamp, style="R")
+            if item.expires_at is not None:
+                human_blocked_until = discord.utils.format_dt(item.expires_at, style="R")
             else:
-                blocked_until = human_blocked_until = "Permanent"
+                human_blocked_until = "Permanent"
 
-            if isinstance(blocked_until, datetime.datetime) and blocked_until < now:
-                self.bot.blocked_users.pop(str(id_))
-                logger.debug("No longer blocked, user %s.", id_)
-                continue
-
-            string = f"<@{id_}> ({human_blocked_until})"
-            string += f"\n- Issued {human_blocked_at} by <@{blocked_by_id}>"
-
-            reason = data.get("reason")
-            if reason:
-                string += f"\n- Blocked for {reason}"
-
-            users.append(string + "\n")
-
-        blocked_roles = list(self.bot.blocked_roles.items())
-        for id_, data in blocked_roles:
-            blocked_by_id = data["blocked_by"]
-            blocked_at = parser.parse(data["blocked_at"])
-            human_blocked_at = discord.utils.format_dt(blocked_at, style="R")
-            if "until" in data:
-                blocked_until = parser.parse(data["until"])
-                human_blocked_until = discord.utils.format_dt(blocked_until, style="R")
+            if item.type == blocklist.BlockType.USER:
+                string = f"<@{item.id}>"
             else:
-                blocked_until = human_blocked_until = "Permanent"
+                string = f"<@&{item.id}>"
 
-            if isinstance(blocked_until, datetime.datetime) and blocked_until < now:
-                self.bot.blocked_users.pop(str(id_))
-                logger.debug("No longer blocked, user %s.", id_)
-                continue
+            string += f" ({human_blocked_until})"
 
-            string = f"<@&{id_}> ({human_blocked_until})"
-            string += f"\n- Issued {human_blocked_at} by <@{blocked_by_id}>"
+            string += f"\n- Issued {human_blocked_at} by <@{item.blocking_user_id}>"
 
-            reason = data.get("reason")
-            if reason:
-                string += f"\n- Blocked for {reason}"
+            if item.reason is not None:
+                string += f"\n- Blocked for {item.reason}"
+            string += "\n"
 
-            roles.append(string + "\n")
+            if item.type == blocklist.BlockType.USER:
+                users.append(string)
+            elif item.type == blocklist.BlockType.ROLE:
+                roles.append(string)
 
         user_embeds = [discord.Embed(title="Blocked Users", color=self.bot.main_color, description="")]
 
@@ -1713,7 +1690,7 @@ class Modmail(commands.Cog):
                 else:
                     embed.description += line
         else:
-            user_embeds[0].description = "Currently there are no blocked users."
+            user_embeds[0].description = "No users are currently blocked."
 
         if len(user_embeds) > 1:
             for n, em in enumerate(user_embeds):
@@ -1736,7 +1713,7 @@ class Modmail(commands.Cog):
                 else:
                     embed.description += line
         else:
-            role_embeds[-1].description = "Currently there are no blocked roles."
+            role_embeds[-1].description = "No roles are currently blocked."
 
         if len(role_embeds) > 1:
             for n, em in enumerate(role_embeds):
@@ -1763,7 +1740,6 @@ class Modmail(commands.Cog):
                 return await ctx.send_help(ctx.command)
 
         mention = getattr(user, "mention", f"`{user.id}`")
-        msg = ""
 
         if str(user.id) in self.bot.blocked_whitelisted_users:
             embed = discord.Embed(
@@ -1775,21 +1751,20 @@ class Modmail(commands.Cog):
             return await ctx.send(embed=embed)
 
         self.bot.blocked_whitelisted_users.append(str(user.id))
-
-        if str(user.id) in self.bot.blocked_users:
-            msg = self.bot.blocked_users.get(str(user.id)) or ""
-            self.bot.blocked_users.pop(str(user.id))
-
         await self.bot.config.update()
 
-        if msg.startswith("System Message: "):
-            # If the user is blocked internally (for example: below minimum account age)
-            # Show an extended message stating the original internal message
-            reason = msg[16:].strip().rstrip(".")
+        blocked: bool
+        blocklist_entry: blocklist.BlocklistEntry
+
+        blocked, blocklist_entry = await self.bot.blocklist.is_id_blocked(user.id)
+        if blocked:
+            await self.bot.blocklist.unblock_id(user.id)
             embed = discord.Embed(
                 title="Success",
-                description=f"{mention} was previously blocked internally for "
-                f'"{reason}". {mention} is now whitelisted.',
+                description=f"""
+                {mention} has been whitelisted.
+                They were previously blocked by <@{blocklist_entry.blocking_user_id}> {" for "+blocklist_entry.reason if blocklist_entry.reason is not None else ""}.
+                """,
                 color=self.bot.main_color,
             )
         else:
@@ -1843,8 +1818,6 @@ class Modmail(commands.Cog):
         ):
             return await send_embed("Error", f"Cannot block {mention}, user is whitelisted.")
 
-        now, blocked = discord.utils.utcnow(), dict()
-
         desc = f"{mention} is now blocked."
         if duration:
             desc += f"\n- Expires: {discord.utils.format_dt(duration.dt, style='R')}"
@@ -1852,24 +1825,24 @@ class Modmail(commands.Cog):
         if reason:
             desc += f"\n- Reason: {reason}"
 
-        blocked["blocked_at"] = str(now)
-        blocked["blocked_by"] = ctx.author.id
-        if duration:
-            blocked["until"] = str(duration.dt)
-        if reason:
-            blocked["reason"] = reason
+        blocktype: BlockType
 
         if isinstance(user_or_role, discord.Role):
-            self.bot.blocked_roles[str(user_or_role.id)] = blocked
+            blocktype = BlockType.ROLE
         elif isinstance(user_or_role, discord.User):
-            blocked_users = self.bot.blocked_users
-            blocked_users[str(user_or_role.id)] = blocked
+            blocktype = BlockType.USER
         else:
             return logger.warning(
                 f"{__name__}: cannot block user, user is neither an instance of Discord Role or User"
             )
 
-        await self.bot.config.update()
+        await self.bot.blocklist.block_id(
+            user_id=user_or_role.id,
+            reason=reason,
+            expires_at=duration.dt if duration is not None else None,
+            blocked_by=ctx.author.id,
+            block_type=blocktype,
+        )
 
         return await send_embed("Success", desc)
 
@@ -1901,20 +1874,13 @@ class Modmail(commands.Cog):
 
         title, desc = "Error", f"{mention} is not blocked."
 
-        if isinstance(user_or_role, discord.Role):
-            if str(user_or_role.id) not in self.bot.blocked_roles:
-                return await send_embed(title, desc)
-            self.bot.blocked_roles.pop(str(user_or_role.id))
-        elif isinstance(user_or_role, discord.User):
-            if str(user_or_role.id) not in self.bot.blocked_users:
-                return await send_embed(title, desc)
-            self.bot.blocked_users.pop(str(user_or_role.id))
-        else:
+        if not isinstance(user_or_role, (discord.Role, discord.User)):
             return logger.warning(
                 f"{__name__}: cannot unblock, user is neither an instance of Discord Role or User"
             )
 
-        await self.bot.config.update()
+        if not await self.bot.blocklist.unblock_id(user_or_role.id):
+            return await send_embed(title, desc)
 
         return await send_embed("Success", f"{mention} has been unblocked.")
 
