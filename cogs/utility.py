@@ -1960,7 +1960,9 @@ class Utility(commands.Cog):
             try:
                 await migrations.migrate_blocklist(self.bot)
             except Exception as e:
-                await ctx.send(embed=discord.Embed(title="Error", description=str(e), color=self.bot.error_color))
+                await ctx.send(
+                    embed=discord.Embed(title="Error", description=str(e), color=self.bot.error_color)
+                )
                 raise e
 
         await ctx.send(embed=discord.Embed(title="Success", color=self.bot.main_color))

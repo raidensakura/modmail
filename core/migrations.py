@@ -10,7 +10,9 @@ logger = getLogger(__name__)
 old_format_matcher = re.compile("by (\w*#\d{1,4})(?: until <t:(\d*):f>)?.")
 
 
-def _convert_legacy_dict_block_format(k, v: dict, block_type: blocklist.BlockType) -> Optional[blocklist.BlocklistEntry]:
+def _convert_legacy_dict_block_format(
+    k, v: dict, block_type: blocklist.BlockType
+) -> Optional[blocklist.BlocklistEntry]:
     """
     Converts a legacy dict based blocklist entry to the new dataclass format
 
@@ -40,11 +42,13 @@ def _convert_legacy_dict_block_format(k, v: dict, block_type: blocklist.BlockTyp
         reason=reason,
         timestamp=blocked_ts,
         blocking_user_id=blocked_by,
-        type=block_type
+        type=block_type,
     )
 
 
-def _convert_legacy_block_format(k, v: str, block_type: blocklist.BlockType) -> Optional[blocklist.BlocklistEntry]:
+def _convert_legacy_block_format(
+    k, v: str, block_type: blocklist.BlockType
+) -> Optional[blocklist.BlocklistEntry]:
     """
     Converts a legacy string based blocklist entry to the new dataclass format
 
@@ -66,12 +70,13 @@ def _convert_legacy_block_format(k, v: str, block_type: blocklist.BlockType) -> 
         timestamp=datetime.datetime.utcnow(),
         # I'm not bothering to fetch the user object here, discords username migrations will have broken all of them
         blocking_user_id=0,
-        type=block_type
+        type=block_type,
     )
 
 
-async def _convert_legacy_block_list(foo: dict, blocklist_batch: list[blocklist.BlocklistEntry],
-                                     block_type: blocklist.BlockType, bot) -> int:
+async def _convert_legacy_block_list(
+    foo: dict, blocklist_batch: list[blocklist.BlocklistEntry], block_type: blocklist.BlockType, bot
+) -> int:
     skipped = 0
 
     for k, v in foo.items():
@@ -109,12 +114,14 @@ async def migrate_blocklist(bot):
 
     blocklist_batch: list[blocklist.BlocklistEntry] = []
     logger.info(f"preparing to process {len(blocked_users)} blocked users")
-    skipped += await _convert_legacy_block_list(foo=blocked_users, blocklist_batch=blocklist_batch,
-                                                block_type=blocklist.BlockType.USER, bot=bot)
+    skipped += await _convert_legacy_block_list(
+        foo=blocked_users, blocklist_batch=blocklist_batch, block_type=blocklist.BlockType.USER, bot=bot
+    )
     logger.info("processed blocked users")
     logger.info(f"preparing to process {len(bot.blocked_roles)} blocked roles")
-    skipped += await _convert_legacy_block_list(foo=bot.blocked_roles, blocklist_batch=blocklist_batch,
-                                                block_type=blocklist.BlockType.ROLE, bot=bot)
+    skipped += await _convert_legacy_block_list(
+        foo=bot.blocked_roles, blocklist_batch=blocklist_batch, block_type=blocklist.BlockType.ROLE, bot=bot
+    )
     logger.info("processed blocked roles")
 
     await bot.api.db.blocklist.insert_many([x.__dict__ for x in blocklist_batch])

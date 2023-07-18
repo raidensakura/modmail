@@ -1836,11 +1836,13 @@ class Modmail(commands.Cog):
                 f"{__name__}: cannot block user, user is neither an instance of Discord Role or User"
             )
 
-        await self.bot.blocklist.block_id(user_id=user_or_role.id,
-                                          reason=reason,
-                                          expires_at=duration.dt if duration is not None else None,
-                                          blocked_by=ctx.author.id,
-                                          block_type=blocktype)
+        await self.bot.blocklist.block_id(
+            user_id=user_or_role.id,
+            reason=reason,
+            expires_at=duration.dt if duration is not None else None,
+            blocked_by=ctx.author.id,
+            block_type=blocktype,
+        )
 
         return await send_embed("Success", desc)
 

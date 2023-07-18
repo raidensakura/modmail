@@ -41,7 +41,7 @@ class BlocklistEntry:
             reason=data["reason"],
             timestamp=data["timestamp"],
             blocking_user_id=data["blocking_user_id"],
-            type=data["type"]
+            type=data["type"],
         )
 
 
@@ -50,7 +50,8 @@ class Blocklist:
 
     def __init__(self: Self, bot) -> None:
         self.blocklist_collection = bot.api.db.blocklist.with_options(
-            codec_options=CodecOptions(tz_aware=True, tzinfo=datetime.timezone.utc))
+            codec_options=CodecOptions(tz_aware=True, tzinfo=datetime.timezone.utc)
+        )
         self.bot = bot
 
     async def setup(self):
@@ -60,18 +61,26 @@ class Blocklist:
     async def add_block(self, block: BlocklistEntry) -> None:
         await self.blocklist_collection.insert_one(block.__dict__)
 
-    async def block_id(self, user_id: int, expires_at: Optional[datetime.datetime], reason: str,
-                       blocked_by: int, block_type: BlockType) -> None:
+    async def block_id(
+        self,
+        user_id: int,
+        expires_at: Optional[datetime.datetime],
+        reason: str,
+        blocked_by: int,
+        block_type: BlockType,
+    ) -> None:
         now = datetime.datetime.utcnow()
 
-        await self.add_block(block=BlocklistEntry(
-            id=user_id,
-            expires_at=expires_at,
-            reason=reason,
-            timestamp=now,
-            blocking_user_id=blocked_by,
-            type=block_type
-        ))
+        await self.add_block(
+            block=BlocklistEntry(
+                id=user_id,
+                expires_at=expires_at,
+                reason=reason,
+                timestamp=now,
+                blocking_user_id=blocked_by,
+                type=block_type,
+            )
+        )
 
     async def unblock_id(self, user_or_role_id: int) -> bool:
         result = await self.blocklist_collection.delete_one({"id": user_or_role_id})
