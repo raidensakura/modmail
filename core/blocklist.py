@@ -1,7 +1,7 @@
 import datetime
 import enum
 from dataclasses import dataclass
-from typing import Optional, Self, Tuple
+from typing import Optional, Tuple
 
 import discord
 import isodate
@@ -48,7 +48,7 @@ class BlocklistEntry:
 class Blocklist:
     blocklist_collection: AgnosticCollection
 
-    def __init__(self: Self, bot) -> None:
+    def __init__(self, bot) -> None:
         self.blocklist_collection = bot.api.db.blocklist.with_options(
             codec_options=CodecOptions(tz_aware=True, tzinfo=datetime.timezone.utc)
         )
