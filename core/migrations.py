@@ -75,11 +75,14 @@ def _convert_legacy_block_format(
 
 
 async def _convert_legacy_block_list(
-    foo: dict, blocklist_batch: list[blocklist.BlocklistEntry], block_type: blocklist.BlockType, bot
+    blocklist_dict: dict,
+    blocklist_batch: list[blocklist.BlocklistEntry],
+    block_type: blocklist.BlockType,
+    bot,
 ) -> int:
     skipped = 0
 
-    for k, v in foo.items():
+    for k, v in blocklist_dict.items():
         # handle new block format
         if type(v) is dict:
             block = _convert_legacy_dict_block_format(k, v, block_type=block_type)
@@ -115,12 +118,18 @@ async def migrate_blocklist(bot):
     blocklist_batch: list[blocklist.BlocklistEntry] = []
     logger.info(f"preparing to process {len(blocked_users)} blocked users")
     skipped += await _convert_legacy_block_list(
-        foo=blocked_users, blocklist_batch=blocklist_batch, block_type=blocklist.BlockType.USER, bot=bot
+        blocklist_dict=blocked_users,
+        blocklist_batch=blocklist_batch,
+        block_type=blocklist.BlockType.USER,
+        bot=bot,
     )
     logger.info("processed blocked users")
     logger.info(f"preparing to process {len(bot.blocked_roles)} blocked roles")
     skipped += await _convert_legacy_block_list(
-        foo=bot.blocked_roles, blocklist_batch=blocklist_batch, block_type=blocklist.BlockType.ROLE, bot=bot
+        blocklist_dict=bot.blocked_roles,
+        blocklist_batch=blocklist_batch,
+        block_type=blocklist.BlockType.ROLE,
+        bot=bot,
     )
     logger.info("processed blocked roles")
 
