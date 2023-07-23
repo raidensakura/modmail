@@ -1,12 +1,14 @@
 import datetime
 import enum
 from dataclasses import dataclass
-from typing import Optional, Self, Tuple
+from typing import Optional, Tuple
 
 import discord
 import isodate
 from bson import CodecOptions
 from motor.core import AgnosticCollection
+from strenum import StrEnum
+from typing_extensions import Self
 
 
 class BlockType(enum.IntEnum):
@@ -14,7 +16,7 @@ class BlockType(enum.IntEnum):
     ROLE = 1
 
 
-class BlockReason(enum.StrEnum):
+class BlockReason(StrEnum):
     GUILD_AGE = "guild_age"
     ACCOUNT_AGE = "account_age"
     BLOCKED_ROLE = "blocked_role"

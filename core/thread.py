@@ -14,7 +14,7 @@ from types import SimpleNamespace
 import discord
 import isodate
 from discord.ext.commands import CommandError, MissingRequiredArgument
-from discord.types.user import User as UserPayload, PartialUser as PartialUserPayload
+from discord.types.user import PartialUser as PartialUserPayload, User as UserPayload
 from lottie.exporters import exporters as l_exporters
 from lottie.importers import importers as l_importers
 
@@ -263,7 +263,9 @@ class Thread:
             # This is incredibly cursed and will break every time discord.py changes their internal API method
             class State:
                 # discord.state.ConnectionState.store_user_no_intents
-                def store_user(self, data: typing.Union[UserPayload, PartialUserPayload], *, cache: bool = True) -> discord.user.User:
+                def store_user(
+                    self, data: typing.Union[UserPayload, PartialUserPayload], *, cache: bool = True
+                ) -> discord.user.User:
                     return discord.user.User(state=self, data=data)
 
             for note in notes:
