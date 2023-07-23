@@ -833,9 +833,9 @@ class ModmailBot(commands.Bot):
             return await channel.send(embed=emb)
 
         if member is not None:
-            blocked, block_type = self.blocklist.is_user_blocked(member)
+            blocked, block_type = await self.blocklist.is_user_blocked(member)
         else:
-            blocked, block_type = self.blocklist.is_id_blocked(author.id)
+            blocked, block_type = await self.blocklist.is_id_blocked(author.id)
             if not self.blocklist.is_valid_account_age(author):
                 blocked = True
                 block_type = BlockReason.ACCOUNT_AGE
