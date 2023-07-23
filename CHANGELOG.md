@@ -46,6 +46,9 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Fixed blocked roles improperly saving in `blocked_users` config.
 - Fixed `?block` command improperly parsing reason as timestamp. 
 
+### Internal
+- `ConfigManager.get` no longer accepts two positional arguments: the `convert` argument is now keyword-only.
+
 # v4.0.2
 
 ### Breaking
