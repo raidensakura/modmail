@@ -8,7 +8,6 @@ import isodate
 from bson import CodecOptions
 from motor.core import AgnosticCollection
 from strenum import StrEnum
-from typing_extensions import Self
 
 
 class BlockType(enum.IntEnum):
