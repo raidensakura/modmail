@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import discord
 import isodate
 from discord.ext.commands import CommandError, MissingRequiredArgument
+from discord.types.user import PartialUser as PartialUserPayload, User as UserPayload
 from lottie.exporters import exporters as l_exporters
 from lottie.importers import importers as l_importers
 
@@ -259,18 +260,24 @@ class Thread:
             notes = await self.bot.api.find_notes(self.recipient)
             ids = {}
 
+            # This is incredibly cursed and will break every time discord.py changes their internal API method
             class State:
-                def store_user(self, user):
-                    return user
+                # discord.state.ConnectionState.store_user_no_intents
+                def store_user(
+                    self, data: typing.Union[UserPayload, PartialUserPayload], *, cache: bool = True
+                ) -> discord.user.User:
+                    return discord.user.User(state=self, data=data)
 
             for note in notes:
                 author = note["author"]
 
-                class Author:
-                    name = author["name"]
-                    id = author["id"]
-                    discriminator = author["discriminator"]
-                    display_avatar = SimpleNamespace(url=author["avatar_url"])
+                author_dict: discord.types.user.PartialUser = {
+                    "username": author["name"],
+                    "id": author["id"],
+                    "discriminator": author["discriminator"],
+                    "avatar": author["avatar_url"],
+                    "global_name": "dontlookatme",
+                }
 
                 data = {
                     "id": round(time.time() * 1000 - discord.utils.DISCORD_EPOCH) << 22,
@@ -282,7 +289,7 @@ class Thread:
                     "mention_everyone": None,
                     "tts": None,
                     "content": note["message"],
-                    "author": Author(),
+                    "author": author_dict,
                 }
                 message = discord.Message(state=State(), channel=self.channel, data=data)
                 ids[note["_id"]] = str((await self.note(message, persistent=True, thread_creation=True)).id)
