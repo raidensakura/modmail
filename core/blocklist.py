@@ -1,7 +1,7 @@
 import datetime
 import enum
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import discord
 import isodate
@@ -111,7 +111,7 @@ class Blocklist:
             return False, None
         return True, BlocklistEntry.from_dict(result)
 
-    async def get_all_blocks(self) -> list[BlocklistEntry]:
+    async def get_all_blocks(self) -> List[BlocklistEntry]:
         """
         Returns a list of all active blocks
 
