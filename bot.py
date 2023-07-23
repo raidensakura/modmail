@@ -173,11 +173,6 @@ class ModmailBot(commands.Bot):
         logger.line()
         logger.info("discord.py: v%s", discord.__version__)
         logger.line()
-        if not self.config["blocked"] or not self.config["blocked_roles"]:
-            logger.warning(
-                "Un-migrated blocklists found. Please run the '[p]migrate blocklist' command after backing "
-                "up your config/database. Blocklist functionality will be disabled until this is done."
-            )
 
     async def load_extensions(self):
         for cog in self.loaded_cogs:
@@ -578,6 +573,13 @@ class ModmailBot(commands.Bot):
             logger.warning(
                 "You are running a developmental version. This should not be used in production. (v%s)",
                 __version__,
+            )
+            logger.line()
+
+        if len(self.config["blocked"]) > 0 or len(self.config["blocked_roles"]) > 0:
+            logger.warning(
+                "Un-migrated blocklists found. Please run the '[p]migrate blocklist' command after backing "
+                "up your config/database. Blocklist functionality will be disabled until this is done."
             )
             logger.line()
 
