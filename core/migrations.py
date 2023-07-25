@@ -1,6 +1,6 @@
 import datetime
 import re
-from typing import Optional
+from typing import Optional, List
 
 from core import blocklist
 from core.models import getLogger
@@ -76,7 +76,7 @@ def _convert_legacy_block_format(
 
 async def _convert_legacy_block_list(
     blocklist_dict: dict,
-    blocklist_batch: list[blocklist.BlocklistEntry],
+    blocklist_batch: List[blocklist.BlocklistEntry],
     block_type: blocklist.BlockType,
     bot,
 ) -> int:
@@ -115,6 +115,10 @@ async def migrate_blocklist(bot):
     logger.info("preparing to migrate blocklist")
     skipped = 0
 
+    if len(blocked_users) == 0 and len(bot.blocked_roles) == 0:
+        logger.info("no blocklist entries to migrate")
+        return
+
     blocklist_batch: list[blocklist.BlocklistEntry] = []
     logger.info(f"preparing to process {len(blocked_users)} blocked users")
     skipped += await _convert_legacy_block_list(
@@ -133,8 +137,9 @@ async def migrate_blocklist(bot):
     )
     logger.info("processed blocked roles")
 
-    await bot.api.db.blocklist.insert_many([x.__dict__ for x in blocklist_batch])
-    blocklist_batch.clear()
+    if len(blocklist_batch) > 0:
+        await bot.api.db.blocklist.insert_many([x.__dict__ for x in blocklist_batch])
+        blocklist_batch.clear()
 
     logger.info("clearing old blocklists")
     bot.blocked_users.clear()
