@@ -476,6 +476,7 @@ class MongoDBClient(ApiClient):
             await coll.create_index(
                 [("messages.content", "text"), ("messages.author.name", "text"), ("key", "text")]
             )
+        await coll.create_index("channel_id", unique=True)
         logger.debug("Successfully configured and verified database indexes.")
 
     async def validate_database_connection(self, *, ssl_retry=True):
