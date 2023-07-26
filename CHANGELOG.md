@@ -17,9 +17,17 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 ### Added
 - Added `content_type` to attachments stored in the database.
 
+### Changed
+- Changing a threads title or NSFW status immediately updates the status in the database.
+
 ### Fixed
 - Persistent notes have been fixed after the previous discord.py update.
 - `is_image` now is true only if the image is actually an image.
+
+### Internal
+- Add `update_title` and `update_nsfw` methods to `ApiClient` to update thread title and nsfw status in the database.
+- `thread.set_title` now requires `channel_id` to be passed as keyword arguments.
+- New `thread.set_nsfw_status` method to set nsfw status of a thread.
 
 # v4.1.0
 

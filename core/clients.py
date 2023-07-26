@@ -429,6 +429,12 @@ class ApiClient:
     async def get_user_info(self) -> Optional[dict]:
         return NotImplemented
 
+    async def update_title(self, title: str, channel_id: Union[str, int]):
+        return NotImplemented
+
+    async def update_nsfw(self, nsfw: bool, channel_id: Union[str, int]):
+        return NotImplemented
+
 
 class MongoDBClient(ApiClient):
     def __init__(self, bot):
@@ -758,6 +764,13 @@ class MongoDBClient(ApiClient):
                     "url": user.url,
                 }
             }
+
+    async def update_title(self, title: str, channel_id: Union[str, int]):
+        await self.bot.db.logs.find_one_and_update({"channel_id": str(channel_id)}, {"$set": {"title": title}})
+
+    async def update_nsfw(self, nsfw: bool, channel_id: Union[str, int]):
+        await self.bot.db.logs.find_one_and_update({"channel_id": str(channel_id)}, {"$set": {"nsfw": nsfw}})
+
 
 
 class PluginDatabaseClient:
