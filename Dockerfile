@@ -1,8 +1,6 @@
 FROM python:3.11-alpine as base
 
 RUN apk update && apk add git \
-	# cairosvg dependencies
-	cairo-dev cairo cairo-tools \
 	# pillow dependencies
 	jpeg-dev zlib-dev
 
