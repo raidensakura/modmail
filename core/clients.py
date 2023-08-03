@@ -666,9 +666,11 @@ class MongoDBClient(ApiClient):
                 {
                     "id": a.id,
                     "filename": a.filename,
-                    "is_image": a.width is not None,
+                    # In previous versions this was true for both videos and images
+                    "is_image": a.content_type.startswith("image/"),
                     "size": a.size,
                     "url": a.url,
+                    "content_type": a.content_type,
                 }
                 for a in message.attachments
             ],
