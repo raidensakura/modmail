@@ -23,7 +23,7 @@ def authentication(func):
         if not self.config.using_oauth:
             result = await func(self, request, key=key or None, **kwargs)
             return result
-        
+
         session = await get_session(request)
         if not session.get("user"):
             session["last_visit"] = str(request.url)
@@ -31,15 +31,11 @@ def authentication(func):
 
         user = session.get("user")
 
-        whitelist = self.bot.config.get("oauth_whitelist", [])
+        whitelist = self.bot.config.get("oauth_whitelist")
 
         roles = await get_user_roles(user["id"])
 
-        if (
-            int(user["id"]) in whitelist or 
-            "everyone" in whitelist or
-            any(int(r) in whitelist for r in roles)
-        ):
+        if int(user["id"]) in whitelist or "everyone" in whitelist or any(int(r) in whitelist for r in roles):
             kwargs["using_oauth"] = True
             kwargs["session"] = session
             kwargs["user"] = user
@@ -47,12 +43,14 @@ def authentication(func):
             kwargs.update(globals())
             result = await func(self, request, key=key or None, **kwargs)
             return result
-        
+
         result = await self.render_template(
             "unauthorized", request, message="You are not authorized to view this thread."
         )
         return result
+
     return wrapper
+
 
 async def get_user_info(token):
     headers = {"Authorization": f"Bearer {token}"}
@@ -60,7 +58,8 @@ async def get_user_info(token):
         resp = await session.get(f"{API_BASE}/users/@me", headers=headers)
         user = await resp.json()
         return user
-        
+
+
 async def get_user_roles(user_id):
     _guild_id = os.getenv("GUILD_ID", None)
     _bot_token = os.getenv("TOKEN", None)
@@ -71,6 +70,7 @@ async def get_user_roles(user_id):
         user = await resp.json()
         user_roles = user.get("roles", [])
         return user_roles
+
 
 async def fetch_token(code):
     data = {
@@ -86,7 +86,8 @@ async def fetch_token(code):
         resp = await session.post(TOKEN_URL, data=data)
         json = await resp.json()
         return json
-    
+
+
 async def login(request):
 
     session = await get_session(request)
@@ -102,6 +103,7 @@ async def login(request):
 
     raise aiohttp.web.HTTPFound(f"{AUTHORIZATION_BASE_URL}?{urlencode(data)}")
 
+
 async def oauth_callback(request):
     session = await get_session(request)
 
@@ -116,6 +118,7 @@ async def oauth_callback(request):
             url = session["last_visit"]
         raise aiohttp.web.HTTPFound(url)
     raise aiohttp.web.HTTPFound("/login")
+
 
 async def logout(request):
     session = await get_session(request)
