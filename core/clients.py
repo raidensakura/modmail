@@ -476,6 +476,7 @@ class MongoDBClient(ApiClient):
             await coll.create_index(
                 [("messages.content", "text"), ("messages.author.name", "text"), ("key", "text")]
             )
+        await coll.create_index("channel_id", unique=True)
         logger.debug("Successfully configured and verified database indexes.")
 
     async def validate_database_connection(self, *, ssl_retry=True):
@@ -665,9 +666,11 @@ class MongoDBClient(ApiClient):
                 {
                     "id": a.id,
                     "filename": a.filename,
-                    "is_image": a.width is not None,
+                    # In previous versions this was true for both videos and images
+                    "is_image": a.content_type.startswith("image/"),
                     "size": a.size,
                     "url": a.url,
+                    "content_type": a.content_type,
                 }
                 for a in message.attachments
             ],

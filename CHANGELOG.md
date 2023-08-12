@@ -8,6 +8,19 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+### Breaking
+- Completely rewritten blocklist system. Blocklisting now runs off its own mongoDB collection. This once again introduces backwards incompatible schema changes, so a manual migration is required. You may upgrade from both v4.0 and v4.1 using the `[p]migrate blocklist` command. This removes any need to perform the previous migration steps in v4.1.0, you may upgrade directly to this version. After running the command, blocklist functionality will return and legacy config based blocks will have been deleted. You should always back up your config before migration.
+
+### Deprecated
+- Legacy blocklist properties are deprecated and no longer function. They now log a warning when used and provide no functionality. They have been replaced with methods in blocklist.py 
+
+### Added
+- Added `content_type` to attachments stored in the database.
+
+### Fixed
+- Persistent notes have been fixed after the previous discord.py update.
+- `is_image` now is true only if the image is actually an image.
+
 # v4.1.0
 
 ### Breaking
