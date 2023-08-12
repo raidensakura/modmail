@@ -429,6 +429,9 @@ class ApiClient:
     async def get_user_info(self) -> Optional[dict]:
         return NotImplemented
 
+    async def close_log(self, channel_id: int, title: str, close_message: str, closer: discord.User) -> dict:
+        return NotImplemented
+
 
 class MongoDBClient(ApiClient):
     def __init__(self, bot):
@@ -728,6 +731,27 @@ class MongoDBClient(ApiClient):
 
     async def edit_note(self, message_id: Union[int, str], message: str):
         await self.db.notes.update_one({"message_id": str(message_id)}, {"$set": {"message": message}})
+
+    async def close_log(self, channel_id: int, title: str, close_message: str, closer: discord.User) -> dict:
+        # TODO doesn't set title yet
+        return await self.bot.db.logs.find_one_and_update(
+            {"channel_id": str(channel_id)},
+            {
+                "$set": {
+                    "open": False,
+                    "closed_at": str(discord.utils.utcnow()),
+                    "title": title,
+                    "close_message": close_message,
+                    "closer": {
+                        "id": str(closer.id),
+                        "name": closer.name,
+                        "discriminator": closer.discriminator,
+                        "avatar_url": closer.display_avatar.url,
+                        "mod": True,
+                    },
+                },
+            },
+        )
 
     def get_plugin_partition(self, cog):
         cls_name = cog.__class__.__name__

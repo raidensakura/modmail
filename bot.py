@@ -621,21 +621,10 @@ class ModmailBot(commands.Bot):
         for log in await self.api.get_open_logs():
             if self.get_channel(int(log["channel_id"])) is None:
                 logger.debug("Unable to resolve thread with channel %s.", log["channel_id"])
-                log_data = await self.api.post_log(
-                    log["channel_id"],
-                    {
-                        "open": False,
-                        "title": None,
-                        "closed_at": str(discord.utils.utcnow()),
-                        "close_message": "Channel has been deleted, no closer found.",
-                        "closer": {
-                            "id": str(self.user.id),
-                            "name": self.user.name,
-                            "discriminator": self.user.discriminator,
-                            "avatar_url": self.user.display_avatar.url,
-                            "mod": True,
-                        },
-                    },
+                log_data = await self.api.close_log(
+                    channel_id=log["channel_id"],
+                    close_message="Channel has been deleted, no closer found.",
+                    closer=self.user,
                 )
                 if log_data:
                     logger.debug("Successfully closed thread with channel %s.", log["channel_id"])

@@ -447,22 +447,11 @@ class Thread:
 
         # Logging
         if self.channel:
-            log_data = await self.bot.api.post_log(
-                self.channel.id,
-                {
-                    "open": False,
-                    "title": match_title(self.channel.topic),
-                    "closed_at": str(discord.utils.utcnow()),
-                    "nsfw": self.channel.nsfw,
-                    "close_message": message,
-                    "closer": {
-                        "id": str(closer.id),
-                        "name": closer.name,
-                        "discriminator": closer.discriminator,
-                        "avatar_url": closer.display_avatar.url,
-                        "mod": True,
-                    },
-                },
+            log_data = await self.bot.api.close_log(
+                channel_id=self.channel.id,
+                title=match_title(self.channel.topic),
+                closer=closer,
+                close_message=message,
             )
         else:
             log_data = None
