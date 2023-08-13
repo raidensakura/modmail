@@ -1,7 +1,7 @@
 import secrets
 import sys
 from json import JSONDecodeError
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, List
 
 import discord
 from aiohttp import ClientResponse, ClientResponseError
@@ -429,6 +429,9 @@ class ApiClient:
     async def get_user_info(self) -> Optional[dict]:
         return NotImplemented
 
+    async def add_recipients(self,channel_id: int, recipient: List[discord.User]):
+        return NotImplemented
+
     async def close_log(self, channel_id: int, title: str, close_message: str, closer: discord.User) -> dict:
         return NotImplemented
 
@@ -731,6 +734,24 @@ class MongoDBClient(ApiClient):
 
     async def edit_note(self, message_id: Union[int, str], message: str):
         await self.db.notes.update_one({"message_id": str(message_id)}, {"$set": {"message": message}})
+
+    async def add_recipients(self, channel_id: int, recipient: List[discord.User]):
+        results: pymongo.results.UpdateResult = await self.bot.db.logs.update_one(
+            {"channel_id": str(channel_id)},
+            {
+                "$addToSet": {
+                    "other_recipients": {
+                        "$each": [
+                            {"id": str(r.id), "name": r.name, "avatar_url": r.display_avatar.url}
+                            for r in recipient
+                        ]
+                    }
+                }
+            },
+        )
+        if results.matched_count == 0:
+            raise ValueError(f"Channel id {channel_id} not found in mongodb")
+        return
 
     async def close_log(self, channel_id: int, title: str, close_message: str, closer: discord.User) -> dict:
         # TODO doesn't set title yet

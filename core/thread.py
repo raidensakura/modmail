@@ -1244,6 +1244,8 @@ class Thread:
 
         topic += f"\nOther Recipients: {ids}"
 
+        await self.bot.api.add_recipients(self._channel.id, users)
+
         await self.channel.edit(topic=topic)
         await self._update_users_genesis()
 
