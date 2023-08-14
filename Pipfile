@@ -24,12 +24,10 @@ pymongo = {extras = ["srv"], version = "*"}  # Required by motor
 python-dateutil = "~=2.8.1"
 python-dotenv = "~=1.0.0"
 uvloop = {version = "~=0.17.0", markers = "sys_platform != 'win32'"}
-lottie = {version = "~=0.6.11", extras = ["pdf"]}
 requests = "~=2.31.0"
 attrs = "~=23.1.0"
 cairocffi = "~=1.3.0"
 cffi = "~=1.15.0"     
-pillow = "~=9.5.0"
 strenum = "*"
 "discord.py" = "==2.3.0"
 

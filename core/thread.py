@@ -15,8 +15,6 @@ import discord
 import isodate
 from discord.ext.commands import CommandError, MissingRequiredArgument
 from discord.types.user import PartialUser as PartialUserPayload, User as UserPayload
-from lottie.exporters import exporters as l_exporters
-from lottie.importers import importers as l_importers
 
 from core.models import DMDisabled, DummyMessage, getLogger
 from core.utils import (
@@ -1022,51 +1020,14 @@ class Thread:
             if is_image_url(url, convert_size=False)
         ]
         images.extend(image_urls)
-
-        def lottie_to_png(data):
-            importer = l_importers.get("lottie")
-            exporter = l_exporters.get("png")
-            with io.BytesIO() as stream:
-                stream.write(data)
-                stream.seek(0)
-                an = importer.process(stream)
-
-            with io.BytesIO() as stream:
-                exporter.process(an, stream)
-                stream.seek(0)
-                return stream.read()
-
-        for i in message.stickers:
-            if i.format in (discord.StickerFormatType.png, discord.StickerFormatType.apng):
-                images.append((i.url, i.name, True))
-            elif i.format == discord.StickerFormatType.lottie:
-                # save the json lottie representation
-                try:
-                    async with self.bot.session.get(i.url) as resp:
-                        data = await resp.read()
-
-                    # convert to a png
-                    img_data = await self.bot.loop.run_in_executor(
-                        None, functools.partial(lottie_to_png, data)
-                    )
-                    b64_data = base64.b64encode(img_data).decode()
-
-                    # upload to imgur
-                    async with self.bot.session.post(
-                        "https://api.imgur.com/3/image",
-                        headers={"Authorization": "Client-ID 50e96145ac5e085"},
-                        data={"image": b64_data},
-                    ) as resp:
-                        result = await resp.json()
-                        url = result["data"]["link"]
-
-                except Exception:
-                    traceback.print_exc()
-                    images.append((None, i.name, True))
-                else:
-                    images.append((url, i.name, True))
-            else:
-                images.append((None, i.name, True))
+        images.extend(
+            (
+                i.url if i.format in (discord.StickerFormatType.png, discord.StickerFormatType.apng) else None,
+                i.name,
+                True,
+            )
+            for i in message.stickers
+        )
 
         embedded_image = False
 
