@@ -1167,7 +1167,7 @@ class Thread:
 
         return " ".join(set(mentions))
 
-    async def set_title(self, title: str) -> None:
+    async def set_title(self, title: str, channel_id: int) -> None:
         topic = f"Title: {title}\n"
 
         user_id = match_user_id(self.channel.topic)
@@ -1177,7 +1177,10 @@ class Thread:
             ids = ",".join(str(i.id) for i in self._other_recipients)
             topic += f"\nOther Recipients: {ids}"
 
-        await self.channel.edit(topic=topic)
+        await asyncio.gather(self.channel.edit(topic=topic), self.bot.api.update_title(title, channel_id))
+
+    async def set_nsfw_status(self, nsfw: bool) -> None:
+        await asyncio.gather(self.channel.edit(nsfw=nsfw), self.bot.api.update_nsfw(nsfw, self.channel.id))
 
     async def _update_users_genesis(self):
         genesis_message = await self.get_genesis_message()
