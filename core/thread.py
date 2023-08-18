@@ -1,11 +1,7 @@
 import asyncio
-import base64
 import copy
-import functools
-import io
 import re
 import time
-import traceback
 import typing
 import warnings
 from datetime import timedelta
@@ -1022,7 +1018,9 @@ class Thread:
         images.extend(image_urls)
         images.extend(
             (
-                i.url if i.format in (discord.StickerFormatType.png, discord.StickerFormatType.apng) else None,
+                i.url
+                if i.format in (discord.StickerFormatType.png, discord.StickerFormatType.apng)
+                else None,
                 i.name,
                 True,
             )
