@@ -766,11 +766,12 @@ class MongoDBClient(ApiClient):
             }
 
     async def update_title(self, title: str, channel_id: Union[str, int]):
-        await self.bot.db.logs.find_one_and_update({"channel_id": str(channel_id)}, {"$set": {"title": title}})
+        await self.bot.db.logs.find_one_and_update(
+            {"channel_id": str(channel_id)}, {"$set": {"title": title}}
+        )
 
     async def update_nsfw(self, nsfw: bool, channel_id: Union[str, int]):
         await self.bot.db.logs.find_one_and_update({"channel_id": str(channel_id)}, {"$set": {"nsfw": nsfw}})
-
 
 
 class PluginDatabaseClient:
