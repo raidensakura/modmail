@@ -1375,44 +1375,34 @@ class ThreadManager:
 
         return thread
 
-    async def _find_from_channel(self, channel):
+    async def _find_from_channel(self, channel) -> typing.Optional[Thread]:
         """
-        Tries to find a thread from a channel channel topic,
-        if channel topic doesnt exist for some reason, falls back to
+        Tries to find a thread from a channel topic,
+        if channel topic doesn't exist for some reason, falls back to
         searching channel history for genesis embed and
         extracts user_id from that.
         """
-
-        if not channel.topic:
+    
+        logger.debug("_find_from_channel")
+        logger.debug(f"channel: {channel}")
+    
+        # TODO cache thread for channel ID
+    
+        log = await self.bot.api.get_log(channel.id)
+    
+        if log is None:
             return None
 
-        _, user_id, other_ids = parse_channel_topic(channel.topic)
-
-        if user_id == -1:
-            return None
-
-        if user_id in self.cache:
-            return self.cache[user_id]
-
-        try:
-            recipient = await self.bot.get_or_fetch_user(user_id)
-        except discord.NotFound:
-            recipient = None
-
-        other_recipients = []
-        for uid in other_ids:
-            try:
-                other_recipient = await self.bot.get_or_fetch_user(uid)
-            except discord.NotFound:
-                continue
-            other_recipients.append(other_recipient)
-
-        if recipient is None:
-            thread = Thread(self, user_id, channel, other_recipients)
-        else:
-            self.cache[user_id] = thread = Thread(self, recipient, channel, other_recipients)
+        logger.debug("This is a thread channel")
+    
+        recipients = log["other_recipients"]
+        # Create a list of tasks to fetch the users
+        tasks = [self.bot.get_or_fetch_user(user_data["id"]) for user_data in recipients]
+        # Fetch the users
+        recipient_users: list[discord.Member] = await asyncio.gather(*tasks)
+    
+        thread = Thread(self, recipient=log["creator"]["id"], channel=channel, other_recipients=recipient_users)
         thread.ready = True
-
         return thread
 
     async def create(
