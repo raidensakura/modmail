@@ -4,6 +4,7 @@ from json import JSONDecodeError
 from typing import Any, Dict, Optional, Union, List
 
 import discord
+import pymongo.results
 from aiohttp import ClientResponse, ClientResponseError
 from discord import DMChannel, Member, Message, TextChannel
 from discord.ext import commands
@@ -593,6 +594,7 @@ class MongoDBClient(ApiClient):
                 "recipient": {
                     "id": str(recipient.id),
                     "name": recipient.name,
+                    "global_name": recipient.global_name,
                     "discriminator": recipient.discriminator,
                     "avatar_url": recipient.display_avatar.url,
                     "mod": False,
@@ -600,6 +602,7 @@ class MongoDBClient(ApiClient):
                 "creator": {
                     "id": str(creator.id),
                     "name": creator.name,
+                    "global_name": creator.global_name,
                     "discriminator": creator.discriminator,
                     "avatar_url": creator.display_avatar.url,
                     "mod": isinstance(creator, Member),
@@ -662,6 +665,7 @@ class MongoDBClient(ApiClient):
             "author": {
                 "id": str(message.author.id),
                 "name": message.author.name,
+                "global_name": message.author.global_name,
                 "discriminator": message.author.discriminator,
                 "avatar_url": message.author.display_avatar.url,
                 "mod": not isinstance(message.channel, DMChannel),
@@ -714,6 +718,7 @@ class MongoDBClient(ApiClient):
                 "author": {
                     "id": str(message.author.id),
                     "name": message.author.name,
+                    "global_name": message.author.global_name,
                     "discriminator": message.author.discriminator,
                     "avatar_url": message.author.display_avatar.url,
                 },
@@ -742,7 +747,13 @@ class MongoDBClient(ApiClient):
                 "$addToSet": {
                     "other_recipients": {
                         "$each": [
-                            {"id": str(r.id), "name": r.name, "avatar_url": r.display_avatar.url}
+                            {
+                                "id": r.id,
+                                "name": r.name,
+                                "global_name": r.global_name,
+                                "discriminator": r.discriminator,
+                                "avatar_url": r.display_avatar.url,
+                            }
                             for r in recipient
                         ]
                     }
@@ -752,7 +763,8 @@ class MongoDBClient(ApiClient):
         if results.matched_count == 0:
             raise ValueError(f"Channel id {channel_id} not found in mongodb")
         return
-
+    
+    
     async def close_log(self, channel_id: int, title: str, close_message: str, closer: discord.User) -> dict:
         # TODO doesn't set title yet
         return await self.bot.db.logs.find_one_and_update(
@@ -766,6 +778,7 @@ class MongoDBClient(ApiClient):
                     "closer": {
                         "id": str(closer.id),
                         "name": closer.name,
+                        "global_name": closer.name,
                         "discriminator": closer.discriminator,
                         "avatar_url": closer.display_avatar.url,
                         "mod": True,
