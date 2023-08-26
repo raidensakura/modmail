@@ -583,7 +583,7 @@ class ModmailBot(commands.Bot):
             )
             logger.line()
 
-        await self.threads.populate_cache()
+        await self.threads.quick_populate_cache()
 
         # closures
         closures = self.config["closures"]

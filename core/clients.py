@@ -567,6 +567,9 @@ class MongoDBClient(ApiClient):
         logger.debug("Retrieving channel %s logs.", channel_id)
         return await self.logs.find_one({"channel_id": str(channel_id)})
 
+    async def get_logs(self, channel_id: List[Union[str, int]]) -> dict:
+        return await self.logs.find({"channel_id": {"$in": [str(i) for i in channel_id]}}).to_list(None)
+
     async def get_log_link(self, channel_id: Union[str, int]) -> str:
         doc = await self.get_log(channel_id)
         logger.debug("Retrieving log link for channel %s.", channel_id)

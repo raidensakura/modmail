@@ -4,6 +4,8 @@ import copy
 import functools
 import io
 import re
+from time import perf_counter
+
 import time
 import traceback
 import typing
@@ -1244,6 +1246,7 @@ class Thread:
 
         topic += f"\nOther Recipients: {ids}"
 
+        # Add recipients to database
         await self.bot.api.add_recipients(self._channel.id, users)
 
         await self.channel.edit(topic=topic)
@@ -1273,11 +1276,14 @@ class ThreadManager:
 
     def __init__(self, bot):
         self.bot = bot
-        self.cache = {}
+        self.cache: typing.Dict[int, Thread] = {}
 
     async def populate_cache(self) -> None:
+        # time method runtime
+        start = perf_counter()
         for channel in self.bot.modmail_guild.text_channels:
             await self.find(channel=channel)
+        logger.info("Cache populated in %fs.", time.perf_counter() - start)
 
     def __len__(self):
         return len(self.cache)
@@ -1287,6 +1293,24 @@ class ThreadManager:
 
     def __getitem__(self, item: str) -> Thread:
         return self.cache[item]
+
+    async def quick_populate_cache(self) -> None:
+        start = perf_counter()
+    
+        # create a list containing the id of every text channel in the modmail guild
+        channel_ids = [channel.id for channel in self.bot.modmail_guild.text_channels]
+        logs = await self.bot.api.get_logs(channel_ids)
+    
+        for log in logs:
+            recipients = log["other_recipients"]
+    
+            tasks = [self.bot.get_or_fetch_user(user_data["id"]) for user_data in recipients]
+            recipient_users: list[discord.Member] = await asyncio.gather(*tasks)
+    
+            self.cache[log["recipient"]["id"]] = Thread(
+                self, recipient=log["creator"]["id"], channel=log["channel_id"], other_recipients=recipient_users
+            )
+        logger.debug("Cache populated in %fs.", perf_counter() - start)
 
     async def find(
         self,
