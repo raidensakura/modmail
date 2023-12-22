@@ -29,6 +29,10 @@ jobs:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
 
+      - name: Maybe install dependencies
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: poetry install --no-root
+
       - name: Run script loadcheck.py
         run: |
           poetry run python .github/workflows/scripts/loadcheck.py
