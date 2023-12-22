@@ -10,19 +10,28 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 ### Breaking
 - Completely rewritten blocklist system. Blocklisting now runs off its own mongoDB collection. This once again introduces backwards incompatible schema changes, so a manual migration is required. You may upgrade from both v4.0 and v4.1 using the `[p]migrate blocklist` command. This removes any need to perform the previous migration steps in v4.1.0, you may upgrade directly to this version. After running the command, blocklist functionality will return and legacy config based blocks will have been deleted. You should always back up your config before migration.
+- Migrated package manager from pipenv to Poetry. Dockerfile and GitHub Actions are also now set up to install using Poetry.
 
 ### Deprecated
 - Legacy blocklist properties are deprecated and no longer function. They now log a warning when used and provide no functionality. They have been replaced with methods in blocklist.py 
 
 ### Added
 - Added `content_type` to attachments stored in the database.
+- Introduced multiplatform Docker workflow for GitHub Actions.
 
 ### Changed
 - Changing a threads title or NSFW status immediately updates the status in the database.
 
+### Removed
+- The logviewer plugin is no longer included locally.
+- Removed lottie sticker support and its dependencies due to unnecessary bulk.
+
 ### Fixed
 - Persistent notes have been fixed after the previous discord.py update.
 - `is_image` now is true only if the image is actually an image.
+- Resolved deprecated pkg_resources warning in certain Python environment.
+- Improved genesis message retrieval checks where it would fail under certain circumstances.
+- Fixed failure on installing local plugins when plugin path contains whitespace.
 
 ### Internal
 - Add `update_title` and `update_nsfw` methods to `ApiClient` to update thread title and nsfw status in the database.
