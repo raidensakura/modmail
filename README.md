@@ -34,7 +34,7 @@ This guide assumes you have installed **git**, a **compatible Python version** a
 5. Install the Python dependencies and run the bot
     ```console
     $ poetry install --no-root
-    $ poetry run bot.py
+    $ poetry run python bot.py
     ```
 7. [Optional] Load the logviewer plugin with `[p]plugin load raidensakura/modmail-plugins/logviewer@main`
 
