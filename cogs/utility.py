@@ -20,7 +20,7 @@ from aiohttp import ClientResponseError
 from discord.enums import ActivityType, Status
 from discord.ext import commands, tasks
 from discord.ext.commands.view import StringView
-from pkg_resources import parse_version
+from packaging import version
 
 from core import checks, migrations, utils
 from core.changelog import Changelog
@@ -353,9 +353,9 @@ class Utility(commands.Cog):
         latest = changelog.latest_version
 
         if self.bot.version.is_prerelease:
-            stable = next(filter(lambda v: not parse_version(v.version).is_prerelease, changelog.versions))
+            stable = next(filter(lambda v: not version.parse(v.version).is_prerelease, changelog.versions))
             footer = f"You are on the prerelease version • the latest version is v{stable.version}."
-        elif self.bot.version < parse_version(latest.version):
+        elif self.bot.version < version.parse(latest.version):
             footer = f"A newer version is available v{latest.version}."
         else:
             footer = "You are up to date with the latest version."
@@ -2003,7 +2003,7 @@ class Utility(commands.Cog):
             "(https://github.com/raidensakura/modmail/blob/stable/bot.py#L1)"
         )
 
-        if self.bot.version >= parse_version(latest.version) and flag.lower() != "force":
+        if self.bot.version >= version.parse(latest.version) and flag.lower() != "force":
             embed = discord.Embed(title="Already up to date", description=desc, color=self.bot.main_color)
 
             data = await self.bot.api.get_user_info()

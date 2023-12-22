@@ -15,7 +15,7 @@ from subprocess import PIPE
 
 import discord
 from discord.ext import commands
-from pkg_resources import parse_version
+from packaging import version
 
 from core import checks
 from core.models import PermissionLevel, getLogger
@@ -288,7 +288,7 @@ class Plugins(commands.Cog):
             if check_version:
                 required_version = details.get("bot_version", False)
 
-                if required_version and self.bot.version < parse_version(required_version):
+                if required_version and self.bot.version < version.parse(required_version):
                     embed = discord.Embed(
                         description="Your bot's version is too low. "
                         f"This plugin requires version `{required_version}`.",
@@ -672,7 +672,7 @@ class Plugins(commands.Cog):
                 embed.set_footer(text="This plugin is currently loaded.")
             else:
                 required_version = details.get("bot_version", False)
-                if required_version and self.bot.version < parse_version(required_version):
+                if required_version and self.bot.version < version.parse(required_version):
                     embed.set_footer(
                         text="Your bot is unable to install this plugin, "
                         f"minimum required version is v{required_version}."
