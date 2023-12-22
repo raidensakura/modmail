@@ -11,7 +11,7 @@ WORKDIR /home/modmail
 
 FROM base as poetry
 
-RUN apk add build-base && \
+RUN apk add build-base libffi-dev && \
 	pip install -U poetry
 COPY --chown=modmail:modmail poetry.lock pyproject.toml /home/modmail/
 RUN python -m poetry export -o requirements.txt
