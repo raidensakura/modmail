@@ -31,7 +31,7 @@ jobs:
 
       - name: Run script loadcheck.py
         run: |
-          pipenv run python .github/workflows/scripts/loadcheck.py
+          poetry run python .github/workflows/scripts/loadcheck.py
         env:
           TOKEN: ${{ secrets.DISCORD_TEST_BOT }}
           CONNECTION_URI: ${{ secrets.CONNECTION_URI }}
