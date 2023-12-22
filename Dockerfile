@@ -2,24 +2,27 @@ FROM python:3.11-alpine as base
 
 RUN apk update && apk add git \
 	# pillow dependencies
-	jpeg-dev zlib-dev
+	jpeg-dev zlib-dev && \
+	adduser -D -h /home/modmail -g 'Modmail' modmail
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+USER modmail
+WORKDIR /home/modmail
 
-FROM base as python-deps
+FROM base as poetry
 
-RUN apk add --virtual build-deps build-base gcc libffi-dev
-COPY requirements.txt /
-RUN pip install --prefix=/inst -U -r /requirements.txt
+RUN pip install -U poetry
+COPY poetry.lock pyproject.toml /home/modmail/
+RUN python -m poetry export -o requirements.txt
 
-FROM base as runtime
+FROM base as deps
 
-ENV USING_DOCKER yes
-COPY --from=python-deps /inst /usr/local
+COPY --from=poetry /home/modmail/requirements.txt /home/modmail/
 
-COPY . /modmail
-WORKDIR /modmail
+RUN pip install -r requirements.txt --user
+
+FROM deps as runtime
+
+ENV PATH=/home/modmail/.local/bin:$PATH
+COPY --chown=modmail:modmail . .
 
 CMD ["python", "bot.py"]
-
-RUN adduser --disabled-password --gecos '' app && \
-    chown -R app /modmail
-USER app

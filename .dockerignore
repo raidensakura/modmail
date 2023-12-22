@@ -139,13 +139,13 @@ temp/
 test.py
 
 # Other stuff
+requirements.txt
 .env.example
 .gitignore
 .dockerignore
 .github/
 app.json
 Procfile
-pyproject.toml
 *.md
 .*.json
 Dockerfile
