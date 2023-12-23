@@ -811,7 +811,7 @@ class Thread:
     async def note(
         self, message: discord.Message, persistent=False, thread_creation=False
     ) -> discord.Message:
-        if not message.content and not message.attachments:
+        if not message.content and not message.attachments and not message.stickers:
             raise MissingRequiredArgument(SimpleNamespace(name="msg"))
 
         msg = await self.send(
@@ -832,7 +832,7 @@ class Thread:
         self, message: discord.Message, anonymous: bool = False, plain: bool = False
     ) -> typing.Tuple[typing.List[discord.Message], discord.Message]:
         """Returns List[user_dm_msg] and thread_channel_msg"""
-        if not message.content and not message.attachments:
+        if not message.content and not message.attachments and not message.stickers:
             raise MissingRequiredArgument(SimpleNamespace(name="msg"))
         if not any(g.get_member(self.id) for g in self.bot.guilds):
             return await message.channel.send(
