@@ -24,8 +24,6 @@ COPY --chown=modmail:modmail poetry.lock pyproject.toml /home/modmail/
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-RUN poetry install --without dev --no-root
-
 FROM base as runtime
 
 ENV VIRTUAL_ENV=/home/modmail/.venv \
@@ -34,5 +32,7 @@ ENV VIRTUAL_ENV=/home/modmail/.venv \
 COPY --from=builder --chown=modmail:modmail ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY --chown=modmail:modmail . .
+
+USER modmail
 
 CMD ["python", "bot.py"]
