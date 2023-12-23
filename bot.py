@@ -1800,14 +1800,13 @@ def main():
         pass
 
     # check discord version
-    discord_version = "2.3.0"
+    discord_version = "2.3.2"
     if discord.__version__ != discord_version:
-        logger.error(
-            "Dependencies are not updated, run pipenv install. discord.py version expected %s, received %s",
+        logger.warning(
+            "discord.py version mismatch detected. Expected %s, received %s",
             discord_version,
             discord.__version__,
         )
-        sys.exit(0)
 
     # Set up discord.py internal logging
     if os.environ.get("LOG_DISCORD"):
