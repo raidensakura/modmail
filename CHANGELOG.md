@@ -34,6 +34,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Improved genesis message retrieval checks where it would fail under certain circumstances.
 - Fixed failure on installing local plugins when plugin path contains whitespace.
 - Fixed sticker replies not being sent in a Modmail thread.
+- Fixed plugin update command where it would fail to remove the plugin when the plugin is invalid.
 
 ### Internal
 - Add `update_title` and `update_nsfw` methods to `ApiClient` to update thread title and nsfw status in the database.
