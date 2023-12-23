@@ -5,7 +5,6 @@ import time
 import typing
 import warnings
 from datetime import timedelta
-from types import SimpleNamespace
 
 import discord
 import isodate
@@ -17,6 +16,7 @@ from core.utils import (
     AcceptButton,
     ConfirmThreadCreationView,
     DenyButton,
+    DummyParam,
     create_thread_channel,
     get_joint_id,
     get_top_role,
@@ -812,7 +812,7 @@ class Thread:
         self, message: discord.Message, persistent=False, thread_creation=False
     ) -> discord.Message:
         if not message.content and not message.attachments and not message.stickers:
-            raise MissingRequiredArgument(SimpleNamespace(name="msg"))
+            raise MissingRequiredArgument(DummyParam("message"))
 
         msg = await self.send(
             message,
@@ -833,7 +833,7 @@ class Thread:
     ) -> typing.Tuple[typing.List[discord.Message], discord.Message]:
         """Returns List[user_dm_msg] and thread_channel_msg"""
         if not message.content and not message.attachments and not message.stickers:
-            raise MissingRequiredArgument(SimpleNamespace(name="msg"))
+            raise MissingRequiredArgument(DummyParam("message"))
         if not any(g.get_member(self.id) for g in self.bot.guilds):
             return await message.channel.send(
                 embed=discord.Embed(

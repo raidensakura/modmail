@@ -2,7 +2,6 @@ import asyncio
 import re
 from datetime import timezone
 from itertools import zip_longest
-from types import SimpleNamespace
 from typing import List, Literal, Optional, Tuple, Union
 
 import discord
@@ -1166,7 +1165,7 @@ class Modmail(commands.Cog):
         if not user:
             thread = ctx.thread
             if not thread:
-                raise commands.MissingRequiredArgument(SimpleNamespace(name="member"))
+                raise commands.MissingRequiredArgument(DummyParam("member"))
             user = thread.recipient or await self.bot.get_or_fetch_user(thread.id)
 
         default_avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
@@ -1802,7 +1801,7 @@ class Modmail(commands.Cog):
         user_or_role = ctx.thread.recipient if (ctx.thread and not user_or_role) else user_or_role
 
         if not user_or_role:
-            raise commands.MissingRequiredArgument(SimpleNamespace(name="user"))
+            raise commands.MissingRequiredArgument(DummyParam("user or role"))
 
         mention = getattr(user_or_role, "mention", f"`{user_or_role.id}`")
 
@@ -1862,7 +1861,7 @@ class Modmail(commands.Cog):
         user_or_role = ctx.thread.recipient if (ctx.thread and not user_or_role) else user_or_role
 
         if not user_or_role:
-            raise commands.MissingRequiredArgument(SimpleNamespace(name="user"))
+            raise commands.MissingRequiredArgument(DummyParam("user or role"))
 
         mention = getattr(user_or_role, "mention", f"`{user_or_role.id}`")
 
