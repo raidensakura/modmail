@@ -29,7 +29,7 @@ attrs = "~=23.1.0"
 cairocffi = "~=1.3.0"
 cffi = "~=1.15.0"     
 strenum = "*"
-"discord.py" = "==2.3.0"
+"discord.py" = {version = "2.3.2", extras = ["speed"]}
 packaging = "^23.2"
 
 [tool.poetry.group.dev.dependencies]
