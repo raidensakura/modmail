@@ -32,11 +32,13 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Resolved deprecated pkg_resources warning in certain Python environment.
 - Improved genesis message retrieval checks where it would fail under certain circumstances.
 - Fixed failure on installing local plugins when plugin path contains whitespace.
+- Fixed sticker replies not being sent in a Modmail thread.
 
 ### Internal
 - Add `update_title` and `update_nsfw` methods to `ApiClient` to update thread title and nsfw status in the database.
 - `thread.set_title` now requires `channel_id` to be passed as keyword arguments.
 - New `thread.set_nsfw_status` method to set nsfw status of a thread.
+- Updated discord.py to 2.3.2, with [speed] extra.
 
 # v4.1.0
 
