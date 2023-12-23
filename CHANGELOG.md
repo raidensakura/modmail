@@ -18,6 +18,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 ### Added
 - Added `content_type` to attachments stored in the database.
 - Introduced multiplatform Docker workflow for GitHub Actions.
+- Improved join/leave message for multiple servers.
 
 ### Changed
 - Changing a threads title or NSFW status immediately updates the status in the database.
