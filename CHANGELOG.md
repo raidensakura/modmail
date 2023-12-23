@@ -35,6 +35,8 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Fixed failure on installing local plugins when plugin path contains whitespace.
 - Fixed sticker replies not being sent in a Modmail thread.
 - Fixed plugin update command where it would fail to remove the plugin when the plugin is invalid.
+- Fixed MissingRequiredArgument requiring additional param.
+- Fixed rate limit issue on raw reaction add/remove events.
 
 ### Internal
 - Add `update_title` and `update_nsfw` methods to `ApiClient` to update thread title and nsfw status in the database.
