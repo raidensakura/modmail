@@ -3,10 +3,8 @@ FROM python:3.11-alpine as base
 RUN apk update && apk add git \
 	# pillow dependencies
 	jpeg-dev zlib-dev && \
+    pip install --upgrade pip && \
 	adduser -D -h /home/modmail -g 'Modmail' modmail
-
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
-	USING_DOCKER=1
 
 WORKDIR /home/modmail
 
@@ -27,7 +25,8 @@ RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --n
 FROM base as runtime
 
 ENV VIRTUAL_ENV=/home/modmail/.venv \
-    PATH="/home/modmail/.venv/bin:$PATH"
+    PATH="/home/modmail/.venv/bin:$PATH" \
+    USING_DOCKER=yes
 
 COPY --from=builder --chown=modmail:modmail ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
