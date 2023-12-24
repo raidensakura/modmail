@@ -13,7 +13,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-aiohttp = "~=3.8.1"
+aiohttp = {version = "3.9.1", extras = ["speedups"]}
 colorama = "~=0.4.5"
 emoji = "~=1.7.0"
 isodate = "~=0.6.0"
