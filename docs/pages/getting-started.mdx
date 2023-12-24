@@ -39,11 +39,11 @@ The first step in setting up Modmail is to create a Discord bot.
 Head over to the Discord Developer Portal and create a new application.
 
 Once you've created a new application, head over to the Bot tab and create a new bot.
-<Image src="/create-bot.png" alt="Hello" width={500} height={500} />
+<Image src="/create-bot.png" alt="Hello" width={850} height={500} />
 <sub>Navigate to the Bot tab on the sidebar. On this page, you can also edit the About Me section of your bot.</sub>
 
 Click Add bot to create the bot. After adding a bot, reset the token and copy and store the newly generated token in your Text editor for later use.
-<Image src="/reset-token.png" alt="Hello" width={500} height={500} />
+<Image src="/reset-token.png" alt="Hello" width={850} height={500} />
 <Callout emoji="⚠️" type="warning">
 	Make sure to keep this token private! Anyone who has this token can control your bot and potentially cause malicious damage.
 </Callout>
@@ -66,7 +66,7 @@ We recommend keeping this toggled off to save computational resources.
 
 Navigate back to the General Information tab and copy the application ID.
 Click Copy to copy the application ID. This is also known as your "Bot ID".
-<Image src="/bot-id.png" alt="Hello" width={500} height={500} />
+<Image src="/bot-id.png" alt="Hello" width={850} height={500} />
 
 Using the following URL as template, replace `YOUR-ID-HERE` with the ID you just copied. Do not change anything else! Open a new browser tab and go to that URL.
 ```
@@ -75,7 +75,7 @@ https://discord.com/oauth2/authorize?scope=bot&permissions=416075476184&client_i
 
 Discord should prompt you to choose a server to invite your bot, followed by a list of permissions. Scroll to the bottom and click Authorize.
 Choose your server to invite, then click Continue.
-<Image src="/invite-bot.png" alt="Hello" width={500} height={500} />
+<Image src="/invite-bot.png" alt="Hello" width={850} height={500} />
 
 Scroll to the bottom and click Authorize. Don't un-check any permissions. Only Administrator is optional.
 <Callout emoji="ℹ️" type="info">
@@ -108,7 +108,7 @@ asking you to "tell us a few things about yourself and your project". You can an
 In the next step for "deploy a cloud database", choose the **Shared** option. Choose the region that's closest to where you're hosting your bot.
 Make sure the **Cluster Tier** is set to **M0 Sandbox** and the price shows as **FREE**.
 
-<Image src="/mongo-shared.png" alt="Hello" width={500} height={500} />
+<Image src="/mongo-shared.png" alt="Hello" width={850} height={500} />
 <sub>Choose the free **Shared** option and click **Create**.</sub>
 
 On the following **Security Quickstart** page, do the following:
@@ -116,13 +116,13 @@ On the following **Security Quickstart** page, do the following:
 1.  Authentication method: _Username and Password_
     ```Username: `modmail`
     Password: Click **Autogenerate Secure Password** - don't type your own password!```
-	<Image src="/mongo-password.png" alt="Hello" width={500} height={500} />
+	<Image src="/mongo-password.png" alt="Hello" width={850} height={500} />
 2.  Copy and **save the password** into your text editor, you will need this for later.
     From now on, we will be referring to these credentials as the _database username_ and _database password_.
 3. Click **Create User**.
 4. Scroll down, we will be connecting from: _My Local Environment_
 5.  Set IP address as **`0.0.0.0/0`** and anything for the description.
-	<Image src="/mongo-ip.png" alt="Hello" width={500} height={500} />
+	<Image src="/mongo-ip.png" alt="Hello" width={850} height={500} />
 	**You must** set the IP address exactly to this, unless you know what you're doing.
 	**Do not** set it to anything else or click add my current IP address. This allows Modmail to connect to your database.
 6. Click **Add Entry**.
@@ -130,7 +130,7 @@ On the following **Security Quickstart** page, do the following:
 Next, we will need to generate a MongoDB connection string. Simply click `Connect` on the main dashboard,
 choose `Connect your application`, then copy the connection string (the default driver is fine) and paste it into your Notepad.
 
-<Image src="/mongo-connect.png" alt="Hello" width={500} height={500} />
+<Image src="/mongo-connect.png" alt="Hello" width={850} height={500} />
 
 If you followed all the steps so far, your Notepad should contain three lines:
 the bot token, the database password, and the MongoDB connection string. For example:

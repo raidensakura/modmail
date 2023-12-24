@@ -3,7 +3,7 @@
   <strong><i>Raiden's personal fork of Python Discord Modmail bot.</i></strong><br><br>
 
   <a href="#"><img src="https://img.shields.io/badge/Version-4.1.0-7d5edd?style=shield&logo=https://modmail-docs.netlify.app/favicon.png"></a>
-  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.8_--_3.11-blue.svg?style=shield&logo=Python" alt="Made with Python 3.8"></a>
+  <img src="https://img.shields.io/badge/3.8_--_3.11-red?logo=python&logoColor=white&label=Python&labelColor=%233772a2&color=%23ffdd54">
   <a href="https://github.com/ambv/black"><img src="https://img.shields.io/badge/Code%20Style-Black-black?style=shield"></a>
   <a href="https://github.com/modmail-dev/modmail/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-e74c3c.svg?style=shield" alt="MIT License"></a>
   <a href="https://discord.gg/cnUpwrnpYb"><img src="https://img.shields.io/discord/616969119685935162.svg?label=Discord&logo=Discord&colorB=7289da&style=shield" alt="Support"></a>

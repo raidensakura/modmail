@@ -5,8 +5,8 @@ import Image from 'next/image'
 
 ## Prerequisites
 
-1. Minimum 2GB of RAM\*
-2. At least 2GB available disk space.
+1. Minimum 2 GB of RAM\*
+2. At least 2 GB available disk space.
 3. Supported Windows version:
    * Windows 10
    * Windows 11
@@ -24,8 +24,8 @@ It is not recommended to run Modmail with previous versions of Windows such as W
 We will be using the following dependencies:
 
 * Chocolatey
-* Python 3.10
-* Additional Modmail requirements: [GTK for Windows](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/)
+* Python 3.11
+* Poetry
 
 To install these dependencies, we will be using Powershell.
 
@@ -38,42 +38,49 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 choco upgrade git --params "/GitOnlyOnPath /WindowsTerminal" -y
-choco upgrade python310 -y
+choco upgrade python311 -y
 ```
 
-After that, ensure `pip` and `pipenv` are installed and updated for Python 3.10 with:
-
+Update `pip` and install `pipx` with:
 ```powershell
-py -3.10 -m ensurepip --upgrade
-py -3.10 -m pip install pipenv
+py -3.11 -m ensurepip --upgrade
+py -3.11 pip install pipx
 ```
 
-After the above installation has finished, download and install the **GTK runtime for Windows** by [clicking here](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/latest).
+Re-launch your powershell and install Poetry with:
+```powershell
+pipx install poetry
+```
 
-## Installing Bot
+## Installation
 
 In any folder location of your choice, `Shift+Right Click` and click on `Open PowerShell window here`.
 
 In your PowerShell window, run these commands to clone the official Modmail repository locally and `cd` into the folder:
 
 ```powershell
-git clone https://github.com/modmail-dev/modmail
+git clone https://github.com/raidensakura/modmail
 cd modmail
 ```
 
-Install project dependencies inside Modmail's pipenv with:
+Install the Python dependencies for Modmail with:
 
 ```powershell
-py -3.10 -m pipenv install --python 3.10
+poetry install --no-root
 ```
 
-Create a new file in the modmail folder named `.env` and paste in your environmental variables needed to run Modmail. Refer to the steps in the [parent Installation page](../#preparing-your-environmental-variables) to find where to obtain these.
+Create a new file in the modmail folder named `.env` and paste in your environmental variables needed to run Modmail.
 
-<Image src="/windows-env.png" alt="Hello" width={500} height={500} />
+<Image src="/windows-env.png" alt="Hello" width={400} height={500} />
 Lastly, in your PowerShell window simply enter the command below to run your Modmail bot:
 
 ```powershell
-py -3.10 -m pipenv run bot
+poetry run python bot.py
 ```
 
 If no error shows up, it means that your Modmail is now running correctly.
+
+## Set up auto-restart
+
+Setting up Modmail on Windows is only intended for development purpose, hence there is no auto-restart method available for Windows OS yet.
+You may look into [pm2-installer](https://github.com/jessety/pm2-installer) to use pm2 on Windows.

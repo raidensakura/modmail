@@ -2,6 +2,8 @@ import Image from 'next/image'
 
 # Introduction
 
+This is the documentation for a fork of [modmail-dev/Modmail](https://github.com/modmail-dev/Modmail), a Discord Modmail bot written in Python.
+
 Modmail is a self-hosted Python Discord bot for your server. 
 It serves as a shared inbox for server staff to communicate with their users in a seamless way.
 Users create a ticket by direct-messaging the bot on Discord, and it will create a ticket channel
@@ -10,11 +12,11 @@ in your chosen server relaying the messages between you and the server staff sea
 It comes with many advanced features and customizable configurations to help you handle tickets smoothly,
 such as custom snippets, command aliases, adding multiple users and so on.
 
-<Image src="/header-pic.png" alt="Hello" width={500} height={500} />
+<br /><Image src="/header-pic.png" alt="Hello" width={500} height={500} />
 
-With the built-in Logviewer plugin, you can also view previous tickets created on your browser.
+With the Logviewer plugin, you can also view previous tickets created on your browser:
 
-<Image src="/logviewer.png" alt="Hello" width={500} height={500} />
+<br /><Image src="/logviewer.png" alt="Hello" width={500} height={500} />
 
 ## Features
 
@@ -46,10 +48,47 @@ With the built-in Logviewer plugin, you can also view previous tickets created o
 
 This list is ever-growing thanks to active development by our exceptional contributors. See a full list of available commands by using the `?help` command.
 
-## Contributing to Modmail
- 
-* Be a stargazer by giving the repository a ⭐
-* Fork the repository and Submit a Pull Request containing your features 🔧
-* Help us find the bugs and submit a GitHub Issue 🐛
+## Contributing to this fork
 
-You can also support the original project on their [GitHub repository](https://github.com/modmail-dev/modmail).
+import { useData } from 'nextra/data'
+ 
+export const getStaticProps = ({ params }) => {
+  return fetch(`https://api.github.com/repos/raidensakura/modmail`)
+    .then(res => res.json())
+    .then(repo => ({
+      props: {
+        ssg: {
+          stars: repo.stargazers_count,
+		  forks: repo.forks_count,
+		  issues: repo.open_issues_count
+        }
+      },
+      revalidate: 60
+    }))
+}
+ 
+export const Stars = () => {
+  const { stars } = useData()
+  return <strong>{stars}</strong>
+}
+
+export const Forks = () => {
+  const { forks } = useData()
+  return <strong>{forks}</strong>
+}
+
+export const Issues = () => {
+  const { issues } = useData()
+  return <strong>{issues}</strong>
+}
+
+Support the project on our [GitHub repository](https://github.com/raidensakura/modmail).
+
+[<img src="https://img.shields.io/badge/ko--fi.com%2Fraidensakura-d11df9?logo=kofi&logoColor=white&label=Support%20me&color=%23ff5b62"/>](https://ko-fi.com/raidensakura)
+ 
+* [Be a stargazer](https://github.com/raidensakura/modmail/stargazers) by giving the repository a ⭐
+<br /><sub>This fork has <Stars /> stargazers on GitHub!</sub>
+* [Fork the repository](https://github.com/raidensakura/modmail/forks) and [Submit a Pull Request](https://github.com/raidensakura/modmail/pulls) containing your features 🔧
+<br /><sub>Forking fork! This fork also has <Forks /> other fork(s) on GitHub!</sub>
+* Help us find issues with the bot and [submit a GitHub Issue](https://github.com/raidensakura/modmail/issues) 🐛
+<br /><sub>This fork currently has <Issues /> open issues on GitHub!</sub>
