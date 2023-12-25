@@ -68,7 +68,7 @@ This project has included pre-commit script that automatically runs black and ru
 
 1. Install development dependencies
     ```console
-    $ poetry install --only dev
+    $ poetry install --no-root --only dev
     ```
 2. Install the pre-commit hook
     ```console
