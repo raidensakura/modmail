@@ -1773,7 +1773,7 @@ class ModmailBot(commands.Bot):
             logger.warning("Autoupdates disabled.")
             self.autoupdate.cancel()
             return
-        
+
     @tasks.loop(hours=1, reconnect=False)
     async def log_expiry(self):
         log_expire_after = self.config.get("log_expiration")

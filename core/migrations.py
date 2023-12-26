@@ -84,7 +84,7 @@ async def _convert_legacy_block_list(
 
     for k, v in blocklist_dict.items():
         # handle new block format
-        if type(v) is dict:
+        if isinstance(v, dict):
             block = _convert_legacy_dict_block_format(k, v, block_type=block_type)
             if block is None:
                 logger.debug("skipping expired block entry")
