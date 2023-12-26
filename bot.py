@@ -653,6 +653,7 @@ class ModmailBot(commands.Bot):
 
         self.post_metadata.start()
         self.autoupdate.start()
+        self.log_expiry.start()
         self._started = True
 
     async def convert_emoji(self, name: str) -> str:
@@ -1772,6 +1773,18 @@ class ModmailBot(commands.Bot):
             logger.warning("Autoupdates disabled.")
             self.autoupdate.cancel()
             return
+        
+    @tasks.loop(hours=1, reconnect=False)
+    async def log_expiry(self):
+        log_expire_after = self.config.get("log_expiration")
+        if log_expire_after == isodate.Duration():
+            return self.log_expiry.stop()
+
+        now = discord.utils.utcnow()
+        expiration_datetime = now - log_expire_after
+        expired_logs = await self.db.logs.delete_many({"closed_at": {"$lte": str(expiration_datetime)}})
+
+        logger.info(f"Deleted {expired_logs.deleted_count} expired logs.")
 
     def format_channel_name(self, author, exclude_channel=None, force_null=False):
         """Sanitises a username for use with text channel names
