@@ -19,6 +19,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Added `content_type` to attachments stored in the database.
 - Introduced multiplatform Docker workflow for GitHub Actions.
 - Improved join/leave message for multiple servers.
+- Added `log_expiration` config to auto-delete old logs on a schedule.
 
 ### Changed
 - Changing a threads title or NSFW status immediately updates the status in the database.
@@ -26,6 +27,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 ### Removed
 - The logviewer plugin is no longer included locally.
 - Removed lottie sticker support and its dependencies due to unnecessary bulk.
+- The bot will no longer embed image from gyazo.
 
 ### Fixed
 - Persistent notes have been fixed after the previous discord.py update.
