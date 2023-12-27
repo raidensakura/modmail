@@ -8,6 +8,46 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+# v4.2.0
+
+### Breaking
+- Completely rewritten blocklist system. Blocklisting now runs off its own mongoDB collection. This once again introduces backwards incompatible schema changes, so a manual migration is required. You may upgrade from both v4.0 and v4.1 using the `[p]migrate blocklist` command. This removes any need to perform the previous migration steps in v4.1.0, you may upgrade directly to this version. After running the command, blocklist functionality will return and legacy config based blocks will have been deleted. You should always back up your config before migration.
+- Migrated package manager from pipenv to Poetry. Dockerfile and GitHub Actions are also now set up to install using Poetry.
+
+### Deprecated
+- Legacy blocklist properties are deprecated and no longer function. They now log a warning when used and provide no functionality. They have been replaced with methods in blocklist.py 
+
+### Added
+- Added `content_type` to attachments stored in the database.
+- Introduced multiplatform Docker workflow for GitHub Actions.
+- Improved join/leave message for multiple servers.
+- Added `log_expiration` config to auto-delete old logs on a schedule.
+
+### Changed
+- Changing a thread's title or NSFW status immediately updates the status in the database.
+
+### Removed
+- The logviewer plugin is no longer included locally.
+- Removed lottie sticker support and its dependencies due to unnecessary bulk.
+- Removed gyazo image embedding.
+
+### Fixed
+- Persistent notes have been fixed after the previous discord.py update.
+- `is_image` now is true only if the image is actually an image.
+- Resolved deprecated pkg_resources warning in certain Python environment.
+- Improved genesis message retrieval checks where it would fail under certain circumstances.
+- Fixed failure on installing local plugins when plugin path contains whitespace.
+- Fixed sticker replies not being sent in a Modmail thread.
+- Fixed plugin update command where it would fail to remove the plugin when the plugin is invalid.
+- Fixed MissingRequiredArgument requiring additional param error on certain commands.
+- Fixed rate limit issue on raw reaction add/remove events.
+
+### Internal
+- Add `update_title` and `update_nsfw` methods to `ApiClient` to update thread title and nsfw status in the database.
+- `thread.set_title` now requires `channel_id` to be passed as keyword arguments.
+- New `thread.set_nsfw_status` method to set nsfw status of a thread.
+- Updated discord.py to 2.3.2, with [speed] extra.
+
 # v4.1.0
 
 ### Breaking
@@ -45,6 +85,9 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Fixed uncached member issue in large guild for react_to_contact and ticket creation.
 - Fixed blocked roles improperly saving in `blocked_users` config.
 - Fixed `?block` command improperly parsing reason as timestamp. 
+
+### Internal
+- `ConfigManager.get` no longer accepts two positional arguments: the `convert` argument is now keyword-only.
 
 # v4.0.2
 

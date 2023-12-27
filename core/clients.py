@@ -429,6 +429,12 @@ class ApiClient:
     async def get_user_info(self) -> Optional[dict]:
         return NotImplemented
 
+    async def update_title(self, title: str, channel_id: Union[str, int]):
+        return NotImplemented
+
+    async def update_nsfw(self, nsfw: bool, channel_id: Union[str, int]):
+        return NotImplemented
+
 
 class MongoDBClient(ApiClient):
     def __init__(self, bot):
@@ -476,6 +482,7 @@ class MongoDBClient(ApiClient):
             await coll.create_index(
                 [("messages.content", "text"), ("messages.author.name", "text"), ("key", "text")]
             )
+        await coll.create_index("channel_id", unique=True)
         logger.debug("Successfully configured and verified database indexes.")
 
     async def validate_database_connection(self, *, ssl_retry=True):
@@ -665,9 +672,11 @@ class MongoDBClient(ApiClient):
                 {
                     "id": a.id,
                     "filename": a.filename,
-                    "is_image": a.width is not None,
+                    # In previous versions this was true for both videos and images
+                    "is_image": a.content_type.startswith("image/"),
                     "size": a.size,
                     "url": a.url,
+                    "content_type": a.content_type,
                 }
                 for a in message.attachments
             ],
@@ -755,6 +764,14 @@ class MongoDBClient(ApiClient):
                     "url": user.url,
                 }
             }
+
+    async def update_title(self, title: str, channel_id: Union[str, int]):
+        await self.bot.db.logs.find_one_and_update(
+            {"channel_id": str(channel_id)}, {"$set": {"title": title}}
+        )
+
+    async def update_nsfw(self, nsfw: bool, channel_id: Union[str, int]):
+        await self.bot.db.logs.find_one_and_update({"channel_id": str(channel_id)}, {"$set": {"nsfw": nsfw}})
 
 
 class PluginDatabaseClient:

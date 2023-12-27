@@ -1,27 +1,22 @@
 import asyncio
-import base64
 import copy
-import functools
-import io
 import re
 import time
-import traceback
 import typing
 import warnings
 from datetime import timedelta
-from types import SimpleNamespace
 
 import discord
 import isodate
 from discord.ext.commands import CommandError, MissingRequiredArgument
-from lottie.exporters import exporters as l_exporters
-from lottie.importers import importers as l_importers
+from discord.types.user import PartialUser as PartialUserPayload, User as UserPayload
 
 from core.models import DMDisabled, DummyMessage, getLogger
 from core.utils import (
     AcceptButton,
     ConfirmThreadCreationView,
     DenyButton,
+    DummyParam,
     create_thread_channel,
     get_joint_id,
     get_top_role,
@@ -146,12 +141,18 @@ class Thread:
         return thread
 
     async def get_genesis_message(self) -> discord.Message:
-        if self._genesis_message is None:
-            async for m in self.channel.history(limit=5, oldest_first=True):
-                if m.author == self.bot.user:
-                    if m.embeds and m.embeds[0].fields and m.embeds[0].fields[0].name == "Roles":
-                        self._genesis_message = m
-
+        if isinstance(self._genesis_message, discord.Message):
+            return self._genesis_message
+        # TODO: Store genesis message in db and use manual detection for last resort
+        async for m in self.channel.history(limit=5, oldest_first=True):
+            if (
+                m.author == self.bot.user
+                and isinstance(m.embeds, list)
+                and m.embeds[0]
+                and m.embeds[0].footer
+                and "user id:" in m.embeds[0].footer.text.lower()
+            ):
+                self._genesis_message = m
         return self._genesis_message
 
     async def setup(self, *, creator=None, category=None, initial_message=None):
@@ -253,18 +254,24 @@ class Thread:
             notes = await self.bot.api.find_notes(self.recipient)
             ids = {}
 
+            # This is incredibly cursed and will break every time discord.py changes their internal API method
             class State:
-                def store_user(self, user):
-                    return user
+                # discord.state.ConnectionState.store_user_no_intents
+                def store_user(
+                    self, data: typing.Union[UserPayload, PartialUserPayload], *, cache: bool = True
+                ) -> discord.user.User:
+                    return discord.user.User(state=self, data=data)
 
             for note in notes:
                 author = note["author"]
 
-                class Author:
-                    name = author["name"]
-                    id = author["id"]
-                    discriminator = author["discriminator"]
-                    display_avatar = SimpleNamespace(url=author["avatar_url"])
+                author_dict: discord.types.user.PartialUser = {
+                    "username": author["name"],
+                    "id": author["id"],
+                    "discriminator": author["discriminator"],
+                    "avatar": author["avatar_url"],
+                    "global_name": "dontlookatme",
+                }
 
                 data = {
                     "id": round(time.time() * 1000 - discord.utils.DISCORD_EPOCH) << 22,
@@ -276,7 +283,7 @@ class Thread:
                     "mention_everyone": None,
                     "tts": None,
                     "content": note["message"],
-                    "author": Author(),
+                    "author": author_dict,
                 }
                 message = discord.Message(state=State(), channel=self.channel, data=data)
                 ids[note["_id"]] = str((await self.note(message, persistent=True, thread_creation=True)).id)
@@ -804,8 +811,8 @@ class Thread:
     async def note(
         self, message: discord.Message, persistent=False, thread_creation=False
     ) -> discord.Message:
-        if not message.content and not message.attachments:
-            raise MissingRequiredArgument(SimpleNamespace(name="msg"))
+        if not message.content and not message.attachments and not message.stickers:
+            raise MissingRequiredArgument(DummyParam("message"))
 
         msg = await self.send(
             message,
@@ -825,8 +832,8 @@ class Thread:
         self, message: discord.Message, anonymous: bool = False, plain: bool = False
     ) -> typing.Tuple[typing.List[discord.Message], discord.Message]:
         """Returns List[user_dm_msg] and thread_channel_msg"""
-        if not message.content and not message.attachments:
-            raise MissingRequiredArgument(SimpleNamespace(name="msg"))
+        if not message.content and not message.attachments and not message.stickers:
+            raise MissingRequiredArgument(DummyParam("message"))
         if not any(g.get_member(self.id) for g in self.bot.guilds):
             return await message.channel.send(
                 embed=discord.Embed(
@@ -999,7 +1006,7 @@ class Thread:
                 attachments.append(attachment)
 
         image_urls = re.findall(
-            r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+",
+            r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[.\-]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+",
             message.content,
         )
 
@@ -1009,51 +1016,16 @@ class Thread:
             if is_image_url(url, convert_size=False)
         ]
         images.extend(image_urls)
-
-        def lottie_to_png(data):
-            importer = l_importers.get("lottie")
-            exporter = l_exporters.get("png")
-            with io.BytesIO() as stream:
-                stream.write(data)
-                stream.seek(0)
-                an = importer.process(stream)
-
-            with io.BytesIO() as stream:
-                exporter.process(an, stream)
-                stream.seek(0)
-                return stream.read()
-
-        for i in message.stickers:
-            if i.format in (discord.StickerFormatType.png, discord.StickerFormatType.apng):
-                images.append((i.url, i.name, True))
-            elif i.format == discord.StickerFormatType.lottie:
-                # save the json lottie representation
-                try:
-                    async with self.bot.session.get(i.url) as resp:
-                        data = await resp.read()
-
-                    # convert to a png
-                    img_data = await self.bot.loop.run_in_executor(
-                        None, functools.partial(lottie_to_png, data)
-                    )
-                    b64_data = base64.b64encode(img_data).decode()
-
-                    # upload to imgur
-                    async with self.bot.session.post(
-                        "https://api.imgur.com/3/image",
-                        headers={"Authorization": "Client-ID 50e96145ac5e085"},
-                        data={"image": b64_data},
-                    ) as resp:
-                        result = await resp.json()
-                        url = result["data"]["link"]
-
-                except Exception:
-                    traceback.print_exc()
-                    images.append((None, i.name, True))
-                else:
-                    images.append((url, i.name, True))
-            else:
-                images.append((None, i.name, True))
+        images.extend(
+            (
+                i.url
+                if i.format in (discord.StickerFormatType.png, discord.StickerFormatType.apng)
+                else None,
+                i.name,
+                True,
+            )
+            for i in message.stickers
+        )
 
         embedded_image = False
 
@@ -1195,7 +1167,7 @@ class Thread:
 
         return " ".join(set(mentions))
 
-    async def set_title(self, title: str) -> None:
+    async def set_title(self, title: str, channel_id: int) -> None:
         topic = f"Title: {title}\n"
 
         user_id = match_user_id(self.channel.topic)
@@ -1205,7 +1177,10 @@ class Thread:
             ids = ",".join(str(i.id) for i in self._other_recipients)
             topic += f"\nOther Recipients: {ids}"
 
-        await self.channel.edit(topic=topic)
+        await asyncio.gather(self.channel.edit(topic=topic), self.bot.api.update_title(title, channel_id))
+
+    async def set_nsfw_status(self, nsfw: bool) -> None:
+        await asyncio.gather(self.channel.edit(nsfw=nsfw), self.bot.api.update_nsfw(nsfw, self.channel.id))
 
     async def _update_users_genesis(self):
         genesis_message = await self.get_genesis_message()

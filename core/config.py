@@ -36,6 +36,7 @@ class ConfigManager:
         "account_age": isodate.Duration(),
         "guild_age": isodate.Duration(),
         "thread_cooldown": isodate.Duration(),
+        "log_expiration": isodate.Duration(),
         "reply_without_command": False,
         "anon_reply_without_command": False,
         "plain_reply_without_command": False,
@@ -183,7 +184,7 @@ class ConfigManager:
 
     colors = {"mod_color", "recipient_color", "main_color", "error_color"}
 
-    time_deltas = {"account_age", "guild_age", "thread_auto_close", "thread_cooldown"}
+    time_deltas = {"account_age", "guild_age", "thread_auto_close", "thread_cooldown", "log_expiration"}
 
     booleans = {
         "use_user_id_channel_name",
@@ -300,7 +301,7 @@ class ConfigManager:
     def __delitem__(self, key: str) -> None:
         return self.remove(key)
 
-    def get(self, key: str, convert=True) -> typing.Any:
+    def get(self, key: str, *, convert: bool = True) -> typing.Any:
         key = key.lower()
         if key not in self.all_keys:
             raise InvalidConfigError(f'Configuration "{key}" is invalid.')

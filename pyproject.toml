@@ -1,6 +1,49 @@
+[tool.poetry]
+name = "Discord Modmail"
+version = "4.2.0"
+description = "Raiden's personal fork of Python Discord Modmail bot"
+authors = [
+	"Raiden Sakura <raiden@project-mei.xyz>",
+	"kyb3r <noemail@example.com>",
+    "4jr <noemail@example.com>",
+    "Taki <noemail@example.com>"
+	]
+license = "AGPL-3.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9 <3.12"
+aiohttp = {version = "3.9.1", extras = ["speedups"]}
+colorama = "~=0.4.5"
+emoji = "~=1.7.0"
+isodate = "~=0.6.0"
+motor = "~=3.1.2"
+natural = "~=0.2.0"
+parsedatetime = "~=2.6"
+pymongo = {extras = ["srv"], version = "*"}
+python-dateutil = "~=2.8.1"
+python-dotenv = "~=1.0.0"
+uvloop = {version = "~=0.17.0", markers = "sys_platform != 'win32'"}
+requests = "~=2.31.0"
+attrs = "~=23.1.0"
+strenum = "^0.4.15"
+"discord.py" = {version = "2.3.2", extras = ["speed"]}
+packaging = "^23.2"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.0"
+ruff = "^0.1.9"
+tomli = "^2.0.1"
+typing-extensions = "^4.9.0"
+pre-commit = "^3.6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
 line-length = "110"
-target-version = ['py310']
+target-version = ['py311']
 include = '\.pyi?$'
 extend-exclude = '''
 (
@@ -20,7 +63,7 @@ extend-exclude = '''
 '''
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 110
 select = ["C90", "E", "F", "I001", "PGH004", "RUF100"]
 ignore = ["F405", "E741", "C901", "F403", "E501"]

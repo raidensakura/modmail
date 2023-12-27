@@ -39,18 +39,17 @@ The first step in setting up Modmail is to create a Discord bot.
 Head over to the Discord Developer Portal and create a new application.
 
 Once you've created a new application, head over to the Bot tab and create a new bot.
-![](./assets/create-bot.png)
+<Image src="/create-bot.png" alt="Hello" width={850} height={500} />
 <sub>Navigate to the Bot tab on the sidebar. On this page, you can also edit the About Me section of your bot.</sub>
 
 Click Add bot to create the bot. After adding a bot, reset the token and copy and store the newly generated token in your Text editor for later use.
-![](./assets/reset-token.png)
+<Image src="/reset-token.png" alt="Hello" width={850} height={500} />
 <Callout emoji="⚠️" type="warning">
 	Make sure to keep this token private! Anyone who has this token can control your bot and potentially cause malicious damage.
 </Callout>
 
 Next, we need to change some bot settings. Toggle off public bot, then toggle on both server members intent and message content intent.
 Remember to click on Save Changes.
-![](./assets/reset-token.png)
 <details>
 <summary>Why do I need to do this?</summary>
 Disabling _public bot_ prevents other users from inviting your bot. Your bot may not behave appropriately if it's present in other servers.
@@ -67,7 +66,7 @@ We recommend keeping this toggled off to save computational resources.
 
 Navigate back to the General Information tab and copy the application ID.
 Click Copy to copy the application ID. This is also known as your "Bot ID".
-![](./assets/bot-id.png)
+<Image src="/bot-id.png" alt="Hello" width={850} height={500} />
 
 Using the following URL as template, replace `YOUR-ID-HERE` with the ID you just copied. Do not change anything else! Open a new browser tab and go to that URL.
 ```
@@ -76,7 +75,7 @@ https://discord.com/oauth2/authorize?scope=bot&permissions=416075476184&client_i
 
 Discord should prompt you to choose a server to invite your bot, followed by a list of permissions. Scroll to the bottom and click Authorize.
 Choose your server to invite, then click Continue.
-![](./assets/invite-bot.png)
+<Image src="/invite-bot.png" alt="Hello" width={850} height={500} />
 
 Scroll to the bottom and click Authorize. Don't un-check any permissions. Only Administrator is optional.
 <Callout emoji="ℹ️" type="info">
@@ -109,7 +108,7 @@ asking you to "tell us a few things about yourself and your project". You can an
 In the next step for "deploy a cloud database", choose the **Shared** option. Choose the region that's closest to where you're hosting your bot.
 Make sure the **Cluster Tier** is set to **M0 Sandbox** and the price shows as **FREE**.
 
-![](./assets/mongo-shared.png)
+<Image src="/mongo-shared.png" alt="Hello" width={850} height={500} />
 <sub>Choose the free **Shared** option and click **Create**.</sub>
 
 On the following **Security Quickstart** page, do the following:
@@ -117,13 +116,13 @@ On the following **Security Quickstart** page, do the following:
 1.  Authentication method: _Username and Password_
     ```Username: `modmail`
     Password: Click **Autogenerate Secure Password** - don't type your own password!```
-	![](./assets/mongo-password.png)
+	<Image src="/mongo-password.png" alt="Hello" width={850} height={500} />
 2.  Copy and **save the password** into your text editor, you will need this for later.
     From now on, we will be referring to these credentials as the _database username_ and _database password_.
 3. Click **Create User**.
 4. Scroll down, we will be connecting from: _My Local Environment_
 5.  Set IP address as **`0.0.0.0/0`** and anything for the description.
-	![](./assets/mongo-ip.png)
+	<Image src="/mongo-ip.png" alt="Hello" width={850} height={500} />
 	**You must** set the IP address exactly to this, unless you know what you're doing.
 	**Do not** set it to anything else or click add my current IP address. This allows Modmail to connect to your database.
 6. Click **Add Entry**.
@@ -131,7 +130,7 @@ On the following **Security Quickstart** page, do the following:
 Next, we will need to generate a MongoDB connection string. Simply click `Connect` on the main dashboard,
 choose `Connect your application`, then copy the connection string (the default driver is fine) and paste it into your Notepad.
 
-![](./assets/mongo-connect.png)
+<Image src="/mongo-connect.png" alt="Hello" width={850} height={500} />
 
 If you followed all the steps so far, your Notepad should contain three lines:
 the bot token, the database password, and the MongoDB connection string. For example:
@@ -177,49 +176,14 @@ MONGO_URI=mongodb+srv://username:password@cluster0-abcde.mongodb.net/
 
 ### Hosting Modmail
 
-Your next step is to choose one of our supported hosting method that's available and preferable to you.
-Click on one of the links below to view further instructions for your preferred hosting method.
+Your next step is to choose one the hosting method that's preferable to you.
+Click on one of the links below to view further instructions for your preferred hosting method and Operating System (OS).
 Each method has their pros and cons, be sure to take them into consideration when choosing your hosting platform to run Modmail.
 
-#### [Railway](railway.md) (free/paid)
-A platform as a service (PaaS) that offers a generous free plan, which allows you to host Modmail for free without any downtime. A credit card is required for verification purposes. Their UI is very simple and easy for beginners to quickly deploy and run your Modmail bot on. You can learn more about their Free Tier plan and pricing by clicking [here](https://railway.app/pricing).&#x20;
+For hosting on a personal device or VPS, refer to the "**Installing Modmail**" section as we cover some widely used OS on our guide.
 
-#### [Northflank](https://northflank.com/) (free/paid)
-
-A PaaS like Railway but with more advanced UI and more features. Does require credit card for verification but has a dedicated free tier that has no hourly limit. Learn more about their free tier and pricing by clicking [here](https://northflank.com/pricing).
-
-#### [Local Hosting](local-hosting-vps/) (free)
-
-If you have an old PC, a Raspberry Pi, or a Linux box that you're able to keep online 24/7, you can also host Modmail with your own machine at home. Since Modmail doesn't require intensive resources to run, you can get by with a system having as low as 1GB of RAM. Setting it up can be quite advanced but you have complete control over your bot instance. Refer to our local hosting guide supporting a few popular OSes by clicking [here](./#local-hosting-free).
-
-#### [Modmail Patreon](https://www.patreon.com/kyber) (paid)
-
-We offer paid hosting solution for your Modmail bot. Hosting Modmail with us costs $4-5 USD per month.
-
-We will also fully manage your bot hosting for you, so you don't need to worry about upgrading or setting up your own host server. Refer to our [Patreon Hosting here](https://www.patreon.com/kyber).
-
-#### [Heroku](heroku.md) (paid)
-
-Another popular PaaS that's used to be free. However, their recent pricing adjustments, it now costs $5-7 USD per month to host Modmail.
-
-If you are currently a higher-education student, you may be eligible for the first year free with their [student offer](https://www.heroku.com/github-students). Refer to our Heroku installation guide by clicking [here](heroku.md).
-
-#### [Cloud Server / VPS](local-hosting-vps/) (paid)
-
-Apart from [Patreon hosting](./#modmail-patreon-paid), hosting on a cloud server / VPS is the most reliable hosting method. Rent a virtual server from any reputable hosting provider of your choice for roughly $4-10 USD per month (price varies), and you'll be able to install Modmail onto the server.
-
-This method is a lot more "involved" than other solutions. If you're not comfortable with configuring remote Linux environments, we recommend you to choose a different option. For this method, you will need to refer to our Local hosting installation guide [here](local-hosting-vps/) and choose your desired OS.
-
-</Steps>
-
-### Community Guides
-If you're not satisfied with the options listed above, some of our community members have created their
-own installation guides for Modmail on various other hosting platforms. Keep in mind that Modmail support staff may
-not be able to assist you much with community-made guides. Feel free to check them out by clicking the link below.
-
-<Callout emoji="ℹ️" type="info">
-	Community guides are not verified by the Modmail team, so use them at your own risk.
-</Callout>
+For hosting on a Cloud platform (PaaS) like Railway, Northflank or Koyeb, refer to the "**Community Guides**" section
+as these platforms are often proprietary and closed source and may affect which may affect the viability of the guides.
 
 <br/>
   <Card
@@ -242,3 +206,5 @@ not be able to assist you much with community-made guides. Feel free to check th
     title="Community Guides"
     href="/community-guides"
   />
+
+</Steps>

@@ -118,7 +118,7 @@ def getLogger(name=None) -> ModmailLogger:
 
 
 class FileFormatter(logging.Formatter):
-    ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+    ansi_escape = re.compile(r"\x1B\[[:;<=>?@]*[ -/]*[@-~]")
 
     def format(self, record):
         record.msg = self.ansi_escape.sub("", record.msg)

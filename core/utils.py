@@ -41,6 +41,7 @@ __all__ = [
     "AcceptButton",
     "DenyButton",
     "ConfirmThreadCreationView",
+    "DummyParam",
 ]
 
 
@@ -148,14 +149,6 @@ def is_image_url(url: str, **kwargs) -> str:
     bool
         Whether the URL is a valid image URL.
     """
-    if url.startswith("https://gyazo.com") or url.startswith("http://gyazo.com"):
-        # gyazo support
-        url = re.sub(
-            r"(http[s]?:\/\/)((?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)",
-            r"\1i.\2.png",
-            url,
-        )
-
     return parse_image_url(url, **kwargs)
 
 
@@ -589,3 +582,13 @@ class ConfirmThreadCreationView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=20)
         self.value = None
+
+
+class DummyParam:
+    """
+    A dummy parameter that can be used for MissingRequiredArgument.
+    """
+
+    def __init__(self, name):
+        self.name = name
+        self.displayed_name = name

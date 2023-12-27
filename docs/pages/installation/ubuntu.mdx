@@ -1,0 +1,143 @@
+import { Callout } from 'nextra-theme-docs'
+import Image from 'next/image'
+
+# Installing Modmail on Ubuntu
+
+<Callout emoji="⚠️" type="warning">
+	For safety reasons, **DO NOT** install Modmail with a root user. A misbehaving or malicious plugin installed on your Modmail bot can easily access your entire system. If you are unsure how to create a new user on Linux, see [DigitalOcean’s tutorial: How To Create a New Sudo-enabled User](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-sudo-enabled-user-on-ubuntu-20-04-quickstart).
+</Callout>
+
+## Prerequisites
+
+1. Root access (**`sudo`**), **not** `root` user.
+2. Minimum 1 GB of RAM
+3. At least 2 GB available disk space.
+4. Supported releases:
+   * Ubuntu 22.04 LTS (Jammy Jellyfish)
+
+## Dependencies
+
+We will be using the following dependencies:
+
+* Python 3.11
+* Tools: `git`, `wget`, `nano`, `software-properties-common`
+* Additional Modmail requirements: `libffi-dev`, `g++`
+
+<Callout emoji="ℹ️" type="info">
+All code blocks should be executed in bash and line by line unless specified otherwise.
+</Callout>
+
+To install these dependencies, we will be using **`apt`**.
+
+We recommend adding the `deadsnakes` ppa to install Python 3.10:
+
+```shell
+sudo apt update
+sudo apt -y install software-properties-common
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+```
+
+Now install the pre-requirements with `apt`, you can copy and run these 3 lines at once:
+
+```shell
+sudo apt -y install python3.11 python3.11-dev python3.11-venv python3-pip \
+                    libffi-dev g++ \
+                    git nano
+```
+
+After that, install `pipx` and `poetry` with:
+
+```shell
+python3.11 -m pip install pipx
+python3.11 -m pipx install poetry
+python3.11 -m pipx ensurepath
+```
+
+<details>
+
+<summary>Failed to install Python 3.11?</summary>
+
+You can manually compile Python instead of adding using the Deadsnakes PPA. Compiling Python may take a while (est. 5-10 minutes).
+```shell
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y software-properties-common \
+                    libffi-dev g++ \
+                    git wget nano \
+                    build-essential zlib1g-dev libncurses5-dev \
+                    libgdbm-dev libnss3-dev libssl-dev \
+                    libreadline-dev libffi-dev libsqlite3-dev libbz2-dev
+wget https://www.python.org/ftp/python/3.11.7/Python-3.11.7.tgz
+tar xzf Python-3.11.7.tgz
+cd Python-3.11.7
+./configure --enable-optimizations 
+make altinstall
+```
+</details>
+
+Now, restart your OS or reinstate your shell session for the PATH change to take effect.
+
+
+## Installation
+
+Clone and change directory into the Modmail folder with:
+
+```shell
+git clone https://github.com/modmail-dev/modmail
+cd modmail
+```
+
+Inside the Modmail folder, Install `pipenv` and its Python packages with:
+
+```shell
+poetry install --no-root
+```
+
+Create a file named `.env` with `nano` and paste all the environmental variables (secrets) needed to run the bot via right-clicking in the nano editor.
+Refer to the [Getting Started](/getting-started) page for instructions on where to obtain these values.
+
+```shell
+nano .env
+```
+
+<Image src="/vps-env.png" alt="Hello" width={600} height={500} />
+
+After that, press `Ctrl+O` and `Enter` to save your changes. Exit the `nano` editor with `Ctrl+X`.
+
+<Callout emoji="ℹ️" type="info">
+If using the `nano` editor is a bit of a learning curve, you can always FTP into your server using software like [WinSCP](https://winscp.net/eng/index.php) to edit the `.env` file manually with your preferred GUI-based editor like Notepad.
+</Callout>
+
+After your `.env` file is ready, you can now go ahead and try running your bot with:
+
+```shell
+poetry run python bot.py
+```
+
+If no error shows up, it means your bot is now running correctly. You can stop the bot from running with `Ctrl+C` to continue using your terminal.
+
+## Set up auto-restart
+
+The recommended way to set up auto-restart on Ubuntu is to install and use [pm2](https://pm2.io/).
+```shell
+sudo apt install npm -y && sudo npm i pm2 -g
+pm2 start modmail.sh --name "modmail"
+```
+
+Inspect the logs with:
+```shell
+pm2 logs modmail
+```
+
+make sure that pm2 stays active and persistent between machine restarts:
+```shell
+pm2 save && pm2 startup
+```
+
+Other PM2 commands for future reference:
+```shell
+pm2 restart modmail
+pm2 reload modmail
+pm2 stop modmail
+pm2 delete modmail
+pm2 list
+```

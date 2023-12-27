@@ -2,21 +2,25 @@ import Image from 'next/image'
 
 # Introduction
 
-Modmail is a self-hosted Discord bot for your server. It works similar to [Reddit](https://reddit.zendesk.com/hc/en-us/articles/210896606-What-is-Modmail-)'s Modmail—both in functionality and purpose. It serves as a shared inbox for server staff to communicate with their users in a seamless way.
+This is the documentation for a fork of [modmail-dev/Modmail](https://github.com/modmail-dev/Modmail), a Discord Modmail bot written in Python.
 
-This bot is free for everyone and always will be. If you like this project and would like to show your appreciation, you can support us on [**Patreon**](https://www.patreon.com/kyber), cool benefits included!
+Modmail is a self-hosted Python Discord bot for your server. 
+It serves as a shared inbox for server staff to communicate with their users in a seamless way.
+Users create a ticket by direct-messaging the bot on Discord, and it will create a ticket channel
+in your chosen server relaying the messages between you and the server staff seamlessly.
 
-## What is Modmail used for?
+It comes with many advanced features and customizable configurations to help you handle tickets smoothly,
+such as custom snippets, command aliases, adding multiple users and so on.
 
-When a member sends a direct message to Modmail, the bot will create a channel (we call it a "thread") into a designated category. All further DM messages will automatically relay to that channel, then any available staff can respond within the channel. Compared to ticketing bots, Modmail allows easier and more organised discussions among staff.
+<br /><Image src="/header-pic.png" alt="Hello" width={500} height={500} />
 
-<Image src="/header-pic.png" alt="Hello" width={500} height={500} />
+With the Logviewer plugin, you can also view previous tickets created on your browser:
 
-Our Logviewer will save the threads so your staff can view previous threads through their corresponding log link. Here is an [example](https://publicmodmail.logs.vodka/logs/example).
+<br /><Image src="/logviewer.png" alt="Hello" width={500} height={500} />
 
 ## Features
 
-#### **Highly customisable**
+### Highly customisable
 
 * Changeable bot status, prefix, category, log channel, etc.
 * Versatile command permission system.
@@ -25,16 +29,16 @@ Our Logviewer will save the threads so your staff can view previous threads thro
 * Minimum duration for accounts to be created before allowed to contact Modmail (`account_age`).
 * Minimum length for members to be in the guild before allowed to contact Modmail (`guild_age`).
 
-#### **Advanced logging functionality**
+### Advanced logging functionality
 
 * When you close a thread, Modmail will generate a log link and post it to your log channel.
 * Native Discord dark-mode feel.
 * Markdown/formatting support.
-* Discord authentication-protected logs ([Patreon-only feature](https://patreon.com/kyber)).
+* Discord authentication-protected logs.
 * See past logs of a user with `?logs`.
 * Searchable by text queries using `?logs search`.
 
-#### **Robust implementation**
+### Robust implementation
 
 * Ease of installation: you can get your Modmail bot running in under 10 minutes!
 * Schedule tasks in human time, e.g. `?close in 2 hours silently`.
@@ -44,17 +48,47 @@ Our Logviewer will save the threads so your staff can view previous threads thro
 
 This list is ever-growing thanks to active development by our exceptional contributors. See a full list of available commands by using the `?help` command.
 
-## Supporting the project
+## Contributing to this fork
 
-You have various options to help the project. Giving this repository a star is greatly appreciated. You can also help people that have trouble setting up Modmail at our [Discord server](https://discord.gg/cnUpwrnpYb).&#x20;
+import { useData } from 'nextra/data'
+ 
+export const getStaticProps = ({ params }) => {
+  return fetch(`https://api.github.com/repos/raidensakura/modmail`)
+    .then(res => res.json())
+    .then(repo => ({
+      props: {
+        ssg: {
+          stars: repo.stargazers_count,
+		  forks: repo.forks_count,
+		  issues: repo.open_issues_count
+        }
+      },
+      revalidate: 60
+    }))
+}
+ 
+export const Stars = () => {
+  const { stars } = useData()
+  return <strong>{stars}</strong>
+}
 
-If you like to show your appreciation, consider supporting us on [**Patreon**](https://www.patreon.com/kyber)!
+export const Forks = () => {
+  const { forks } = useData()
+  return <strong>{forks}</strong>
+}
 
-### Contributing
+export const Issues = () => {
+  const { issues } = useData()
+  return <strong>{issues}</strong>
+}
 
-Support Modmail with your contributions! Whether it be improvements to the documentation or new functionality, please feel free to make the change. Check out our [contributing guidelines](https://github.com/modmail-dev/modmail/blob/master/.github/CONTRIBUTING.md) before you get started.
+Support the project on our [GitHub repository](https://github.com/raidensakura/modmail).
 
-## Next steps
-
-* Read about [installing Modmail](installation/).
-* Become familiar with [Modmail commands and functionalities](getting-started.md).
+[<img src="https://img.shields.io/badge/ko--fi.com%2Fraidensakura-d11df9?logo=kofi&logoColor=white&label=Support%20me&color=%23ff5b62"/>](https://ko-fi.com/raidensakura)
+ 
+* [Be a stargazer](https://github.com/raidensakura/modmail/stargazers) by giving the repository a ⭐
+<br /><sub>This fork has <Stars /> stargazers on GitHub!</sub>
+* [Fork the repository](https://github.com/raidensakura/modmail/forks) and [Submit a Pull Request](https://github.com/raidensakura/modmail/pulls) containing your features 🔧
+<br /><sub>Forking fork! This fork also has <Forks /> other fork(s) on GitHub!</sub>
+* Help us find issues with the bot and [submit a GitHub Issue](https://github.com/raidensakura/modmail/issues) 🐛
+<br /><sub>This fork currently has <Issues /> open issues on GitHub!</sub>

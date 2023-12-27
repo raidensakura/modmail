@@ -15,7 +15,7 @@ from subprocess import PIPE
 
 import discord
 from discord.ext import commands
-from pkg_resources import parse_version
+from packaging import version
 
 from core import checks
 from core.models import PermissionLevel, getLogger
@@ -234,7 +234,7 @@ class Plugins(commands.Cog):
             venv = hasattr(sys, "real_prefix") or hasattr(sys, "base_prefix")  # in a virtual env
             user_install = " --user" if not venv else ""
             proc = await asyncio.create_subprocess_shell(
-                f'"{sys.executable}" -m pip install --upgrade{user_install} -r {req_txt} -q -q',
+                f'"{sys.executable}" -m pip install --upgrade{user_install} -r "{req_txt}" -q -q',
                 stderr=PIPE,
                 stdout=PIPE,
             )
@@ -288,7 +288,7 @@ class Plugins(commands.Cog):
             if check_version:
                 required_version = details.get("bot_version", False)
 
-                if required_version and self.bot.version < parse_version(required_version):
+                if required_version and self.bot.version < version.parse(required_version):
                     embed = discord.Embed(
                         description="Your bot's version is too low. "
                         f"This plugin requires version `{required_version}`.",
@@ -300,10 +300,10 @@ class Plugins(commands.Cog):
             plugin = Plugin(user, repo, plugin_name, branch)
 
         else:
-            if not self.bot.config.get("registry_plugins_only", False):
+            if self.bot.config.get("registry_plugins_only"):
                 embed = discord.Embed(
-                    description="This plugin is not in the registry. "
-                    "To install it, you must set `REGISTRY_PLUGINS_ONLY=false` in your .env file or config settings.",
+                    description="This plugin is not in the registry. To install this plugin, "
+                    "you must set `REGISTRY_PLUGINS_ONLY=no` or remove this key in your .env file.",
                     color=self.bot.error_color,
                 )
                 await ctx.send(embed=embed)
@@ -487,12 +487,12 @@ class Plugins(commands.Cog):
                         description=f"Failed to update {plugin.name}. This plugin will now be removed from your bot.",
                         color=self.bot.error_color,
                     )
-                    self.bot.config["plugins"].remove(plugin_name)
-                    logger.debug("Failed to update %s. Removed plugin from config.", plugin_name)
+                    self.bot.config["plugins"].remove(str(plugin))
+                    logger.debug("Failed to update %s. Removed plugin from config.", plugin)
                 else:
-                    logger.debug("Updated %s.", plugin_name)
+                    logger.debug("Updated %s.", plugin)
             else:
-                logger.debug("Updated %s.", plugin_name)
+                logger.debug("Updated %s.", plugin)
             return await ctx.send(embed=embed)
 
     @plugins.command(name="update")
@@ -672,7 +672,7 @@ class Plugins(commands.Cog):
                 embed.set_footer(text="This plugin is currently loaded.")
             else:
                 required_version = details.get("bot_version", False)
-                if required_version and self.bot.version < parse_version(required_version):
+                if required_version and self.bot.version < version.parse(required_version):
                     embed.set_footer(
                         text="Your bot is unable to install this plugin, "
                         f"minimum required version is v{required_version}."

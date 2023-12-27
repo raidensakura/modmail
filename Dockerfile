@@ -1,27 +1,37 @@
 FROM python:3.11-alpine as base
 
 RUN apk update && apk add git \
-	# cairosvg dependencies
-	cairo-dev cairo cairo-tools \
 	# pillow dependencies
-	jpeg-dev zlib-dev
+	jpeg-dev zlib-dev && \
+    pip install --upgrade pip && \
+	adduser -D -h /home/modmail -g 'Modmail' modmail
 
-FROM base as python-deps
+WORKDIR /home/modmail
 
-RUN apk add --virtual build-deps build-base gcc libffi-dev
-COPY requirements.txt /
-RUN pip install --prefix=/inst -U -r /requirements.txt
+FROM base as builder
+
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
+RUN apk add build-base libffi-dev && \
+	pip install -U poetry
+
+COPY --chown=modmail:modmail poetry.lock pyproject.toml /home/modmail/
+
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
 FROM base as runtime
 
-ENV USING_DOCKER yes
-COPY --from=python-deps /inst /usr/local
+ENV VIRTUAL_ENV=/home/modmail/.venv \
+    PATH="/home/modmail/.venv/bin:$PATH" \
+    USING_DOCKER=yes
 
-COPY . /modmail
-WORKDIR /modmail
+COPY --from=builder --chown=modmail:modmail ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+
+COPY --chown=modmail:modmail . .
+
+USER modmail
 
 CMD ["python", "bot.py"]
-
-RUN adduser --disabled-password --gecos '' app && \
-    chown -R app /modmail
-USER app

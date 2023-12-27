@@ -1,4 +1,4 @@
-__version__ = "4.1.0"
+__version__ = "4.2.0"
 
 
 import asyncio
@@ -22,7 +22,9 @@ from discord.ext import commands, tasks
 from discord.ext.commands import MemberConverter
 from discord.ext.commands.view import StringView
 from emoji import UNICODE_EMOJI
-from pkg_resources import parse_version
+from packaging import version
+
+from core.blocklist import Blocklist, BlockReason
 
 try:
     # noinspection PyUnresolvedReferences
@@ -47,7 +49,7 @@ from core.models import (
 )
 from core.thread import ThreadManager
 from core.time import human_timedelta
-from core.utils import normalize_alias, parse_alias, truncate, tryint
+from core.utils import human_join, normalize_alias, parse_alias, truncate, tryint
 
 logger = getLogger(__name__)
 
@@ -87,6 +89,9 @@ class ModmailBot(commands.Bot):
         self._configure_logging()
 
         self.plugin_db = PluginDatabaseClient(self)  # Deprecated
+
+        self.blocklist = Blocklist(bot=self)
+
         self.startup()
 
     def get_guild_icon(
@@ -98,7 +103,7 @@ class ModmailBot(commands.Bot):
             return "https://cdn.discordapp.com/embed/avatars/0.png"
         if size is None:
             return guild.icon.url
-        return guild.icon.with_size(size)
+        return guild.icon.with_size(size).url
 
     def _resolve_snippet(self, name: str) -> typing.Optional[str]:
         """
@@ -206,7 +211,7 @@ class ModmailBot(commands.Bot):
 
     @property
     def version(self):
-        return parse_version(__version__)
+        return version.parse(__version__)
 
     @property
     def api(self) -> ApiClient:
@@ -462,10 +467,14 @@ class ModmailBot(commands.Bot):
 
     @property
     def blocked_users(self) -> typing.Dict[str, str]:
+        """DEPRECATED, used blocklist instead"""
+        logger.warning("blocked_users is deprecated and does not function, its usage is a bug")
         return self.config["blocked"]
 
     @property
     def blocked_roles(self) -> typing.Dict[str, str]:
+        """DEPRECATED, used blocklist instead"""
+        logger.warning("blocked_roles is deprecated and does not function, its usage is a bug")
         return self.config["blocked_roles"]
 
     @property
@@ -524,6 +533,7 @@ class ModmailBot(commands.Bot):
         logger.debug("Connected to gateway.")
         await self.config.refresh()
         await self.api.setup_indexes()
+        await self.blocklist.setup()
         await self.load_extensions()
         self._connected.set()
 
@@ -563,6 +573,13 @@ class ModmailBot(commands.Bot):
             logger.warning(
                 "You are running a developmental version. This should not be used in production. (v%s)",
                 __version__,
+            )
+            logger.line()
+
+        if len(self.config["blocked"]) > 0 or len(self.config["blocked_roles"]) > 0:
+            logger.warning(
+                "Un-migrated blocklists found. Please run the '[p]migrate blocklist' command after backing "
+                "up your config/database. Blocklist functionality will be disabled until this is done."
             )
             logger.line()
 
@@ -636,6 +653,7 @@ class ModmailBot(commands.Bot):
 
         self.post_metadata.start()
         self.autoupdate.start()
+        self.log_expiry.start()
         self._started = True
 
     async def convert_emoji(self, name: str) -> str:
@@ -718,6 +736,8 @@ class ModmailBot(commands.Bot):
         return True
 
     def check_manual_blocked_roles(self, author: discord.Member) -> bool:
+        """DEPRECATED"""
+        logger.error("check_manual_blocked_roles is deprecated, usage is a bug.")
         for role in author.roles:
             if str(role.id) not in self.blocked_roles:
                 continue
@@ -734,6 +754,8 @@ class ModmailBot(commands.Bot):
         return True
 
     def check_manual_blocked(self, author: discord.User) -> bool:
+        """DEPRECATED"""
+        logger.error("check_manual_blocked is deprecated, usage is a bug.")
         if str(author.id) not in self.blocked_users:
             return True
 
@@ -758,6 +780,7 @@ class ModmailBot(commands.Bot):
     # This is to store blocked message cooldown in memory
     _block_msg_cooldown = dict()
 
+    # This has a bunch of side effects
     async def is_blocked(
         self,
         author: discord.User,
@@ -765,6 +788,24 @@ class ModmailBot(commands.Bot):
         channel: discord.TextChannel = None,
         send_message: bool = False,
     ) -> bool:
+        """
+        Check if a user is blocked for any reason and send a message if they are (if send_message is true).
+
+        If you are using this method with send_message set to false or not set,
+        You should be using blocklist.is_user_blocked() or blocklist.is_id_blocked()
+        if you only care whether a user is manually blocked then use blocklist.is_id_blocked().
+
+        Parameters
+        ----------
+        author
+        channel
+        send_message
+
+        Returns
+        -------
+        bool
+            Whether the user is blocked or not.
+        """
         member = self.guild.get_member(author.id) or await MemberConverter.convert(author)
         if member is None:
             # try to find in other guilds
@@ -794,33 +835,36 @@ class ModmailBot(commands.Bot):
             self._block_msg_cooldown[str(author)] = now + timedelta(minutes=5)
             return await channel.send(embed=emb)
 
-        if str(author.id) in self.blocked_whitelisted_users:
-            if str(author.id) in self.blocked_users:
-                self.blocked_users.pop(str(author.id))
-                await self.config.update()
-            return False
+        if member is not None:
+            blocked, block_type = await self.blocklist.is_user_blocked(member)
+        else:
+            blocked, block_type = await self.blocklist.is_id_blocked(author.id)
+            if not self.blocklist.is_valid_account_age(author):
+                blocked = True
+                block_type = BlockReason.ACCOUNT_AGE
 
-        if not self.check_account_age(author):
-            blocked_reason = "Sorry, your account is too new to initiate a ticket."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+        if blocked:
+            if block_type == BlockReason.ACCOUNT_AGE:
+                blocked_reason = "Sorry, your account is too new to initiate a ticket."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        if not self.check_manual_blocked(author):
-            blocked_reason = "You have been blocked from contacting Modmail."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+            if block_type == BlockReason.BLOCKED_USER:
+                blocked_reason = "You have been blocked from contacting Modmail."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        if not self.check_guild_age(member):
-            blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+            if block_type == BlockReason.GUILD_AGE:
+                blocked_reason = "Sorry, you joined the server too recently to initiate a ticket."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        if not self.check_manual_blocked_roles(member):
-            blocked_reason = "Sorry, your role(s) has been blacklisted from contacting Modmail."
-            await send_embed(title="Message not sent!", desc=blocked_reason)
-            return True
+            if block_type == BlockReason.BLOCKED_ROLE:
+                blocked_reason = "Sorry, your role(s) has been blacklisted from contacting Modmail."
+                await send_embed(title="Message not sent!", desc=blocked_reason)
+                return True
 
-        return False
+        return blocked
 
     async def get_thread_cooldown(self, author: discord.Member):
         thread_cooldown = self.config.get("thread_cooldown")
@@ -1226,25 +1270,37 @@ class ModmailBot(commands.Bot):
             return
 
         channel = self.get_channel(payload.channel_id)
-        if not channel:  # dm channel not in internal cache
-            _thread = await self.threads.find(recipient=user)
-            if not _thread:
+        thread = None
+        # dm channel not in internal cache
+        if not channel:
+            thread = await self.threads.find(recipient=user)
+            if not thread:
                 return
-            channel = await _thread.recipient.create_dm()
+            channel = await thread.recipient.create_dm()
+            if channel.id != payload.channel_id:
+                return
 
+        from_dm = isinstance(channel, discord.DMChannel)
+        from_txt = isinstance(channel, discord.TextChannel)
+        if not from_dm and not from_txt:
+            return
+
+        if not thread:
+            params = {"recipient": user} if from_dm else {"channel": channel}
+            thread = await self.threads.find(**params)
+            if not thread:
+                return
+
+        # thread must exist before doing this API call
         try:
             message = await channel.fetch_message(payload.message_id)
         except (discord.NotFound, discord.Forbidden):
             return
 
         reaction = payload.emoji
-
         close_emoji = await self.convert_emoji(self.config["close_emoji"])
 
-        if isinstance(channel, discord.DMChannel):
-            thread = await self.threads.find(recipient=user)
-            if not thread:
-                return
+        if from_dm:
             if (
                 payload.event_type == "REACTION_ADD"
                 and message.embeds
@@ -1252,7 +1308,7 @@ class ModmailBot(commands.Bot):
                 and self.config.get("recipient_thread_close")
             ):
                 ts = message.embeds[0].timestamp
-                if thread and ts == thread.channel.created_at:
+                if ts == thread.channel.created_at:
                     # the reacted message is the corresponding thread creation embed
                     # closing thread
                     return await thread.close(closer=user)
@@ -1272,11 +1328,10 @@ class ModmailBot(commands.Bot):
                 logger.warning("Failed to find linked message for reactions: %s", e)
                 return
         else:
-            thread = await self.threads.find(channel=channel)
-            if not thread:
-                return
             try:
-                _, *linked_messages = await thread.find_linked_messages(message.id, either_direction=True)
+                _, *linked_messages = await thread.find_linked_messages(
+                    message1=message, either_direction=True
+                )
             except ValueError as e:
                 logger.warning("Failed to find linked message for reactions: %s", e)
                 return
@@ -1386,28 +1441,44 @@ class ModmailBot(commands.Bot):
             await thread.close(closer=mod, silent=True, delete_channel=False)
 
     async def on_member_remove(self, member):
-        if member.guild != self.guild:
-            return
         thread = await self.threads.find(recipient=member)
         if thread:
-            if self.config["close_on_leave"]:
+            if member.guild == self.guild and self.config["close_on_leave"]:
                 await thread.close(
                     closer=member.guild.me,
                     message=self.config["close_on_leave_reason"],
                     silent=True,
                 )
             else:
-                embed = discord.Embed(
-                    description=self.config["close_on_leave_reason"], color=self.error_color
-                )
+                if len(self.guilds) > 1:
+                    guild_left = member.guild
+                    remaining_guilds = member.mutual_guilds
+
+                    if remaining_guilds:
+                        remaining_guild_names = [guild.name for guild in remaining_guilds]
+                        leave_message = (
+                            f"The recipient has left {guild_left}. "
+                            f"They are still in {human_join(remaining_guild_names, final='and')}."
+                        )
+                    else:
+                        leave_message = (
+                            f"The recipient has left {guild_left}. We no longer share any mutual servers."
+                        )
+                else:
+                    leave_message = "The recipient has left the server."
+
+                embed = discord.Embed(description=leave_message, color=self.error_color)
                 await thread.channel.send(embed=embed)
 
     async def on_member_join(self, member):
-        if member.guild != self.guild:
-            return
         thread = await self.threads.find(recipient=member)
         if thread:
-            embed = discord.Embed(description="The recipient has joined the server.", color=self.mod_color)
+            if len(self.guilds) > 1:
+                guild_joined = member.guild
+                join_message = f"The recipient has joined {guild_joined}."
+            else:
+                join_message = "The recipient has joined the server."
+            embed = discord.Embed(description=join_message, color=self.mod_color)
             await thread.channel.send(embed=embed)
 
     async def on_message_delete(self, message):
@@ -1550,7 +1621,7 @@ class ModmailBot(commands.Bot):
             "member_count": len(self.guild.members),
             "uptime": delta.total_seconds(),
             "latency": f"{self.ws.latency * 1000:.4f}",
-            "version": str(self.version),
+            "version": f"{self.version} on raidensakura's fork",
             "selfhosted": True,
             "last_updated": str(discord.utils.utcnow()),
         }
@@ -1584,7 +1655,7 @@ class ModmailBot(commands.Bot):
         changelog = await Changelog.from_url(self)
         latest = changelog.latest_version
 
-        if self.version < parse_version(latest.version):
+        if self.version < version.parse(latest.version):
             error = None
             data = {}
             try:
@@ -1703,6 +1774,18 @@ class ModmailBot(commands.Bot):
             self.autoupdate.cancel()
             return
 
+    @tasks.loop(hours=1, reconnect=False)
+    async def log_expiry(self):
+        log_expire_after = self.config.get("log_expiration")
+        if log_expire_after == isodate.Duration():
+            return self.log_expiry.stop()
+
+        now = discord.utils.utcnow()
+        expiration_datetime = now - log_expire_after
+        expired_logs = await self.db.logs.delete_many({"closed_at": {"$lte": str(expiration_datetime)}})
+
+        logger.info(f"Deleted {expired_logs.deleted_count} expired logs.")
+
     def format_channel_name(self, author, exclude_channel=None, force_null=False):
         """Sanitises a username for use with text channel names
 
@@ -1757,14 +1840,13 @@ def main():
         pass
 
     # check discord version
-    discord_version = "2.3.0"
+    discord_version = "2.3.2"
     if discord.__version__ != discord_version:
-        logger.error(
-            "Dependencies are not updated, run pipenv install. discord.py version expected %s, received %s",
+        logger.warning(
+            "discord.py version mismatch detected. Expected %s, received %s",
             discord_version,
             discord.__version__,
         )
-        sys.exit(0)
 
     # Set up discord.py internal logging
     if os.environ.get("LOG_DISCORD"):

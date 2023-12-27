@@ -1,3 +1,4 @@
-#!/bin/sh
+#!bin/sh
 
-pipenv run python3 bot.py
+# Used as pm2 auto-start script
+poetry run python bot.py

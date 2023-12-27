@@ -14,7 +14,7 @@ print(f"Starting Modmail with {python_version}")
 
 file = open("modmail.log", "w")
 proc = subprocess.Popen(
-    "pipenv run bot",
+    "poetry run python bot.py",
     stdout=file,
     stderr=subprocess.STDOUT,
     shell=True,
