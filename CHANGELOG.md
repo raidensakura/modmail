@@ -8,6 +8,8 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+# v4.2.0
+
 ### Breaking
 - Completely rewritten blocklist system. Blocklisting now runs off its own mongoDB collection. This once again introduces backwards incompatible schema changes, so a manual migration is required. You may upgrade from both v4.0 and v4.1 using the `[p]migrate blocklist` command. This removes any need to perform the previous migration steps in v4.1.0, you may upgrade directly to this version. After running the command, blocklist functionality will return and legacy config based blocks will have been deleted. You should always back up your config before migration.
 - Migrated package manager from pipenv to Poetry. Dockerfile and GitHub Actions are also now set up to install using Poetry.
@@ -22,12 +24,12 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Added `log_expiration` config to auto-delete old logs on a schedule.
 
 ### Changed
-- Changing a threads title or NSFW status immediately updates the status in the database.
+- Changing a thread's title or NSFW status immediately updates the status in the database.
 
 ### Removed
 - The logviewer plugin is no longer included locally.
 - Removed lottie sticker support and its dependencies due to unnecessary bulk.
-- The bot will no longer embed image from gyazo.
+- Removed gyazo image embedding.
 
 ### Fixed
 - Persistent notes have been fixed after the previous discord.py update.
@@ -37,7 +39,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Fixed failure on installing local plugins when plugin path contains whitespace.
 - Fixed sticker replies not being sent in a Modmail thread.
 - Fixed plugin update command where it would fail to remove the plugin when the plugin is invalid.
-- Fixed MissingRequiredArgument requiring additional param.
+- Fixed MissingRequiredArgument requiring additional param error on certain commands.
 - Fixed rate limit issue on raw reaction add/remove events.
 
 ### Internal
