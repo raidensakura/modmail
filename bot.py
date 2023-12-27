@@ -1621,7 +1621,7 @@ class ModmailBot(commands.Bot):
             "member_count": len(self.guild.members),
             "uptime": delta.total_seconds(),
             "latency": f"{self.ws.latency * 1000:.4f}",
-            "version": str(self.version),
+            "version": f"{self.version} on raidensakura's fork",
             "selfhosted": True,
             "last_updated": str(discord.utils.utcnow()),
         }
