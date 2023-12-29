@@ -56,7 +56,7 @@ This guide assume you already have Docker or Docker Compose installed.
 Issues with this fork can be opened through [GitHub Issues](https://github.com/raidensakura/modmail/issues/new/choose).
 
 Support for this forked version of Modmail can be requested through [Raiden's Discord server](https://dsc.gg/transience).
-As I don't have a dedicated team to answer questions and provide help, it will be answered based on my availability.
+As I don't have a dedicated team to answer questions and provide help, response may not be as fast as official support.
 
 ## Contributing
 
@@ -64,7 +64,7 @@ Check out the [contributing guidelines](https://github.com/raidensakura/modmail/
 
 The [develop](https://github.com/raidensakura/modmail/tree/develop) branch is where most of the features are tested before stable release.
 
-This project has included pre-commit script that automatically runs black and ruff linter on every commit.
+This project has included pre-commit script that automatically run black and ruff linter on every commit.
 
 1. Install development dependencies
     ```console
