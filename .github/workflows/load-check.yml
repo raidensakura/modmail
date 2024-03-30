@@ -21,10 +21,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v9
       - name: Cache poetry
         id: cache-poetry
-        uses: actions/cache@v3
+        uses: actions/cache@v4.0.2
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
@@ -40,8 +40,7 @@ jobs:
           TOKEN: ${{ secrets.DISCORD_TEST_BOT }}
           CONNECTION_URI: ${{ secrets.CONNECTION_URI }}
           LOG_URL: https://domain.example
-          GUILD_ID: "616969119685935162"
-          MODMAIL_GUILD_ID: "1100011945207271494"
+          GUILD_ID: "1100011945207271494"
           OWNERS: "243316261264556032,505386507440488458"
           DATA_COLLECTION: off
           LOG_LEVEL: DEBUG
