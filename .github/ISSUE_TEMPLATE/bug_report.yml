@@ -1,14 +1,14 @@
 name: Bug Report
 description: File a bug report
-title: "[BUG]: your bug report title"
-labels: "maybe: bug"
+title: "[BUG]: "
+labels: "bug"
 body:
   - type: input
     id: bot-info-version
     attributes:
       label: Bot Version
       description: Check it with `@modmail about`
-      placeholder: eg. v3.9.4
+      placeholder: eg. v4.2.0
     validations:
       required: true
   - type: dropdown
@@ -17,39 +17,31 @@ body:
       label: How are you hosting Modmail?
       description: You can check it with `@modmail about` if you are unsure
       options:
-        - Heroku
-        - Systemd
-        - PM2
-        - Patreon
+        - Local-hosting
+        - Docker
         - Other
     validations:
       required: true
   - type: input
     id: logs
     attributes:
-      label: Error Logs
-      placeholder: https://hastebin.cc/placeholder
+      label: Error Logs / Screenshot
+      placeholder: https://hastebin.cc/paste-id
       description:
         "If your Modmail bot is online, type `@modmail debug hastebin` and include the link here.
         
-        If your Modmail bot is not online or the previous command did not generate a link, do the following:
-
-        1. Select your *bot* application at https://dashboard.heroku.com
-        
-        2. [Restart your bot](https://i.imgur.com/3FcrlKz.png)
-        
-        3. Reproduce the error to populate the error logs
-        
-        4. [Copy and paste the logs](https://i.imgur.com/TTrhitm.png)"
-    validations:
-      required: true
+        If your Modmail bot is not online or the previous command did not generate a link, restart your bot and verify the issue is reproducible.
+        After that, upload a screenshot of the **full** error into [postimages](https://postimages.org/) or any equivalent website, or
+        copy and paste **entire** error stack trace into the additional field below."
   - type: textarea
     id: screenshots
     attributes:
-      label: Screenshots
-      description: "[optional] You may add screenshots to further explain your problem."
+      label: Brief Description
+      description: "Provide a short description of the issue you're facing."
+      validations:
+        required: true
   - type: textarea
     id: additional-info
     attributes:
       label: Additional Information
-      description: "[optional] You may provide additional context for us to better understand how this issue occured."
+      description: "You may provide additional context or stack trace for us to better understand how this issue occured."
