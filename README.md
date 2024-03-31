@@ -56,7 +56,7 @@ This guide assume you already have Docker or Docker Compose installed.
 Issues with this fork can be opened through [GitHub Issues](https://github.com/raidensakura/modmail/issues/new/choose).
 
 Support for this forked version of Modmail can be requested through [Raiden's Discord server](https://dsc.gg/transience).
-As I don't have a dedicated team to answer questions and provide help, response may not be as fast as official support.
+As I don't have a dedicated team to answer questions and provide help, it will be answered based on my availability.
 
 ## Contributing
 

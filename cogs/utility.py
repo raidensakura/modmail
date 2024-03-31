@@ -277,7 +277,7 @@ class Utility(commands.Cog):
 
     @commands.command()
     @checks.has_permissions(PermissionLevel.REGULAR)
-    @utils.trigger_typing
+    @trigger_typing
     async def changelog(self, ctx, version: str.lower = ""):
         """Shows the changelog of the Modmail."""
         changelog = await Changelog.from_url(self.bot)
@@ -310,7 +310,7 @@ class Utility(commands.Cog):
 
     @commands.command(aliases=["info"])
     @checks.has_permissions(PermissionLevel.REGULAR)
-    @utils.trigger_typing
+    @trigger_typing
     async def about(self, ctx):
         """Shows information about this bot."""
         embed = discord.Embed(color=self.bot.main_color, timestamp=discord.utils.utcnow())
@@ -381,7 +381,7 @@ class Utility(commands.Cog):
 
     @commands.command(aliases=["sponsor"])
     @checks.has_permissions(PermissionLevel.REGULAR)
-    @utils.trigger_typing
+    @trigger_typing
     async def sponsors(self, ctx):
         """Shows the sponsors of this project."""
 
@@ -403,7 +403,7 @@ class Utility(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     @checks.has_permissions(PermissionLevel.OWNER)
-    @utils.trigger_typing
+    @trigger_typing
     async def debug(self, ctx):
         """Shows the recent application logs of the bot."""
 
@@ -456,7 +456,7 @@ class Utility(commands.Cog):
 
     @debug.command(name="hastebin", aliases=["haste"])
     @checks.has_permissions(PermissionLevel.OWNER)
-    @utils.trigger_typing
+    @trigger_typing
     async def debug_hastebin(self, ctx):
         """Posts application-logs to Hastebin."""
 
@@ -493,7 +493,7 @@ class Utility(commands.Cog):
 
     @debug.command(name="clear", aliases=["wipe"])
     @checks.has_permissions(PermissionLevel.OWNER)
-    @utils.trigger_typing
+    @trigger_typing
     async def debug_clear(self, ctx):
         """Clears the locally cached logs."""
 
@@ -670,7 +670,7 @@ class Utility(commands.Cog):
 
     @commands.command()
     @checks.has_permissions(PermissionLevel.ADMINISTRATOR)
-    @utils.trigger_typing
+    @trigger_typing
     async def ping(self, ctx):
         """Pong! Returns your websocket latency."""
         embed = discord.Embed(
