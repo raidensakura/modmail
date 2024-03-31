@@ -44,7 +44,7 @@ class Plugin:
             self.repo = repo
             self.name = name
             self.local = False
-            self.branch = branch if branch is not None else "stable"
+            self.branch = branch if branch is not None else "main"
             self.url = f"https://github.com/{user}/{repo}/archive/{self.branch}.zip"
             self.link = f"https://github.com/{user}/{repo}/tree/{self.branch}/{name}"
 
