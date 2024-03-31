@@ -5,6 +5,7 @@ import time
 import typing
 import warnings
 from datetime import timedelta
+from time import perf_counter
 
 import discord
 import isodate
@@ -441,22 +442,11 @@ class Thread:
 
         # Logging
         if self.channel:
-            log_data = await self.bot.api.post_log(
-                self.channel.id,
-                {
-                    "open": False,
-                    "title": match_title(self.channel.topic),
-                    "closed_at": str(discord.utils.utcnow()),
-                    "nsfw": self.channel.nsfw,
-                    "close_message": message,
-                    "closer": {
-                        "id": str(closer.id),
-                        "name": closer.name,
-                        "discriminator": closer.discriminator,
-                        "avatar_url": closer.display_avatar.url,
-                        "mod": True,
-                    },
-                },
+            log_data = await self.bot.api.close_log(
+                channel_id=self.channel.id,
+                title=match_title(self.channel.topic),
+                closer=closer,
+                close_message=message,
             )
         else:
             log_data = None
@@ -1217,6 +1207,9 @@ class Thread:
 
         topic += f"\nOther Recipients: {ids}"
 
+        # Add recipients to database
+        await self.bot.api.add_recipients(self._channel.id, users)
+
         await self.channel.edit(topic=topic)
         await self._update_users_genesis()
 
@@ -1244,11 +1237,14 @@ class ThreadManager:
 
     def __init__(self, bot):
         self.bot = bot
-        self.cache = {}
+        self.cache: typing.Dict[int, Thread] = {}
 
     async def populate_cache(self) -> None:
+        # time method runtime
+        start = perf_counter()
         for channel in self.bot.modmail_guild.text_channels:
             await self.find(channel=channel)
+        logger.info("Cache populated in %fs.", time.perf_counter() - start)
 
     def __len__(self):
         return len(self.cache)
@@ -1258,6 +1254,27 @@ class ThreadManager:
 
     def __getitem__(self, item: str) -> Thread:
         return self.cache[item]
+
+    async def quick_populate_cache(self) -> None:
+        start = perf_counter()
+
+        # create a list containing the id of every text channel in the modmail guild
+        channel_ids = [channel.id for channel in self.bot.modmail_guild.text_channels]
+        logs = await self.bot.api.get_logs(channel_ids)
+
+        for log in logs:
+            recipients = log["other_recipients"]
+
+            tasks = [self.bot.get_or_fetch_user(user_data["id"]) for user_data in recipients]
+            recipient_users: list[discord.Member] = await asyncio.gather(*tasks)
+
+            self.cache[log["recipient"]["id"]] = Thread(
+                self,
+                recipient=log["creator"]["id"],
+                channel=log["channel_id"],
+                other_recipients=recipient_users,
+            )
+        logger.debug("Cache populated in %fs.", perf_counter() - start)
 
     async def find(
         self,
@@ -1322,44 +1339,36 @@ class ThreadManager:
 
         return thread
 
-    async def _find_from_channel(self, channel):
+    async def _find_from_channel(self, channel) -> typing.Optional[Thread]:
         """
-        Tries to find a thread from a channel channel topic,
-        if channel topic doesnt exist for some reason, falls back to
+        Tries to find a thread from a channel topic,
+        if channel topic doesn't exist for some reason, falls back to
         searching channel history for genesis embed and
         extracts user_id from that.
         """
 
-        if not channel.topic:
+        logger.debug("_find_from_channel")
+        logger.debug(f"channel: {channel}")
+
+        # TODO cache thread for channel ID
+
+        log = await self.bot.api.get_log(channel.id)
+
+        if log is None:
             return None
 
-        _, user_id, other_ids = parse_channel_topic(channel.topic)
+        logger.debug("This is a thread channel")
 
-        if user_id == -1:
-            return None
+        recipients = log["other_recipients"]
+        # Create a list of tasks to fetch the users
+        tasks = [self.bot.get_or_fetch_user(user_data["id"]) for user_data in recipients]
+        # Fetch the users
+        recipient_users: list[discord.Member] = await asyncio.gather(*tasks)
 
-        if user_id in self.cache:
-            return self.cache[user_id]
-
-        try:
-            recipient = await self.bot.get_or_fetch_user(user_id)
-        except discord.NotFound:
-            recipient = None
-
-        other_recipients = []
-        for uid in other_ids:
-            try:
-                other_recipient = await self.bot.get_or_fetch_user(uid)
-            except discord.NotFound:
-                continue
-            other_recipients.append(other_recipient)
-
-        if recipient is None:
-            thread = Thread(self, user_id, channel, other_recipients)
-        else:
-            self.cache[user_id] = thread = Thread(self, recipient, channel, other_recipients)
+        thread = Thread(
+            self, recipient=log["creator"]["id"], channel=channel, other_recipients=recipient_users
+        )
         thread.ready = True
-
         return thread
 
     async def create(

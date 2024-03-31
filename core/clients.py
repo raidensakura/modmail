@@ -1,9 +1,10 @@
 import secrets
 import sys
 from json import JSONDecodeError
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import discord
+import pymongo.results
 from aiohttp import ClientResponse, ClientResponseError
 from discord import DMChannel, Member, Message, TextChannel
 from discord.ext import commands
@@ -429,6 +430,12 @@ class ApiClient:
     async def get_user_info(self) -> Optional[dict]:
         return NotImplemented
 
+    async def add_recipients(self, channel_id: int, recipient: List[discord.User]):
+        return NotImplemented
+
+    async def close_log(self, channel_id: int, title: str, close_message: str, closer: discord.User) -> dict:
+        return NotImplemented
+
     async def update_title(self, title: str, channel_id: Union[str, int]):
         return NotImplemented
 
@@ -566,6 +573,9 @@ class MongoDBClient(ApiClient):
         logger.debug("Retrieving channel %s logs.", channel_id)
         return await self.logs.find_one({"channel_id": str(channel_id)})
 
+    async def get_logs(self, channel_id: List[Union[str, int]]) -> dict:
+        return await self.logs.find({"channel_id": {"$in": [str(i) for i in channel_id]}}).to_list(None)
+
     async def get_log_link(self, channel_id: Union[str, int]) -> str:
         doc = await self.get_log(channel_id)
         logger.debug("Retrieving log link for channel %s.", channel_id)
@@ -593,6 +603,7 @@ class MongoDBClient(ApiClient):
                 "recipient": {
                     "id": str(recipient.id),
                     "name": recipient.name,
+                    "global_name": recipient.global_name,
                     "discriminator": recipient.discriminator,
                     "avatar_url": recipient.display_avatar.url,
                     "mod": False,
@@ -600,6 +611,7 @@ class MongoDBClient(ApiClient):
                 "creator": {
                     "id": str(creator.id),
                     "name": creator.name,
+                    "global_name": creator.global_name,
                     "discriminator": creator.discriminator,
                     "avatar_url": creator.display_avatar.url,
                     "mod": isinstance(creator, Member),
@@ -662,6 +674,7 @@ class MongoDBClient(ApiClient):
             "author": {
                 "id": str(message.author.id),
                 "name": message.author.name,
+                "global_name": message.author.global_name,
                 "discriminator": message.author.discriminator,
                 "avatar_url": message.author.display_avatar.url,
                 "mod": not isinstance(message.channel, DMChannel),
@@ -714,6 +727,7 @@ class MongoDBClient(ApiClient):
                 "author": {
                     "id": str(message.author.id),
                     "name": message.author.name,
+                    "global_name": message.author.global_name,
                     "discriminator": message.author.discriminator,
                     "avatar_url": message.author.display_avatar.url,
                 },
@@ -734,6 +748,52 @@ class MongoDBClient(ApiClient):
 
     async def edit_note(self, message_id: Union[int, str], message: str):
         await self.db.notes.update_one({"message_id": str(message_id)}, {"$set": {"message": message}})
+
+    async def add_recipients(self, channel_id: int, recipient: List[discord.User]):
+        results: pymongo.results.UpdateResult = await self.bot.db.logs.update_one(
+            {"channel_id": str(channel_id)},
+            {
+                "$addToSet": {
+                    "other_recipients": {
+                        "$each": [
+                            {
+                                "id": r.id,
+                                "name": r.name,
+                                "global_name": r.global_name,
+                                "discriminator": r.discriminator,
+                                "avatar_url": r.display_avatar.url,
+                            }
+                            for r in recipient
+                        ]
+                    }
+                }
+            },
+        )
+        if results.matched_count == 0:
+            raise ValueError(f"Channel id {channel_id} not found in mongodb")
+        return
+
+    async def close_log(self, channel_id: int, title: str, close_message: str, closer: discord.User) -> dict:
+        # TODO doesn't set title yet
+        return await self.bot.db.logs.find_one_and_update(
+            {"channel_id": str(channel_id)},
+            {
+                "$set": {
+                    "open": False,
+                    "closed_at": str(discord.utils.utcnow()),
+                    "title": title,
+                    "close_message": close_message,
+                    "closer": {
+                        "id": str(closer.id),
+                        "name": closer.name,
+                        "global_name": closer.name,
+                        "discriminator": closer.discriminator,
+                        "avatar_url": closer.display_avatar.url,
+                        "mod": True,
+                    },
+                },
+            },
+        )
 
     def get_plugin_partition(self, cog):
         cls_name = cog.__class__.__name__
