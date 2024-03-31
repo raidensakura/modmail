@@ -139,6 +139,7 @@ temp/
 test.py
 
 # Unused repository files
+**/.git/
 .env.example
 .gitignore
 .dockerignore

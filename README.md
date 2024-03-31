@@ -64,7 +64,7 @@ Check out the [contributing guidelines](https://github.com/raidensakura/modmail/
 
 The [develop](https://github.com/raidensakura/modmail/tree/develop) branch is where most of the features are tested before stable release.
 
-This project has included pre-commit script that automatically runs black and ruff linter on every commit.
+This project has included pre-commit script that automatically run black and ruff linter on every commit.
 
 1. Install development dependencies
     ```console

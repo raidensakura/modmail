@@ -8,6 +8,13 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+### Added
+- Add `?avatar` command for changing the bot avatar with a given URL or attachment.
+
+### Fixed
+- Improve select options in the select menu (Thanks #3298).
+- Fix the bot failing catastrophically when plugin registry fails to load (Thanks #3328).
+
 # v4.2.0
 
 ### Breaking
