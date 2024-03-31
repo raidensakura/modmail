@@ -346,7 +346,7 @@ class Utility(commands.Cog):
         embed.add_field(name="Bot Version", value=f"`{self.bot.version}`")
         _c_url = "https://github.com/modmail-dev/modmail/graphs/contributors"
         _c = f"[and many other contributors]({_c_url})"
-        embed.add_field(name="Authors", value=f"`kyb3r`, `Taki`, `fourjr`, {_c}")
+        embed.add_field(name="Authors", value=f"kyb3r, Taki, fourjr, {_c}")
         embed.add_field(name="Hosting Method", value=self.bot.hosting_method.name)
 
         changelog = await Changelog.from_url(self.bot)
@@ -361,23 +361,18 @@ class Utility(commands.Cog):
             footer = "You are up to date with the latest version."
 
         embed.add_field(
-            name="Want Modmail in Your Server?",
-            value="Follow the installation guide on [GitHub](https://github.com/modmail-dev/modmail/) "
-            "and join our [Discord server](https://discord.gg/zmdYe3ZVHG)!",
+            name="Bot Details",
+            value="This is an open-source [Discord Modmail bot](https://github.com/modmail-dev/Modmail) written in Python. "
+            "Visit our official [support server](https://discord.gg/zmdYe3ZVHG) for help "
+            "and refer to the [documentation page](https://docs.modmail.dev) for information.",
             inline=False,
         )
 
         embed.add_field(
-            name="Support the Developers",
-            value="This bot is completely free for everyone. We rely on kind individuals "
-            "like you to support us on [`Patreon`](https://patreon.com/kyber) (perks included) "
-            "to keep this bot free forever!",
-            inline=False,
-        )
-
-        embed.add_field(
-            name="Project Sponsors",
-            value=f"Checkout the people who supported Modmail with command `{self.bot.prefix}sponsors`!",
+            name="Additional Notes",
+            value="This is a forked version of the original Modmail bot maintained by [`@raiden_sakura`](https://github.com/raidensakura/modmail). "
+            "This version contains several backward-incompatible changes, hence "
+            "is not compatible with the original bot.",
             inline=False,
         )
 
