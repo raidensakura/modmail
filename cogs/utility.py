@@ -14,6 +14,7 @@ from subprocess import PIPE
 from textwrap import indent
 from typing import Union
 
+import aiohttp
 import discord
 from aiohttp import ClientResponseError
 from discord.enums import ActivityType, Status
@@ -25,7 +26,7 @@ from core import checks, migrations, utils
 from core.changelog import Changelog
 from core.models import HostingMethod, InvalidConfigError, PermissionLevel, UnseenFormatter, getLogger
 from core.paginator import EmbedPaginatorSession, MessagePaginatorSession
-from core.utils import DummyParam, trigger_typing, truncate
+from core.utils import DummyParam, is_image_url, trigger_typing, truncate
 
 logger = getLogger(__name__)
 
@@ -2190,6 +2191,55 @@ class Utility(commands.Cog):
                         await ctx.send(f"```py\n{page}\n```")
 
         await self.bot.add_reaction(ctx.message, "\u2705")
+
+    @commands.command(name="avatar")
+    @commands.cooldown(3, 10, commands.BucketType.default)
+    @checks.has_permissions(PermissionLevel.OWNER)
+    @trigger_typing
+    async def avatar(self, ctx: commands.Context, url: Union[str, None]):
+        """
+        Updates the bot's avatar within discord.
+        """
+        if not ctx.message.attachments and (url is None or not is_image_url(url)):
+            embed = discord.Embed(
+                title="Error",
+                description="You need to upload or link a valid image file.",
+                color=self.bot.error_color,
+            )
+            return await ctx.send(embed=embed)
+        dc_avatar = None
+        if ctx.message.attachments:
+            dc_avatar = await ctx.message.attachments[0].read()
+        elif url:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    dc_avatar = await resp.read()
+
+        embed = None
+        if dc_avatar:
+            try:
+                await self.bot.user.edit(avatar=dc_avatar)
+                logger.info("Bot Avatar updated.")
+                embed = discord.Embed(
+                    title="Successfully updated",
+                    description="Successfully updated avatar.",
+                    color=self.bot.main_color,
+                )
+            except Exception as e:
+                logger.error(f"Uploading the avatar to discord failed: {e}")
+                embed = discord.Embed(
+                    title="Error",
+                    description=f"Could not upload avatar to Discord: {e}.",
+                    color=self.bot.error_color,
+                )
+            await ctx.send(embed=embed)
+        else:
+            embed = discord.Embed(
+                title="Error",
+                description="Could not fetch an image file from given URL.",
+                color=self.bot.error_color,
+            )
+            await ctx.send(embed=embed)
 
 
 async def setup(bot):
