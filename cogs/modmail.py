@@ -779,7 +779,7 @@ class Modmail(commands.Cog):
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
     @commands.cooldown(1, 600, BucketType.channel)
-    async def adduser(self, ctx, *users_arg: Union[discord.Member, discord.Role, str]):
+    async def adduser(self, ctx, *users_arg: Union[discord.User, discord.Role, str]):
         """Adds a user to a modmail thread
 
         `options` can be `silent` or `silently`.
@@ -792,7 +792,7 @@ class Modmail(commands.Cog):
                     silent = True
             elif isinstance(u, discord.Role):
                 users += u.members
-            elif isinstance(u, discord.Member):
+            elif isinstance(u, discord.User):
                 users.append(u)
 
         for u in users:
