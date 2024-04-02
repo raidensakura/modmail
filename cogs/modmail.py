@@ -15,7 +15,7 @@ from core.blocklist import BlockType
 from core.models import DMDisabled, PermissionLevel, SimilarCategoryConverter, getLogger
 from core.paginator import EmbedPaginatorSession
 from core.thread import Thread
-from core.time import ShortTime, UserFriendlyTime, human_timedelta
+from core.time import ShortTime, human_timedelta
 from core.utils import *
 
 logger = getLogger(__name__)
@@ -461,24 +461,27 @@ class Modmail(commands.Cog):
     async def close(
         self,
         ctx,
-        option: Optional[Literal["silent", "silently", "cancel"]] = "",
+        duration: Optional[ShortTime] = None,
+        option: Optional[Literal["silent", "silently", "cancel"]] = None,
         *,
-        after: UserFriendlyTime = None,
+        message: Optional[str] = None,
     ):
         """
         Close the current thread.
 
         Close after a period of time:
-        - `{prefix}close in 5 hours`
-        - `{prefix}close 2m30s`
+        - `{prefix}close 5hours`
+        - `{prefix}close 3h2m30s`
 
-        Custom close messages:
-        - `{prefix}close 2 hours The issue has been resolved.`
-        - `{prefix}close We will contact you once we find out more.`
+        Close thread silently:
+        - `{prefix}close silent`
 
-        Silently close a thread (no message)
-        - `{prefix}close silently`
-        - `{prefix}close silently in 10m`
+        Close thread silently with a message:
+        - `{prefix}close silent The issue has been resolved.`
+        - `{prefix}close silently We will contact you once we find out more.`
+
+        Close after a period of time silently with a message:
+        `{prefix}close 3h10m silently Thread marked as inactive.`
 
         Stop a thread from closing:
         - `{prefix}close cancel`
@@ -486,7 +489,7 @@ class Modmail(commands.Cog):
 
         thread = ctx.thread
 
-        close_after = (after.dt - after.now).total_seconds() if after else 0
+        close_after = (duration.dt - duration.now).total_seconds() if duration else 0
         silent = any(x == option for x in {"silent", "silently"})
         cancel = option == "cancel"
 
@@ -504,12 +507,11 @@ class Modmail(commands.Cog):
 
             return await ctx.send(embed=embed)
 
-        message = after.arg if after else None
         if self.bot.config["require_close_reason"] and message is None:
             raise commands.BadArgument("Provide a reason for closing the thread.")
 
-        if after and after.dt > after.now:
-            await self.send_scheduled_close_message(ctx, after, silent)
+        if duration and duration.dt > duration.now:
+            await self.send_scheduled_close_message(ctx, duration, silent)
 
         await thread.close(closer=ctx.author, after=close_after, message=message, silent=silent)
 
