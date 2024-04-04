@@ -615,7 +615,5 @@ def convert_sticker(sticker: discord.Sticker) -> str:
     elif sticker.format.name == "lottie":
         logger.debug("Unable to convert Lottie sticker")
     elif sticker.format.name == "gif":
-        pattern = r"(https://)cdn\.discordapp\.com(/.+)"
-        replacement = r"\1media.discordapp.net\2"
-        url = re.sub(pattern, replacement, sticker.url)
+        url = f"https://media.discordapp.net/stickers/{sticker.id}.gif"
     return url

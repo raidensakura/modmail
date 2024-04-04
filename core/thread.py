@@ -947,6 +947,7 @@ class Thread:
         for i, sticker in enumerate(message.stickers):
             url = convert_sticker(sticker)
             if url:
+                sticker.url = url
                 message.stickers[i] = sticker
 
         if not from_mod and not note:
