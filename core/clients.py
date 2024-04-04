@@ -680,6 +680,15 @@ class MongoDBClient(ApiClient):
                 }
                 for a in message.attachments
             ],
+            "stickers": [
+                {
+                    "format": s.format,
+                    "id": s.id,
+                    "name": s.name,
+                    "url": s.url,
+                }
+                for s in message.stickers
+            ],
         }
 
         return await self.logs.find_one_and_update(

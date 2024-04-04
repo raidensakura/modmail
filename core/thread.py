@@ -17,6 +17,7 @@ from core.utils import (
     ConfirmThreadCreationView,
     DenyButton,
     DummyParam,
+    convert_sticker,
     create_thread_channel,
     get_joint_id,
     get_top_role,
@@ -943,6 +944,11 @@ class Thread:
         if not self.ready:
             await self.wait_until_ready()
 
+        for i, sticker in enumerate(message.stickers):
+            url = convert_sticker(sticker)
+            if url:
+                message.stickers[i] = sticker
+
         if not from_mod and not note:
             self.bot.loop.create_task(self.bot.api.append_log(message, channel_id=self.channel.id))
 
@@ -995,7 +1001,8 @@ class Thread:
                 url=f"https://discordapp.com/users/{author.id}#{message.id}",
             )
 
-        ext = [(a.url, a.filename, False) for a in message.attachments]
+        ext = [(a.url, a.filename) for a in message.attachments]
+        stickers = [(a.id, a.url, a.name) for a in message.stickers]
 
         images = []
         attachments = []
@@ -1005,62 +1012,41 @@ class Thread:
             else:
                 attachments.append(attachment)
 
-        image_urls = re.findall(
-            r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[.\-]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+",
+        image_regex = re.findall(
+            r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[\/#%&\-+.?=]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+",
             message.content,
         )
 
-        image_urls = [
-            (is_image_url(url, convert_size=False), None, False)
-            for url in image_urls
-            if is_image_url(url, convert_size=False)
-        ]
-        images.extend(image_urls)
-        images.extend(
-            (
-                i.url
-                if i.format in (discord.StickerFormatType.png, discord.StickerFormatType.apng)
-                else None,
-                i.name,
-                True,
-            )
-            for i in message.stickers
-        )
+        for match in image_regex:
+            if is_image_url(match, convert_size=False):
+                images.append((match, None))
 
-        embedded_image = False
+        img_on_first_embed = False
 
         prioritize_uploads = any(i[1] is not None for i in images)
 
         additional_images = []
         additional_count = 1
 
-        for url, filename, is_sticker in images:
+        if note:
+            color = self.bot.main_color
+        elif from_mod:
+            color = self.bot.mod_color
+        else:
+            color = self.bot.recipient_color
+
+        for url, filename in images:
             if (
                 not prioritize_uploads or ((url is None or is_image_url(url)) and filename)
-            ) and not embedded_image:
-                if url is not None:
+            ) and not img_on_first_embed:
+                if url:
                     embed.set_image(url=url)
                 if filename:
-                    if is_sticker:
-                        if url is None:
-                            description = f"{filename}: Unable to retrieve sticker image"
-                        else:
-                            description = f"[{filename}]({url})"
-                        embed.add_field(name="Sticker", value=description)
-                    else:
-                        embed.add_field(name="Image", value=f"[{filename}]({url})")
-                embedded_image = True
+                    embed.add_field(name="Image", value=f"[{filename}]({url})")
+                img_on_first_embed = True
             else:
-                if note:
-                    color = self.bot.main_color
-                elif from_mod:
-                    color = self.bot.mod_color
-                else:
-                    color = self.bot.recipient_color
-
                 img_embed = discord.Embed(color=color)
-
-                if url is not None:
+                if url:
                     img_embed.set_image(url=url)
                     img_embed.url = url
                 if filename is not None:
@@ -1069,6 +1055,26 @@ class Thread:
                 img_embed.timestamp = message.created_at
                 additional_images.append(destination.send(embed=img_embed))
                 additional_count += 1
+
+        for id, url, name in stickers:
+            if not img_on_first_embed:
+                embed.set_image(url=url)
+                embed.add_field(name="Sticker", value=f"[{name}]({url})", inline=False)
+                embed.url = url
+                embed.timestamp = message.created_at
+            else:
+                if note:
+                    color = self.bot.main_color
+                elif from_mod:
+                    color = self.bot.mod_color
+                else:
+                    color = self.bot.recipient_color
+                sticker_embed = discord.Embed(color=self.bot.main_color)
+                sticker_embed.set_image(url=url)
+                sticker_embed.add_field(name="Sticker", value=f"[{name}]({url})", inline=False)
+                sticker_embed.url = url
+                sticker_embed.timestamp = message.created_at
+                additional_images.append(destination.send(embed=sticker_embed))
 
         file_upload_count = 1
 

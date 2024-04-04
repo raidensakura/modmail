@@ -592,3 +592,30 @@ class DummyParam:
     def __init__(self, name):
         self.name = name
         self.displayed_name = name
+
+
+def convert_sticker(sticker: discord.Sticker) -> str:
+    """A method to convert Discord sticker object into a displayable image URL.
+
+    Parameters
+    ----------
+    sticker : discord.Sticker
+        Discord sticker object.
+
+    Returns
+    -------
+    Optional[str]
+        URL of the image if successfully converted
+    """
+    url = None
+    if sticker.format.name == "png":
+        url = sticker.url
+    elif sticker.format.name == "apng":
+        logger.debug("Unable to convert APNG sticker")
+    elif sticker.format.name == "lottie":
+        logger.debug("Unable to convert Lottie sticker")
+    elif sticker.format.name == "gif":
+        pattern = r"(https://)cdn\.discordapp\.com(/.+)"
+        replacement = r"\1media.discordapp.net\2"
+        url = re.sub(pattern, replacement, sticker.url)
+    return url
