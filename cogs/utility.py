@@ -14,9 +14,8 @@ from subprocess import PIPE
 from textwrap import indent
 from typing import Union
 
-import aiohttp
 import discord
-from aiohttp import ClientResponseError
+from aiohttp import ClientResponseError, ClientSession
 from discord.enums import ActivityType, Status
 from discord.ext import commands, tasks
 from discord.ext.commands.view import StringView
@@ -2206,7 +2205,7 @@ class Utility(commands.Cog):
         if ctx.message.attachments:
             dc_avatar = await ctx.message.attachments[0].read()
         elif url:
-            async with aiohttp.ClientSession() as session:
+            async with ClientSession() as session:
                 async with session.get(url) as resp:
                     dc_avatar = await resp.read()
 
