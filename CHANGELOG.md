@@ -9,11 +9,17 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 # [UNRELEASED]
 
 ### Added
-- Add `?avatar` command for changing the bot avatar with a given URL or attachment.
+- Added `?avatar` command for changing the bot avatar with a given URL or attachment.
 
 ### Fixed
-- Improve select options in the select menu (Thanks #3298).
-- Fix the bot failing catastrophically when plugin registry fails to load (Thanks #3328).
+- Improved select options in the select menu (Thanks #3298).
+- Fixed the bot failing catastrophically when plugin registry fails to load (Thanks #3328).
+- Modmail now properly save stickers into MongoDB (#3240).
+- Reworked `?close` command syntax to fix improper argument parsing (#3310).
+- Fixed improper type hinting in `?adduser` command leading to command failure. (#3311).
+
+### Changed
+- `?close` command now have a different order of arguments.
 
 # v4.2.0
 
