@@ -8,6 +8,9 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+# Breaking
+- The `?close` command argument order has been changed due to technical difficulties with the structure of argument passing.
+
 ### Added
 - Added `?avatar` command for changing the bot avatar with a given URL or attachment.
 
@@ -17,9 +20,6 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Modmail now properly save stickers into MongoDB (#3240).
 - Reworked `?close` command syntax to fix improper argument parsing (#3310).
 - Fixed improper type hinting in `?adduser` command leading to command failure. (#3311).
-
-### Changed
-- `?close` command now have a different order of arguments.
 
 # v4.2.0
 
