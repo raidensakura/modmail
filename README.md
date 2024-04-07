@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://modmail-docs.netlify.app/logo-long.png" align="center"><br>
-  <strong><i>Raiden's personal fork of Python Discord Modmail bot.</i></strong><br><br>
+  <strong><i>A Modmail fork with a focus on improvements and bug fixes.</i></strong><br><br>
 
   <a href="#"><img src="https://img.shields.io/badge/Version-4.2.0-7d5edd?style=shield&logo=https://modmail-docs.netlify.app/favicon.png"></a>
   <img src="https://img.shields.io/badge/3.8_--_3.11-red?logo=python&logoColor=white&label=Python&labelColor=%233772a2&color=%23ffdd54">
@@ -13,9 +13,9 @@
 
 ## Why hard fork?
 
-Several fundamental issues for the official Modmail require fixes that are backward-incompatible, hence I decided to make this fork since it's unlikely my PR will be accepted. As this is a pretty niche use-case, most users should probably not use this. As a disclaimer, **I will not be responsible for any damage caused to your Modmail instance by using my fork.** This is made public simply for the spirit of open-source software.
+Modmail has quite a few significant problems with its feature implementations, ranging from improper Discord sticker support down to suboptimal user blocking feature. Inevitably, fixing these fundametal issues required backward-incompatible fixes and since Modmail is rather slow on updates, I decided to turn this into a public hard fork for other user's benefits and for the spirit of FOSS.
 
-This is mainly maintained by [@raidensakura](https://github.com/raidensakura) and [@khakers](https://github.com/khakers).
+**Important disclaimer:** This fork is neither supported nor endorsed by the Official Modmail team. __Do not ask__ the official support team if you have issues on this forked version. Since most of the modifications implemented are backward-incompatible, I will not be responsible for the damage caused to your Modmail instance by using this fork.
 
 ## Installation
 
@@ -29,9 +29,9 @@ This guide assumes you have installed **git**, a **compatible Python version** a
     $ cd modmail
     ```
 2. Create a Discord bot account, grant the necessary intents, and invite the bot.
-3. Create a free MongoDB database.
-4. Rename the file `.env.example` to `.env` and fill it with appropriate values
-5. Install the Python dependencies and run the bot
+3. Create a MongoDB database and a user for the bot to connect to.
+4. Rename the file `.env.example` to `.env` and fill it with appropriate values.
+5. Install the Python dependencies and run the bot.
     ```console
     $ poetry install --no-root
     $ poetry run python bot.py
@@ -53,10 +53,7 @@ This guide assume you already have Docker or Docker Compose installed.
 
 ## Support & Issues
 
-Issues with this fork can be opened through [GitHub Issues](https://github.com/raidensakura/modmail/issues/new/choose).
-
-Support for this forked version of Modmail can be requested through [Raiden's Discord server](https://dsc.gg/transience).
-As I don't have a dedicated team to answer questions and provide help, it will be answered based on my availability.
+This is mainly maintained by [@raidensakura](https://github.com/raidensakura), issues and support questions can be raised via [Discord Server](https://dsc.gg/transience) or [GitHub Issues](https://github.com/raidensakura/modmail/issues/new/choose). 
 
 ## Contributing
 
@@ -66,11 +63,11 @@ The [develop](https://github.com/raidensakura/modmail/tree/develop) branch is wh
 
 This project has included pre-commit script that automatically run black and ruff linter on every commit.
 
-1. Install development dependencies
+1. Install development dependencies.
     ```console
     $ poetry install --no-root --only dev
     ```
-2. Install the pre-commit hook
+2. Install the pre-commit hook.
     ```console
     $ poetry run pre-commit install
     ```
