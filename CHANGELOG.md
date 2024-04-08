@@ -23,6 +23,9 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Reworked `?close` command syntax to fix improper argument parsing (#3310).
 - Fixed improper type hinting in `?adduser` command leading to command failure. (#3311).
 
+### Deprecated
+- Dropped support for Python 3.8 as the `pre-commit` development dependency requires Python 3.9 and above to be installed. Users on this version should upgrade to a supported Python version.
+
 # v4.2.0
 
 ### Breaking
