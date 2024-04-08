@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "Discord Modmail"
 version = "4.3.0"
-description = "Raiden's personal fork of Python Discord Modmail bot"
+description = "A Modmail fork with a focus on improvements and bug fixes"
 authors = [
 	"Raiden Sakura <raiden@project-mei.xyz>",
 	"kyb3r <noemail@example.com>",
