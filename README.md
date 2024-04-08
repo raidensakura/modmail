@@ -2,7 +2,7 @@
   <img src="https://modmail-docs.netlify.app/logo-long.png" align="center"><br>
   <strong><i>A Modmail fork with a focus on improvements and bug fixes.</i></strong><br><br>
 
-  <a href="#"><img src="https://img.shields.io/badge/Version-4.2.0-7d5edd?style=shield&logo=https://modmail-docs.netlify.app/favicon.png"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-4.3.0-7d5edd?style=shield&logo=https://modmail-docs.netlify.app/favicon.png"></a>
   <img src="https://img.shields.io/badge/3.8_--_3.11-red?logo=python&logoColor=white&label=Python&labelColor=%233772a2&color=%23ffdd54">
   <a href="https://github.com/ambv/black"><img src="https://img.shields.io/badge/Code%20Style-Black-black?style=shield"></a>
   <a href="https://github.com/modmail-dev/modmail/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-e74c3c.svg?style=shield" alt="MIT License"></a>

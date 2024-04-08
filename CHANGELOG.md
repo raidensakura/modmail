@@ -8,6 +8,8 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+# v4.3.0
+
 # Breaking
 - The `?close` command argument order has been changed due to technical difficulties with the structure of argument passing.
 
@@ -17,7 +19,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 ### Fixed
 - Improved select options in the select menu (Thanks #3298).
 - Fixed the bot failing catastrophically when plugin registry fails to load (Thanks #3328).
-- Modmail now properly save stickers into MongoDB (#3240).
+- Modmail now properly save stickers as its own object in MongoDB. (#3240).
 - Reworked `?close` command syntax to fix improper argument parsing (#3310).
 - Fixed improper type hinting in `?adduser` command leading to command failure. (#3311).
 
