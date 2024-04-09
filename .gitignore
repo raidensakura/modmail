@@ -55,16 +55,16 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
+# Django
 *.log
 local_settings.py
 db.sqlite3
 
-# Flask stuff:
+# Flask
 instance/
 .webassets-cache
 
-# Scrapy stuff:
+# Scrapy
 .scrapy
 
 # Sphinx documentation
@@ -139,3 +139,7 @@ temp/
 test.py
 stack.yml
 .github/workflows/build_docker.yml
+
+# PDM
+.pdm-python
+.pdm-build/

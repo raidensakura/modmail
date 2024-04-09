@@ -21,7 +21,7 @@ Modmail has quite a few significant problems with its feature implementations, r
 
 This is a general installation guide for developers. Refer to the [documentation](https://modmail-docs.netlify.app) for user guide.
 
-This guide assumes you have installed **git**, a **compatible Python version** and [**Poetry**](https://python-poetry.org/) installed.
+This guide assumes you have installed **git**, a **compatible Python version** and [**Poetry**](https://python-poetry.org/) / [**PDM**](https://pdm-project.org/) installed.
 
 1. Clone the repository
     ```console
@@ -31,11 +31,19 @@ This guide assumes you have installed **git**, a **compatible Python version** a
 2. Create a Discord bot account, grant the necessary intents, and invite the bot.
 3. Create a MongoDB database and a user for the bot to connect to.
 4. Rename the file `.env.example` to `.env` and fill it with appropriate values.
-5. Install the Python dependencies and run the bot.
-    ```console
-    $ poetry install --no-root
-    $ poetry run python bot.py
-    ```
+5. Install project dependencies and run the bot.
+	- Using Poetry:  
+
+		```console
+		$ poetry install --no-root
+		$ poetry run python bot.py
+		```
+	- Using PDM:
+
+		```console
+		$ pdm install
+		$ pdm run python bot.py
+		```
 7. [Optional] Load the logviewer plugin with `[p]plugin load raidensakura/modmail-plugins/logviewer@main`
 
 ## Running the Docker Image
