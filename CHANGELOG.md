@@ -8,6 +8,10 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+# v4.3.1
+
+- Fix `?close` command failing silently due to attribute error.
+
 # v4.3.0
 
 # Breaking
