@@ -438,8 +438,8 @@ class Modmail(commands.Cog):
         sent_emoji, _ = await self.bot.retrieve_emoji()
         await self.bot.add_reaction(ctx.message, sent_emoji)
 
-    async def send_scheduled_close_message(self, ctx, after, silent=False):
-        human_delta = human_timedelta(after.dt)
+    async def send_scheduled_close_message(self, ctx, duration, message, silent=False):
+        human_delta = human_timedelta(duration.dt)
 
         embed = discord.Embed(
             title="Scheduled close",
@@ -447,15 +447,15 @@ class Modmail(commands.Cog):
             color=self.bot.error_color,
         )
 
-        if after.arg and not silent:
-            embed.add_field(name="Message", value=after.arg)
+        if message and not silent:
+            embed.add_field(name="Message", value=message)
 
         embed.set_footer(text="Closing will be cancelled if a thread message is sent.")
-        embed.timestamp = after.dt
+        embed.timestamp = duration.dt
 
         await ctx.send(embed=embed)
 
-    @commands.command(usage="[after] [close message]")
+    @commands.command(usage="[time] [option] [close message]")
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
     async def close(
@@ -489,7 +489,7 @@ class Modmail(commands.Cog):
 
         thread = ctx.thread
 
-        close_after = (duration.dt - duration.now).total_seconds() if duration else 0
+        close_after = (duration.dt - ctx.message.created_at).total_seconds() if duration else 0
         silent = any(x == option for x in {"silent", "silently"})
         cancel = option == "cancel"
 
@@ -510,8 +510,8 @@ class Modmail(commands.Cog):
         if self.bot.config["require_close_reason"] and message is None:
             raise commands.BadArgument("Provide a reason for closing the thread.")
 
-        if duration and duration.dt > duration.now:
-            await self.send_scheduled_close_message(ctx, duration, silent)
+        if duration and duration.dt > ctx.message.created_at:
+            await self.send_scheduled_close_message(ctx, duration, message, silent)
 
         await thread.close(closer=ctx.author, after=close_after, message=message, silent=silent)
 
