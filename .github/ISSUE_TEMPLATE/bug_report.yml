@@ -38,8 +38,8 @@ body:
     attributes:
       label: Brief Description
       description: "Provide a short description of the issue you're facing."
-      validations:
-        required: true
+    validations:
+      required: true
   - type: textarea
     id: additional-info
     attributes:
