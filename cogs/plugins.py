@@ -306,7 +306,7 @@ class Plugins(commands.Cog):
             if self.bot.config.get("registry_plugins_only"):
                 embed = discord.Embed(
                     description="This plugin is not in the registry. To install this plugin, "
-                    "you must set `REGISTRY_PLUGINS_ONLY=no` or remove this key in your .env file.",
+                    "you must set `REGISTRY_PLUGINS_ONLY=false` or remove this key in your .env file.",
                     color=self.bot.error_color,
                 )
                 await ctx.send(embed=embed)
@@ -356,7 +356,7 @@ class Plugins(commands.Cog):
         if plugin.name in self.bot.cogs:
             # another class with the same name
             embed = discord.Embed(
-                description="Cannot install this plugin (dupe cog name).",
+                description="Plugin with this name is already installed.",
                 color=self.bot.error_color,
             )
             return await ctx.send(embed=embed)
