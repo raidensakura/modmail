@@ -4,8 +4,9 @@
 
   <img alt="Dynamic TOML Badge" src="https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fraidensakura%2Fmodmail%2Fstable%2Fpyproject.toml&query=tool.poetry.version&style=flat&label=Version&color=7d5edd">
   <img alt="Dynamic TOML Badge" src="https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fraidensakura%2Fmodmail%2Fstable%2Fpyproject.toml&query=tool.poetry.dependencies.python&style=flat&logo=python&logoColor=white&label=Python&labelColor=%233772a2&color=%23ffdd54">
+  <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/raidensakura/modmail?label=Docker%20Pulls&link=https%3A%2F%2Fgithub.com%2Fraidensakura%2Fmodmail%2Fpkgs%2Fcontainer%2Fmodmail">
   <a href="https://github.com/ambv/black"><img src="https://img.shields.io/badge/Code%20Style-Black-black?style=shield"></a>
-  <a href="https://github.com/modmail-dev/modmail/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-e74c3c.svg?style=shield" alt="MIT License"></a>
+  <img alt="GitHub License" src="https://img.shields.io/github/license/raidensakura/modmail?link=https%3A%2F%2Fgithub.com%2Fraidensakura%2Fmodmail%2Fblob%2Fstable%2FLICENSE">
   <a href="https://discord.gg/cnUpwrnpYb"><img src="https://img.shields.io/discord/616969119685935162.svg?label=Discord&logo=Discord&colorB=7289da&style=shield" alt="Support"></a>
 
 <img src='https://github.com/raidensakura/modmail/assets/38610216/106e8fa3-6f8e-4b00-9968-f5c2f3108da0' align='center' width=500>
