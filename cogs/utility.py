@@ -1989,6 +1989,16 @@ class Utility(commands.Cog):
         To stay up-to-date with the latest commit from GitHub, specify "force" as the flag.
         """
 
+        if self.bot.hosting_method == HostingMethod.DOCKER:
+            return await ctx.send(
+                embed=discord.Embed(
+                    title="This command is not supported on Docker",
+                    description="You can update your bot by pulling the latest image from the registry:"
+                    "\n`docker pull ghcr.io/raidensakura/modmail:stable`",
+                    color=self.bot.error_color,
+                )
+            )
+
         changelog = await Changelog.from_url(self.bot)
         latest = changelog.latest_version
 
