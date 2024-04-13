@@ -10,6 +10,7 @@ import discord
 import isodate
 from discord.ext.commands import CommandError, MissingRequiredArgument
 from discord.types.user import PartialUser as PartialUserPayload, User as UserPayload
+import isodate.duration
 
 from core.models import DMDisabled, DummyMessage, getLogger
 from core.utils import (
@@ -384,7 +385,10 @@ class Thread:
 
     async def _close_after(self, after, closer, silent, delete_channel, message):
         await asyncio.sleep(after)
-        return self.bot.loop.create_task(self._close(closer, silent, delete_channel, message, True))
+        timeout = self.bot.config.get("thread_auto_close")
+        if timeout != isodate.Duration():
+            return self.bot.loop.create_task(self._close(closer, silent, delete_channel, message, True))
+        logger.debug("Cancelling thread auto close task due to disabled thread_auto_close")
 
     async def close(
         self,
