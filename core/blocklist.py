@@ -103,7 +103,7 @@ class Blocklist:
         Returns
         -------
 
-        True if there is an active block for the given ID
+        Tuple[bool, Optional[BlocklistEntry]]
 
         """
         result = await self.blocklist_collection.find_one({"id": user_or_role_id})
