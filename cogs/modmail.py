@@ -1556,6 +1556,7 @@ class Modmail(commands.Cog):
 
         for u in list(users):
             exists = await self.bot.threads.find(recipient=u)
+            is_user_blocked, block_reason = await self.bot.blocklist.is_user_blocked(u)
             if exists:
                 errors.append(f"A thread for {u} already exists.")
                 if exists.channel:
@@ -1565,7 +1566,7 @@ class Modmail(commands.Cog):
             elif u.bot:
                 errors.append(f"{u} is a bot, cannot add to thread.")
                 users.remove(u)
-            elif await self.bot.blocklist.is_user_blocked(u):
+            elif is_user_blocked:
                 ref = f"{u.mention} is" if ctx.author != u else "You are"
                 errors.append(f"{ref} currently blocked from contacting {self.bot.user.name}.")
                 users.remove(u)

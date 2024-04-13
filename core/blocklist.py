@@ -140,7 +140,7 @@ class Blocklist:
 
         Returns
         -------
-        True if the user is blocked
+        Tuple[bool, Optional[BlockReason]]
         """
         #
 
