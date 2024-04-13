@@ -18,6 +18,10 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Thread auto close now checks for `thread_auto_close` config before actually closing the ticket. [(#3290)](https://github.com/modmail-dev/Modmail/issues/3290)
 - Update command on Docker platform has been disabled. [(OpenModmail#76304f1)](https://github.com/khakers/OpenModmail/commit/76304f19553fe086ac79beab222c23fb224c88c9)
 
+### Removed
+
+- Removed sponsor command from the bot, no more nice fork щ(゜ロ゜щ)
+
 # v4.3.1
 
 ### Fixed

@@ -1,7 +1,6 @@
 import asyncio
 import inspect
 import os
-import random
 import re
 import sys
 import traceback
@@ -9,7 +8,7 @@ from contextlib import redirect_stdout
 from difflib import get_close_matches
 from io import BytesIO, StringIO
 from itertools import takewhile, zip_longest
-from json import JSONDecodeError, loads
+from json import JSONDecodeError
 from subprocess import PIPE
 from textwrap import indent
 from typing import Union
@@ -377,28 +376,6 @@ class Utility(commands.Cog):
 
         embed.set_footer(text=footer)
         await ctx.send(embed=embed)
-
-    @commands.command(aliases=["sponsor"])
-    @checks.has_permissions(PermissionLevel.REGULAR)
-    @trigger_typing
-    async def sponsors(self, ctx):
-        """Shows the sponsors of this project."""
-
-        async with self.bot.session.get(
-            "https://raw.githubusercontent.com/modmail-dev/modmail/master/SPONSORS.json"
-        ) as resp:
-            data = loads(await resp.text())
-
-        embeds = []
-
-        for elem in data:
-            embed = discord.Embed.from_dict(elem["embed"])
-            embeds.append(embed)
-
-        random.shuffle(embeds)
-
-        session = EmbedPaginatorSession(ctx, *embeds)
-        await session.run()
 
     @commands.group(invoke_without_command=True)
     @checks.has_permissions(PermissionLevel.OWNER)
