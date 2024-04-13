@@ -8,9 +8,9 @@ from datetime import timedelta
 
 import discord
 import isodate
+import isodate.duration
 from discord.ext.commands import CommandError, MissingRequiredArgument
 from discord.types.user import PartialUser as PartialUserPayload, User as UserPayload
-import isodate.duration
 
 from core.models import DMDisabled, DummyMessage, getLogger
 from core.utils import (

@@ -8,7 +8,18 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+### Added
+
+- Modmail dependencies can now be installed using [PDM](https://pdm-project.org/latest/).
+- Added `IS_RAIDEN_FORK` as environmental variable to indicate user is on this version of Modmail.
+
+### Fixed
+
+- Thread auto close now checks for `thread_auto_close` config before actually closing the ticket. [(#3290)](https://github.com/modmail-dev/Modmail/issues/3290)
+
 # v4.3.1
+
+### Fixed
 
 - Fix `?close` command failing silently due to attribute error.
 
@@ -21,11 +32,11 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Added `?avatar` command for changing the bot avatar with a given URL or attachment.
 
 ### Fixed
-- Improved select options in the select menu (Thanks #3298).
-- Fixed the bot failing catastrophically when plugin registry fails to load (Thanks #3328).
-- Modmail now properly save stickers as its own object in MongoDB. (#3240).
-- Reworked `?close` command syntax to fix improper argument parsing (#3310).
-- Fixed improper type hinting in `?adduser` command leading to command failure. (#3311).
+- Improved select options in the select menu, thanks [(#3298)](https://github.com/modmail-dev/Modmail/pull/3298).
+- Fixed the bot failing catastrophically when plugin registry fails to load. [(#3328)](https://github.com/modmail-dev/Modmail/issues/3328)
+- Modmail now properly save stickers as its own object in MongoDB. [(#3240)](https://github.com/modmail-dev/Modmail/pull/3240)
+- Reworked `?close` command syntax to fix improper argument parsing. [(#3310)](https://github.com/modmail-dev/Modmail/issues/3310)
+- Fixed improper type hinting in `?adduser` command leading to command failure. [(#3311)](https://github.com/modmail-dev/Modmail/issues/3311)
 
 ### Deprecated
 - Dropped support for Python 3.8 as the `pre-commit` development dependency requires Python 3.9 and above to be installed. Users on this version should upgrade to a supported Python version.
