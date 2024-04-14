@@ -64,7 +64,7 @@ if sys.platform == "win32":
     except AttributeError:
         logger.error("Failed to use WindowsProactorEventLoopPolicy.", exc_info=True)
 
-os.environ['IS_RAIDEN_FORK'] = "1"
+os.environ["IS_RAIDEN_FORK"] = "1"
 
 
 class ModmailBot(commands.Bot):
