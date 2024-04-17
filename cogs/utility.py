@@ -5,6 +5,7 @@ import re
 import sys
 import traceback
 from contextlib import redirect_stdout
+from copy import copy
 from difflib import get_close_matches
 from io import BytesIO, StringIO
 from itertools import takewhile, zip_longest
@@ -1262,6 +1263,38 @@ class Utility(commands.Cog):
             "5": PermissionLevel.OWNER,
         }
         return transform.get(name, PermissionLevel.INVALID)
+
+    @permissions.command(name="canrun")
+    @checks.has_permissions(PermissionLevel.OWNER)
+    async def canrun(self, ctx: commands.Context, user: discord.Member, *, command: str):
+        """
+        Check if a user is allowed to run a given command.
+
+        This will take the current context into account, such as the
+        server and text channel.
+        """
+        # Thanks Red Bot
+        # https://github.com/Cog-Creators/Red-DiscordBot/blob/00e41d38f9c28d459d5d45ad70d65f5e175df0df/redbot/cogs/permissions/permissions.py#L235
+        fake_message = copy(ctx.message)
+        fake_message.author = user
+        fake_message.content = "{}{}".format(ctx.prefix, command)
+
+        com = ctx.bot.get_command(command)
+        if com is None:
+            out = "No such command"
+        else:
+            fake_context = await ctx.bot.get_context(fake_message)
+            try:
+                can = await com.can_run(fake_context)
+            except commands.CommandError:
+                can = False
+
+            out = (
+                ("✅ That user can run the specified command.")
+                if can
+                else ("⛔ That user cannot run the specified command.")
+            )
+        await ctx.send(out)
 
     @permissions.command(name="override")
     @checks.has_permissions(PermissionLevel.OWNER)

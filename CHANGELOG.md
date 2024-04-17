@@ -12,6 +12,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 - Modmail dependencies can now be installed using [PDM](https://pdm-project.org/latest/).
 - Added `IS_RAIDEN_FORK` as environmental variable to indicate user is on this version of Modmail.
+- Added `?perms canrun` command to check if a user is able to run a specific command.
 
 ### Fixed
 
