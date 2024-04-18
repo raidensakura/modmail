@@ -130,12 +130,17 @@ class Plugins(commands.Cog):
             logger.info("Plugins not loaded since ENABLE_PLUGINS=false.")
 
     async def populate_registry(self):
-        url = "https://raw.githubusercontent.com/modmail-dev/modmail/master/plugins/registry.json"
+        url = "https://raw.githubusercontent.com/raidensakura/modmail/stable/plugins/registry.json"
         try:
             async with self.bot.session.get(url) as resp:
                 self.registry = json.loads(await resp.text())
-        except asyncio.TimeoutError:
-            logger.warning("Failed to fetch registry. Loading with empty registry")
+        except Exception as e:
+            logger.warning(f"Failed to fetch remote registry, using local registry:\n{e}")
+            registry_json = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "REGISTRY.json"
+            )
+            with open(registry_json, "r", encoding="utf-8") as f:
+                self.registry = json.load(f)
 
     async def initial_load_plugins(self):
         for plugin_name in list(self.bot.config["plugins"]):
@@ -618,8 +623,6 @@ class Plugins(commands.Cog):
         `{prefix}plugin registry plugin-name` Details about the indicated plugin.
         `{prefix}plugin registry page-number` Jump to a page in the registry.
         """
-
-        await self.populate_registry()
 
         embeds = []
 
