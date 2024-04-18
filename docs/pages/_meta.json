@@ -3,12 +3,8 @@
 	"getting-started": "Getting started",
 	"installation": "Installing Modmail",
 	"logviewer-installation": "Installing Logviewer",
+	"configuration": "Configuring Modmail",
 	"updating": "Updating Modmail",
-	"configuring": {
-		"title": "Configuring Modmail",
-		"href": "https://docs.modmail.dev/usage-guide/configuration",
-		"newWindow": true
-	},
 	"contact": {
 	  "title": "Discord ↗",
 	  "type": "page",
