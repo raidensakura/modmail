@@ -1,8 +1,0 @@
-version: "1"
-rules:
-  - base: stable
-    upstream: raidensakura:stable
-    mergeMethod: hardreset
-  - base: develop
-    upstream: raidensakura:develop
-    mergeMethod: hardreset
