@@ -693,14 +693,20 @@ class Modmail(commands.Cog):
         sent_emoji, _ = await self.bot.retrieve_emoji()
         await self.bot.add_reaction(ctx.message, sent_emoji)
 
-    @commands.command()
+    @commands.command(name="msglink", aliases=["messagelink"])
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
     async def msglink(self, ctx, message_id: int):
         """Retrieves the link to a message in the current thread."""
-        try:
-            message = await ctx.thread.recipient.fetch_message(message_id)
-        except discord.NotFound:
+        found = False
+        for recipient in ctx.thread.recipients:
+            try:
+                message = await recipient.fetch_message(message_id)
+                found = True
+                break
+            except discord.NotFound:
+                continue
+        if not found:
             embed = discord.Embed(
                 color=self.bot.error_color, description="Message not found or no longer exists."
             )
