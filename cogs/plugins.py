@@ -706,8 +706,6 @@ class Plugins(commands.Cog):
         Shows a compact view of all plugins within the registry.
         """
 
-        await self.populate_registry()
-
         registry = sorted(self.registry.items(), key=lambda elem: elem[0])
 
         pages = [""]
