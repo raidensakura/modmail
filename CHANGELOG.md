@@ -24,6 +24,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 ### Changed
 
 - Plugin registry now loads the local file when it failed to fetch from the repo.
+- `registry_plugins_only` is now a configurable option within the bot.
 
 ### Removed
 

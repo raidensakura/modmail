@@ -40,6 +40,7 @@ class ConfigManager:
         "reply_without_command": False,
         "anon_reply_without_command": False,
         "plain_reply_without_command": False,
+        "registry_plugins_only": True,
         # logging
         "log_channel_id": None,
         "mention_channel_id": None,
@@ -167,7 +168,6 @@ class ConfigManager:
         "connection_uri": None,  # replace mongo uri in the future
         "owners": None,
         "enable_presence_intent": False,
-        "registry_plugins_only": False,
         # bot
         "token": None,
         "enable_plugins": True,

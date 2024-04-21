@@ -1181,5 +1181,13 @@
             "If this configuration is enabled, only roles that are hoisted (displayed seperately in member list) will be used. If a user has no hoisted roles, it will return 'None'.",
             "If you would like to display the top role of a user regardless of if it's hoisted or not, disable `use_hoisted_top_role`."
         ]
-    }
+    },
+	"registry_plugins_only": {
+		"default": "True",
+		"description": "Controls if the bot is only allowed to install plugins specified in the registry.",
+		"examples": [
+			"`{prefix}config set registry_plugins_only False`"
+		],
+		"notes": []
+	}
 }
