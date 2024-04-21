@@ -384,13 +384,7 @@ class Utility(commands.Cog):
     async def debug(self, ctx):
         """Shows the recent application logs of the bot."""
 
-        log_file_name = self.bot.token.split(".")[0]
-
-        with open(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), f"../temp/{log_file_name}.log"),
-            "r+",
-            encoding="utf-8",
-        ) as f:
+        with open(self.bot.log_file_path, "r+", encoding="utf-8") as f:
             logs = f.read().strip()
 
         if not logs:
@@ -416,7 +410,7 @@ class Utility(commands.Cog):
                     msg = "```Haskell\n"
             msg += line
             if len(msg) + 3 > 2000:
-                msg = msg[:1993] + "[...]```"
+                msg = msg[:1992] + "[...]```"
                 messages.append(msg)
                 msg = "```Haskell\n"
 
@@ -438,12 +432,7 @@ class Utility(commands.Cog):
         """Posts application-logs to Hastebin."""
 
         haste_url = os.environ.get("HASTE_URL", "https://hastebin.cc")
-        log_file_name = self.bot.token.split(".")[0]
-
-        with open(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), f"../temp/{log_file_name}.log"),
-            "rb+",
-        ) as f:
+        with open(self.bot.log_file_path, "rb+") as f:
             logs = BytesIO(f.read().strip())
 
         try:
@@ -474,12 +463,7 @@ class Utility(commands.Cog):
     async def debug_clear(self, ctx):
         """Clears the locally cached logs."""
 
-        log_file_name = self.bot.token.split(".")[0]
-
-        with open(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), f"../temp/{log_file_name}.log"),
-            "w",
-        ):
+        with open(self.bot.log_file_path, "w"):
             pass
         await ctx.send(
             embed=discord.Embed(color=self.bot.main_color, description="Cached logs are now cleared.")

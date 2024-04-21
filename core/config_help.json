@@ -373,17 +373,17 @@
             "To disable thread cooldown, do `{prefix}config del thread_cooldown`."
         ]
     },
-	"log_expiration": {
-		"default": "Never",
-		"description": "The duration closed threads will be stored within the database before deletion. Logs that have been closed for longer than this duration will be deleted automatically.",
-		"examples": [
-		  "`{prefix}config set log_expiration P12DT3H` (stands for 12 days and 3 hours in [ISO-8601 Duration Format](https://en.wikipedia.org/wiki/ISO_8601#Durations))",
-		  "`{prefix}config set log_expiration 3 days and 5 hours` (accepted readable time)"
-		],
-		"notes": [
-		  "To disable log expiration, do `{prefix}config del log_expiration`."
-		]
-	  },
+    "log_expiration": {
+        "default": "Never",
+        "description": "The duration closed threads will be stored within the database before deletion. Logs that have been closed for longer than this duration will be deleted automatically.",
+        "examples": [
+            "`{prefix}config set log_expiration P12DT3H` (stands for 12 days and 3 hours in [ISO-8601 Duration Format](https://en.wikipedia.org/wiki/ISO_8601#Durations))",
+            "`{prefix}config set log_expiration 3 days and 5 hours` (accepted readable time)"
+        ],
+        "notes": [
+            "To disable log expiration, do `{prefix}config del log_expiration`."
+        ]
+    },
     "thread_cancelled": {
         "default": "\"Cancelled\"",
         "description": "This is the message to display when a thread times out and creation is cancelled.",
@@ -1182,12 +1182,20 @@
             "If you would like to display the top role of a user regardless of if it's hoisted or not, disable `use_hoisted_top_role`."
         ]
     },
-	"registry_plugins_only": {
-		"default": "True",
-		"description": "Controls if the bot is only allowed to install plugins specified in the registry.",
-		"examples": [
-			"`{prefix}config set registry_plugins_only False`"
-		],
-		"notes": []
-	}
+    "registry_plugins_only": {
+        "default": "True",
+        "description": "Controls if the bot is only allowed to install plugins specified in the registry.",
+        "examples": [
+            "`{prefix}config set registry_plugins_only False`"
+        ],
+        "notes": []
+    },
+    "discord_log_level": {
+        "default": "INFO",
+        "description": "The `discord.py` library logging level for logging to stdout.",
+        "examples": [],
+        "notes": [
+            "This configuration can only to be set through `.env` file or environment (config) variables."
+        ]
+    }
 }

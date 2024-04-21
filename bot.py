@@ -4,7 +4,6 @@ __version__ = "4.3.1"
 import asyncio
 import copy
 import hashlib
-import logging
 import os
 import re
 import string
@@ -87,8 +86,11 @@ class ModmailBot(commands.Bot):
 
         self.threads = ThreadManager(self)
 
-        self.log_file_name = os.path.join(temp_dir, f"{self.token.split('.')[0]}.log")
-        self._configure_logging()
+        log_dir = os.path.join(temp_dir, "logs")
+        if not os.path.exists(log_dir):
+            os.mkdir(log_dir)
+        self.log_file_path = os.path.join(log_dir, "modmail.log")
+        configure_logging(self)
 
         self.plugin_db = PluginDatabaseClient(self)  # Deprecated
 
@@ -187,29 +189,6 @@ class ModmailBot(commands.Bot):
             except Exception:
                 logger.exception("Failed to load %s.", cog)
         logger.line("debug")
-
-    def _configure_logging(self):
-        level_text = self.config["log_level"].upper()
-        logging_levels = {
-            "CRITICAL": logging.CRITICAL,
-            "ERROR": logging.ERROR,
-            "WARNING": logging.WARNING,
-            "INFO": logging.INFO,
-            "DEBUG": logging.DEBUG,
-        }
-        logger.line()
-
-        log_level = logging_levels.get(level_text)
-        if log_level is None:
-            log_level = self.config.remove("log_level")
-            logger.warning("Invalid logging level set: %s.", level_text)
-            logger.warning("Using default logging level: INFO.")
-        else:
-            logger.info("Logging level: %s", level_text)
-
-        logger.info("Log file: %s", self.log_file_name)
-        configure_logging(self.log_file_name, log_level)
-        logger.debug("Successfully configured logging.")
 
     @property
     def version(self):
@@ -1849,16 +1828,6 @@ def main():
             discord_version,
             discord.__version__,
         )
-
-    # Set up discord.py internal logging
-    if os.environ.get("LOG_DISCORD"):
-        logger.debug(f"Discord logging enabled: {os.environ['LOG_DISCORD'].upper()}")
-        d_logger = logging.getLogger("discord")
-
-        d_logger.setLevel(os.environ["LOG_DISCORD"].upper())
-        handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
-        handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
-        d_logger.addHandler(handler)
 
     bot = ModmailBot()
     bot.run()
