@@ -775,7 +775,7 @@ class Modmail(commands.Cog):
     @commands.command(cooldown_after_parsing=True)
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
-    @commands.cooldown(1, 600, BucketType.channel)
+    @commands.cooldown(2, 600, BucketType.channel)
     async def title(self, ctx, *, name: str):
         """Sets title for a thread"""
         await ctx.thread.set_title(name, ctx.channel.id)
@@ -786,7 +786,7 @@ class Modmail(commands.Cog):
     @commands.command(usage="<users_or_roles...> [options]", cooldown_after_parsing=True)
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
-    @commands.cooldown(1, 600, BucketType.channel)
+    @commands.cooldown(2, 600, BucketType.channel)
     async def adduser(self, ctx, *users_arg: Union[discord.User, discord.Role, str]):
         """Adds a user to a modmail thread
 
@@ -884,7 +884,7 @@ class Modmail(commands.Cog):
     @commands.command(usage="<users_or_roles...> [options]", cooldown_after_parsing=True)
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
-    @commands.cooldown(1, 600, BucketType.channel)
+    @commands.cooldown(2, 600, BucketType.channel)
     async def removeuser(self, ctx, *users_arg: Union[discord.Member, discord.Role, str]):
         """Removes a user from a modmail thread
 
@@ -977,7 +977,7 @@ class Modmail(commands.Cog):
     @commands.command(usage="<users_or_roles...> [options]", cooldown_after_parsing=True)
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
-    @commands.cooldown(1, 600, BucketType.channel)
+    @commands.cooldown(2, 600, BucketType.channel)
     async def anonadduser(self, ctx, *users_arg: Union[discord.Member, discord.Role, str]):
         """Adds a user to a modmail thread anonymously
 
@@ -1071,7 +1071,7 @@ class Modmail(commands.Cog):
     @commands.command(usage="<users_or_roles...> [options]", cooldown_after_parsing=True)
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
-    @commands.cooldown(1, 600, BucketType.channel)
+    @commands.cooldown(2, 600, BucketType.channel)
     async def anonremoveuser(self, ctx, *users_arg: Union[discord.Member, discord.Role, str]):
         """Removes a user from a modmail thread anonymously
 
