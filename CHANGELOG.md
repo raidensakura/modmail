@@ -8,6 +8,8 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+# v4.3.2
+
 ### Added
 
 - Modmail dependencies can now be installed using [PDM](https://pdm-project.org/latest/).
