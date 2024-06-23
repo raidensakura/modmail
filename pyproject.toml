@@ -59,7 +59,7 @@ uvloop = {version = "~=0.17.0", markers = "sys_platform != 'win32'"}
 requests = "~=2.31.0"
 attrs = "~=23.1.0"
 strenum = "^0.4.15"
-"discord.py" = {version = "2.3.2", extras = ["speed"]}
+"discord.py" = {version = "2.4.0", extras = ["speed"]}
 packaging = "^23.2"
 
 [tool.poetry.group.dev.dependencies]

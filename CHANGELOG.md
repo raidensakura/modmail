@@ -26,6 +26,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 - Plugin registry now loads the local file when it failed to fetch from the repo.
 - `registry_plugins_only` is now a configurable option within the bot.
+- discord.py version has been updated to 2.4.0.
 
 ### Removed
 

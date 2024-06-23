@@ -1777,7 +1777,7 @@ def main():
         pass
 
     # check discord version
-    discord_version = "2.3.2"
+    discord_version = "2.4.0"
     if discord.__version__ != discord_version:
         logger.warning(
             "discord.py version mismatch detected. Expected %s, received %s",
