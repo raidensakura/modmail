@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:1ad25127db194ef045cc8cdda46151d3588ff866c8e52512b5175067735bd03e"
+content_hash = "sha256:5a6ad4dbc82e69edfe144078a7010a22d055db5306be80be96a0a48aa1c12557"
 
 [[package]]
 name = "aiodns"
@@ -467,35 +467,35 @@ files = [
 
 [[package]]
 name = "discord-py"
-version = "2.3.2"
-requires_python = ">=3.8.0"
+version = "2.4.0"
+requires_python = ">=3.8"
 summary = "A Python wrapper for the Discord API"
 groups = ["default"]
 dependencies = [
     "aiohttp<4,>=3.7.4",
 ]
 files = [
-    {file = "discord.py-2.3.2-py3-none-any.whl", hash = "sha256:9da4679fc3cb10c64b388284700dc998663e0e57328283bbfcfc2525ec5960a6"},
-    {file = "discord.py-2.3.2.tar.gz", hash = "sha256:4560f70f2eddba7e83370ecebd237ac09fbb4980dc66507482b0c0e5b8f76b9c"},
+    {file = "discord.py-2.4.0-py3-none-any.whl", hash = "sha256:b8af6711c70f7e62160bfbecb55be699b5cb69d007426759ab8ab06b1bd77d1d"},
+    {file = "discord_py-2.4.0.tar.gz", hash = "sha256:d07cb2a223a185873a1d0ee78b9faa9597e45b3f6186df21a95cec1e9bcdc9a5"},
 ]
 
 [[package]]
 name = "discord-py"
-version = "2.3.2"
+version = "2.4.0"
 extras = ["speed"]
-requires_python = ">=3.8.0"
+requires_python = ">=3.8"
 summary = "A Python wrapper for the Discord API"
 groups = ["default"]
 dependencies = [
     "Brotli",
     "aiodns>=1.1",
     "cchardet==2.1.7; python_version < \"3.10\"",
-    "discord-py==2.3.2",
+    "discord-py==2.4.0",
     "orjson>=3.5.4",
 ]
 files = [
-    {file = "discord.py-2.3.2-py3-none-any.whl", hash = "sha256:9da4679fc3cb10c64b388284700dc998663e0e57328283bbfcfc2525ec5960a6"},
-    {file = "discord.py-2.3.2.tar.gz", hash = "sha256:4560f70f2eddba7e83370ecebd237ac09fbb4980dc66507482b0c0e5b8f76b9c"},
+    {file = "discord.py-2.4.0-py3-none-any.whl", hash = "sha256:b8af6711c70f7e62160bfbecb55be699b5cb69d007426759ab8ab06b1bd77d1d"},
+    {file = "discord_py-2.4.0.tar.gz", hash = "sha256:d07cb2a223a185873a1d0ee78b9faa9597e45b3f6186df21a95cec1e9bcdc9a5"},
 ]
 
 [[package]]
