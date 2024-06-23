@@ -632,7 +632,6 @@ class ModmailBot(commands.Bot):
             )
             logger.warning("If the external servers are valid, you may ignore this message.")
 
-        self.post_metadata.start()
         self.autoupdate.start()
         self.log_expiry.start()
         self._started = True
@@ -1587,49 +1586,6 @@ class ModmailBot(commands.Bot):
             logger.info("DisabledCommand: %s is trying to run eval but it's disabled", context.author.name)
         else:
             logger.error("Unexpected exception:", exc_info=exception)
-
-    @tasks.loop(hours=1)
-    async def post_metadata(self):
-        info = await self.application_info()
-
-        delta = discord.utils.utcnow() - self.start_time
-        data = {
-            "bot_id": self.user.id,
-            "bot_name": str(self.user),
-            "avatar_url": self.user.display_avatar.url,
-            "guild_id": self.guild_id,
-            "guild_name": self.guild.name,
-            "member_count": len(self.guild.members),
-            "uptime": delta.total_seconds(),
-            "latency": f"{self.ws.latency * 1000:.4f}",
-            "version": f"{self.version} on raidensakura's fork",
-            "selfhosted": True,
-            "last_updated": str(discord.utils.utcnow()),
-        }
-
-        if info.team is not None:
-            data.update(
-                {
-                    "owner_name": info.team.owner.name if info.team.owner is not None else "No Owner",
-                    "owner_id": info.team.owner_id,
-                    "team": True,
-                }
-            )
-        else:
-            data.update({"owner_name": info.owner.name, "owner_id": info.owner.id, "team": False})
-
-        async with self.session.post("https://api.modmail.dev/metadata", json=data):
-            logger.debug("Uploading metadata to Modmail server.")
-
-    @post_metadata.before_loop
-    async def before_post_metadata(self):
-        await self.wait_for_connected()
-        if not self.config.get("data_collection") or not self.guild:
-            self.post_metadata.cancel()
-            return
-
-        logger.debug("Starting metadata loop.")
-        logger.line("debug")
 
     @tasks.loop(hours=1)
     async def autoupdate(self):

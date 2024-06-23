@@ -181,8 +181,6 @@ class ConfigManager:
         "stream_log_format": "plain",
         "file_log_format": "plain",
         "discord_log_level": "INFO",
-        # data collection
-        "data_collection": True,
     }
 
     colors = {"mod_color", "recipient_color", "main_color", "error_color"}
@@ -212,7 +210,6 @@ class ConfigManager:
         "confirm_thread_creation",
         "use_regex_autotrigger",
         "enable_plugins",
-        "data_collection",
         "enable_eval",
         "disable_autoupdates",
         "disable_updates",

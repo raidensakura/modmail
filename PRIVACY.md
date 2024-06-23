@@ -1,11 +1,16 @@
 # Privacy Statement
 
-Hey, we are the lead developers of Modmail bot. This is a look into the data we collect, the data you collect, the data other parties collect, and what can be done about any of this data.    
-> **Disclaimer**: None of us are lawyers. We are just trying to be more transparent
+Hey, we are the lead developers of Modmail bot. This is a look into the data you collect, the data other parties collect, and what can be done about any of this data.  
+> **Disclaimer**: None of us are lawyers. We are just trying to be more transparent.
+
+This version of Modmail is a fork, and this privacy policy is a fork of the original Modmail privacy policy.
+All telemetry and data collection has been removed from this fork.
+
+**Plugins may collect additional data**. Please check with the plugin developer for more information.
 
 ### TL;DR
 
-Yes, we collect some data to keep us happy. You collect some data to keep the bot functioning. External services also collect some data that is out of our control.
+You collect some data to keep the bot functioning. External services also collect some data that is out of our control.
 
 ## Interpretation
 
@@ -17,38 +22,6 @@ Yes, we collect some data to keep us happy. You collect some data to keep the bo
 - User: The end user, or server members, that interface with the bot.
 - Database: A location where data is stored, hosted by the bot owner. The following types of database are currently supported: [MongoDB](#MongoDB).
 - Logviewer: A webserver hosted by the bot owner.
-
-## The Data We Collect
-
-No data is being collected unless someone decides to host the bot and the bot is kept online.
-
-The Modmail Team collect some metadata to keep us updated on the number of instances that are making use of the bot and know what features we should focus on. The following is a list of data that we collect:
-- Bot ID
-- Bot username and discriminator
-- Bot avatar URL
-- Main guild ID
-- Main guild name
-- Main guild member count
-- Bot uptime
-- Bot latency
-- Bot version
-- Whether the bot is selfhosted
-
-No tokens/passwords/private data is ever being collected or sent to our servers.
-
-This metadata is sent to our centralised servers every hour that the bot is up and can be viewed in the bot logs when the `log_level` is set to `DEBUG`.
-
-As our bot is completely open-source, the part that details this behaviour is located in `bot.py > ModmailBot > post_metadata`.
-
-We assure you that the data is not being sold to anybody.
-
-### Opting out
-
-The bot owner can opt out of this data collection by setting `data_collection` to `off` within the configuration variables or the `.env` file.
-
-### Data deletion
-
-Data can be deleted with a request in a DM to our [support server](https://discord.gg/etJNHCQ)'s Modmail bot.
 
 ## The Data You Collect
 
@@ -99,11 +72,6 @@ If you wish to opt out of any of this data collection, please view their own pri
 
 - [Discord Privacy Policy](https://discord.com/privacy)
 
-### Heroku
-
-- [Heroku Security](https://www.heroku.com/policy/security)
-- [Salesforce Privacy Policy](https://www.salesforce.com/company/privacy/).
-
 ### MongoDB
 
 - [MongoDB Privacy Policy](https://www.mongodb.com/legal/privacy-policy).
@@ -117,6 +85,5 @@ If you wish to opt out of any of this data collection, please view their own pri
 For a maximum privacy setup, we recommend the following hosting procedure. We have included links to various help articles for each relevant step. We will not provide support for such a procedure.
 - [Creating a local mongodb instance](https://zellwk.com/blog/local-mongodb/)
 - [Hosting Modmail on your personal computer](https://docs.modmail.dev/)
-- Ensuring `data_collection` is set to `no` in the `.env` file.
 - [Opt out of discord data collection](https://support.discord.com/hc/en-us/articles/360004109911-Data-Privacy-Controls)
 - Do not use any plugins, setting `enable_plugins` to `no`.
