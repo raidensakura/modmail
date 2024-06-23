@@ -56,6 +56,17 @@
             "See also: `{prefix}help mention`."
         ]
     },
+	"mention_message": {
+        "default": "None",
+        "description": "This is the message that is added next to the mention when a thread is created.",
+        "examples": [
+            "`{prefix}config set mention_message A new thread has been created.`"
+        ],
+        "notes": [
+            "To disable mention and mention message altogether, use command `{prefix}mention disable`.",
+            "See also: `{prefix}help mention`."
+        ]
+    },
     "main_color": {
         "default": "Discord Blurple [#7289DA](https://placehold.it/100/7289da?text=+)",
         "description": "This is the main color for Modmail (help/about/ping embed messages, subscribe, move, etc.).",
@@ -1135,14 +1146,6 @@
     "enable_plugins": {
         "default": "Yes",
         "description": "Whether plugins should be enabled and loaded into Modmail.",
-        "examples": [],
-        "notes": [
-            "This configuration can only be set through `.env` file or environment (config) variables."
-        ]
-    },
-    "data_collection": {
-        "default": "Yes",
-        "description": "Controls if bot metadata should be sent to the development team.",
         "examples": [],
         "notes": [
             "This configuration can only be set through `.env` file or environment (config) variables."
