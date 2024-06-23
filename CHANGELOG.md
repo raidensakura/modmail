@@ -13,6 +13,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Modmail dependencies can now be installed using [PDM](https://pdm-project.org/latest/).
 - Added `IS_RAIDEN_FORK` as environmental variable to indicate user is on this version of Modmail.
 - Added `?perms canrun` command to check if a user is able to run a specific command.
+- Added mention_message help menu.
 
 ### Fixed
 
@@ -29,6 +30,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 ### Removed
 
 - Removed sponsor command from the bot, no more nice fork щ(゜ロ゜щ)
+- Removed end user data collection from the bot.
 
 # v4.3.1
 
