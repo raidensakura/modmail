@@ -139,3 +139,9 @@ dist
 
 # Miscellaneous
 /.DS_Store
+
+# Persistent files from code branches
+.pdm-python
+__pycache__/
+plugins/@local
+temp/

@@ -9,10 +9,10 @@ import Image from 'next/image'
 
 ## Prerequisites
 
-1. Root access (**`sudo`**), **not** `root` user.
-2. Minimum 1 GB of RAM
-3. At least 2 GB available disk space.
-4. Tested releases:
+* Root access (**`sudo`**), __not__ `root` user
+* Minimum 1 GB of RAM
+* At least 2 GB available disk space
+* Tested releases:
    * Ubuntu 22.04 LTS (Jammy Jellyfish)
 
 ## Dependencies
@@ -29,7 +29,7 @@ All code blocks should be executed in bash and line by line unless specified oth
 
 To install these dependencies, we will be using **`apt`**.
 
-We recommend adding the `deadsnakes` ppa to install Python 3.10:
+We recommend adding the `deadsnakes` ppa to install Python 3.11:
 
 ```shell
 sudo apt update
@@ -131,13 +131,4 @@ pm2 logs modmail
 make sure that pm2 stays active and persistent between machine restarts:
 ```shell
 pm2 save && pm2 startup
-```
-
-Other PM2 commands for future reference:
-```shell
-pm2 restart modmail
-pm2 reload modmail
-pm2 stop modmail
-pm2 delete modmail
-pm2 list
 ```
