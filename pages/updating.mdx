@@ -1,10 +1,13 @@
----
-description: Keeping your Modmail up to date
-title: Updating Modmail
----
-
 import Image from 'next/image'
 
 # Updating Modmail
 
-Your Modmail is set to auto-update itself periodically by default, but you can also run the `[p]update` command on your bot manually, replacing `[p]` with your bot prefix.
+Your update method may differ depending on your hosting method. For example, Modmail automatically disables the internal
+auto-update function as Docker handles the application differently and does not save application changes.
+
+Other than Docker, your Modmail is set to auto-update itself periodically by default, but you can also run the `[p]update` command on your bot manually, replacing `[p]` with your bot prefix.
+
+#### Updating Modmail on a fork
+
+If your running Modmail is based on a fork of this project, you need to first pull in the changes from this project into your repository in order to update the codebase.
+On GitHub, this can be done with the "Sync fork" button on your repository.

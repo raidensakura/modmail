@@ -8,28 +8,28 @@ import { Steps } from 'nextra-theme-docs'
 import { Card, Cards } from 'nextra-theme-docs'
 import Link from 'next/link'
 
-# Getting Started
+## Before you proceed
 
-Modmail is a self-hosted bot. This unfortunately means that there's no public bot invite. 
-Furthermore, due to the inner workings of the bot and its highly customisable interfaces, you will need to host your own dedicated Modmail bot.
+* **Modmail is a self-hosted private bot intended for a single server use case.**  
+As Modmail is written with single-server use case in mind, it is not advised nor recommended to have your bot in servers other than the one specified in `GUILD_ID` or `MODMAIL_GUILD_ID`
+due to the way it handles the threads and channels internally.
 
-This section provides setup instructions for Modmail on many hosting methods, both with free and paid options. 
-Keep in mind, some free options will still require a payment method for verification.
+* **This Modmail is different from the original Modmail bot by kyb3r and has incompatible changes.**  
+As such, plugins made for the original bot may not work properly on this instance. Consult the plugin author to determine the compatibility.
+
+* **Using this code revokes your official support eligibity from the official Modmail staff.**  
+Using a modified codebase automatically disqualifies you from getting official support. Issues, questions and concerns can be raised
+in the support server made for this instance at https://dsc.gg/transience.
 
 ## Basic requirements
 
-- **A Discord account**  
-You will need to create a Discord bot under your account.
-- **A MongoDB database instance**  
-Modmail will store its internal data to this database.
-- **A hosting server**  
-To keep Modmail running 24/7 in your server.  
-- **Note Editing Program (Notepad for desktop, VSCode, etc.)**  
-Anywhere you can copy and paste to temporary store some texts while we set up the bot.
- 
-<Callout emoji="ℹ️" type="info">
-	There are two components for Modmail: the bot component and the Logviewer component. You will need both to take full advantage of Modmail.
-</Callout>
+There are three components for Modmail:
+- **The bot program**  
+This is your main bot process which does all the heavy lifting.
+- **The database**  
+Modmail uses MongoDB as the database program. **All** operational data is stored here.
+- **Logviewer webserver**  
+A web app used to view the thread transcripts via your browser. Optional but recommended.
 
 <Steps>
 
@@ -92,13 +92,14 @@ You will need to invite your Modmail bot to **both** your main (public) server a
 </details>
 
 Your bot should now be **offline** in your server. Congratulations, that's as expected! You have successfully created a Discord bot.
-The next step is to [create a MongoDB database](./#create-a-mongodb-database).
+The next step is to [create a MongoDB database](#create-a-mongodb-database).
 
 ### Create a MongoDB database
 
 Modmail uses MongoDB to store its internal configurations and log histories. You must create a MongoDB database in order to use Modmail.
 
-We will be using [MongoDB Atlas](https://www.mongodb.com/atlas), which provides us with a free 512MB storage share—more than enough for Modmail.
+You can use [MongoDB Atlas](https://www.mongodb.com/atlas) as they allow a free 512MB storage instance which is more than enough for Modmail,
+though it is also possible to self-host the database on your own machine, **you may skip this step if you intend to self-host the database**.
 
 Head over to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) and register for a free account:
 
@@ -177,7 +178,6 @@ MONGO_URI=mongodb+srv://username:password@cluster0-abcde.mongodb.net/
 ### Hosting Modmail
 
 Your next step is to choose one the hosting method that's preferable to you.
-Click on one of the links below to view further instructions for your preferred hosting method and Operating System (OS).
 Each method has their pros and cons, be sure to take them into consideration when choosing your hosting platform to run Modmail.
 
 For hosting on a personal device or VPS, refer to the "**Installing Modmail**" section as we cover some widely used OS on our guide.

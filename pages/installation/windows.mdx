@@ -78,5 +78,38 @@ If no error shows up, it means that your Modmail is now running correctly.
 
 ## Set up auto-restart
 
-Setting up Modmail on Windows is only intended for development purpose, hence there is no auto-restart method available for Windows OS yet.
-You may look into [pm2-installer](https://github.com/jessety/pm2-installer) to use pm2 on Windows.
+### Creating a batch file
+
+Create a new text document anywhere you want to. This file will be used to launch the bot, so you may want to put it somewhere convenient, like Documents or Desktop.
+
+Open that document in Notepad, and paste the following text in it:
+
+```batch
+@ECHO OFF
+:MODMAIL
+poetry run python bot.py
+
+IF %ERRORLEVEL% == 1 GOTO RESTART_MODMAIL
+IF %ERRORLEVEL% == 26 GOTO RESTART_MODMAIL
+EXIT /B %ERRORLEVEL%
+
+:RESTART_MODMAIL
+ECHO Restarting Modmail...
+GOTO MODMAIL
+```
+
+Click "File", "Save as". Change the dropdown "Save as type" to "All Files (.)". Set the filename to `start_modmail.bat`, and click save.
+
+There should now be a new file in the location you created the text document in. You can delete that text document as it is no longer needed.
+You can now use the `start_modmail.bat` batch file to launch Modmail by double clicking it.
+This script will automatically restart Modmail when when the bot shuts down abnormally.
+
+### Launch the bot on startup
+
+Create a shortcut of your `start_modmail.bat` file.
+
+Open the "Run" dialogue box using **Windows Key + R**.
+
+Enter `shell:startup` if you want the bot to launch only when the current user logs in, or `shell:common` startup if you want the bot to launch when any user logs in.
+
+Drag the shortcut into the folder that is opened. The bot will now launch on startup.
