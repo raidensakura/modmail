@@ -141,3 +141,6 @@ test.py
 # PDM
 .pdm-python
 .pdm-build/
+
+# Cache files from docs branch
+.next/
