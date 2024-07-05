@@ -4,7 +4,7 @@ services:
     container_name: modmail
     restart: always
     environment:
-      - CONNECTION_URI=mongodb://mongo
+      - CONNECTION_URI=mongodb://db
     env_file:
       - .env
     depends_on:
@@ -12,10 +12,7 @@ services:
 
   db:
     image: mongo
-    container_name: mongodb
+    container_name: modmail-db
     restart: always
     volumes:
-      - mongodb:/data/db
-
-volumes:
-  mongodb:
+      - ./env/db:/data/db
