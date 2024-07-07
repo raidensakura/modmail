@@ -1,7 +1,6 @@
 import asyncio
 import re
 from datetime import timezone
-from itertools import zip_longest
 from typing import List, Literal, Optional, Tuple, Union
 
 import discord
@@ -160,13 +159,18 @@ class Modmail(commands.Cog):
             embed.set_author(name="Snippets", icon_url=self.bot.get_guild_icon(guild=ctx.guild, size=128))
             return await ctx.send(embed=embed)
 
-        embeds = []
-
-        for i, names in enumerate(zip_longest(*(iter(sorted(self.bot.snippets)),) * 15)):
-            description = format_description(i, names)
-            embed = discord.Embed(color=self.bot.main_color, description=description)
+        embeds, i = [], 0
+        embed = discord.Embed(color=self.bot.main_color)
+        for name, content in zip(self.bot.snippets.keys(), self.bot.snippets.values()):
+            if i % 10 == 0:
+                embed = discord.Embed(color=self.bot.main_color)
+            embed.add_field(
+                name=name, value=f"{content[:127]}{'...' if len(content) > 128 else ''}", inline=False
+            )
             embed.set_author(name="Snippets", icon_url=self.bot.get_guild_icon(guild=ctx.guild, size=128))
-            embeds.append(embed)
+            if i % 10 == 0:
+                embeds.append(embed)
+            i += 1
 
         session = EmbedPaginatorSession(ctx, *embeds)
         await session.run()
