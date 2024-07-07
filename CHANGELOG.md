@@ -8,6 +8,9 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+### Added
+- `?snippet` command now include a truncated preview of a snippet's content.
+
 # v4.3.2
 
 ### Added
