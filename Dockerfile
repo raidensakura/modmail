@@ -1,4 +1,4 @@
-FROM python:3.11-alpine as base
+FROM python:3.11-alpine AS base
 
 RUN apk update && apk add git \
 	# pillow dependencies
@@ -8,7 +8,7 @@ RUN apk update && apk add git \
 
 WORKDIR /home/modmail
 
-FROM base as builder
+FROM base AS builder
 
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
@@ -22,7 +22,7 @@ COPY --chown=modmail:modmail poetry.lock pyproject.toml /home/modmail/
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-FROM base as runtime
+FROM base AS runtime
 
 ENV VIRTUAL_ENV=/home/modmail/.venv \
     PATH="/home/modmail/.venv/bin:$PATH" \
