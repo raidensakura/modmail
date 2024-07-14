@@ -1319,8 +1319,8 @@ class ThreadManager:
                 return recipient_id == user_id or recipient_id in other_ids
 
             channel = discord.utils.find(
-                lambda x: (check(x.topic)) if x.topic else False,
-                self.bot.guilds,
+                lambda x: (check(x.topic)) if isinstance(x, discord.TextChannel) and x.topic else False,
+                [c for g in self.bot.guilds for c in g.text_channels],
             )
 
             if channel:
@@ -1341,8 +1341,8 @@ class ThreadManager:
 
     async def _find_from_channel(self, channel):
         """
-        Tries to find a thread from a channel channel topic,
-        if channel topic doesnt exist for some reason, falls back to
+        Tries to find a thread from a channel's topic,
+        if channel topic doesn't exist for some reason, falls back to
         searching channel history for genesis embed and
         extracts user_id from that.
         """
