@@ -8,8 +8,15 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+# v4.3.3
+
 ### Added
+
 - `?snippet` command now include a truncated preview of a snippet's content.
+
+### Fixed
+
+- Fixed scheduled close command from not closing threads.
 
 # v4.3.2
 
@@ -35,7 +42,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 ### Removed
 
-- Removed sponsor command from the bot, no more nice fork щ(゜ロ゜щ)
+- Removed sponsor command from the bot, no more nice fork щ(゜ロ゜ щ)
 - Removed end user data collection from the bot.
 
 # v4.3.1
@@ -47,12 +54,15 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 # v4.3.0
 
 # Breaking
+
 - The `?close` command argument order has been changed due to technical difficulties with the structure of argument passing.
 
 ### Added
+
 - Added `?avatar` command for changing the bot avatar with a given URL or attachment.
 
 ### Fixed
+
 - Improved select options in the select menu, thanks [(#3298)](https://github.com/modmail-dev/Modmail/pull/3298).
 - Fixed the bot failing catastrophically when plugin registry fails to load. [(#3328)](https://github.com/modmail-dev/Modmail/issues/3328)
 - Modmail now properly save stickers as its own object in MongoDB. [(#3240)](https://github.com/modmail-dev/Modmail/pull/3240)
@@ -60,32 +70,39 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Fixed improper type hinting in `?adduser` command leading to command failure. [(#3311)](https://github.com/modmail-dev/Modmail/issues/3311)
 
 ### Deprecated
+
 - Dropped support for Python 3.8 as the `pre-commit` development dependency requires Python 3.9 and above to be installed. Users on this version should upgrade to a supported Python version.
 
 # v4.2.0
 
 ### Breaking
+
 - Completely rewritten blocklist system. Blocklisting now runs off its own mongoDB collection. This once again introduces backwards incompatible schema changes, so a manual migration is required. You may upgrade from both v4.0 and v4.1 using the `[p]migrate blocklist` command. This removes any need to perform the previous migration steps in v4.1.0, you may upgrade directly to this version. After running the command, blocklist functionality will return and legacy config based blocks will have been deleted. You should always back up your config before migration.
 - Migrated package manager from pipenv to Poetry. Dockerfile and GitHub Actions are also now set up to install using Poetry.
 
 ### Deprecated
-- Legacy blocklist properties are deprecated and no longer function. They now log a warning when used and provide no functionality. They have been replaced with methods in blocklist.py 
+
+- Legacy blocklist properties are deprecated and no longer function. They now log a warning when used and provide no functionality. They have been replaced with methods in blocklist.py
 
 ### Added
+
 - Added `content_type` to attachments stored in the database.
 - Introduced multiplatform Docker workflow for GitHub Actions.
 - Improved join/leave message for multiple servers.
 - Added `log_expiration` config to auto-delete old logs on a schedule.
 
 ### Changed
+
 - Changing a thread's title or NSFW status immediately updates the status in the database.
 
 ### Removed
+
 - The logviewer plugin is no longer included locally.
 - Removed lottie sticker support and its dependencies due to unnecessary bulk.
 - Removed gyazo image embedding.
 
 ### Fixed
+
 - Persistent notes have been fixed after the previous discord.py update.
 - `is_image` now is true only if the image is actually an image.
 - Resolved deprecated pkg_resources warning in certain Python environment.
@@ -97,6 +114,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Fixed rate limit issue on raw reaction add/remove events.
 
 ### Internal
+
 - Add `update_title` and `update_nsfw` methods to `ApiClient` to update thread title and nsfw status in the database.
 - `thread.set_title` now requires `channel_id` to be passed as keyword arguments.
 - New `thread.set_nsfw_status` method to set nsfw status of a thread.
@@ -105,9 +123,11 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 # v4.1.0
 
 ### Breaking
+
 - The block functionality has been overhauled to fix major performance issues and issues with the saving of blocked users and roles. This unfortunately introduces backward-incompatible config schema changes. If you have blocked users stored in your MongoDB or use the `account_age` and `guild_age` functionality in Modmail, you must migrate manually by exporting and deleting the `blocked` field in your `config` collection and manually add them back using the `?block` command.
 
 ### Added
+
 - New .env config option: `REGISTRY_PLUGINS_ONLY`, restricts to only allow adding registry plugins. ([PR #3247](https://github.com/modmail-dev/modmail/pull/3247))
 - New config option: `mention_message`, this will include an additional configurable message next to role mention on thread creation. Defaults to None.
 - Added custom database name detection in `CONNECTION_URI` .env config option. You can now specify custom database name by appending /db_name in your `CONNECTION_URI`.
@@ -117,6 +137,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - `?plugin uninstall` is now an alias for `?plugin remove` ([GH #3260](https://github.com/modmail-dev/modmail/issues/3260))
 
 ### Changed
+
 - Guild icons in embed footers and author urls now have a fixed size of 128. ([PR #3261](https://github.com/modmail-dev/modmail/pull/3261))
 - Official repo moved to https://github.com/modmail-dev/modmail.
 - Optimized Dockerfile build steps for smaller overall image size. (900MB -> under 400MB)
@@ -126,10 +147,12 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Updated requirements.txt to be in sync with Pipfile.
 
 ### Removed
+
 - Removed bandit from dev dependencies as it's no longer used in develop workflow.
 - Removed CairoSVG from Python dependencies.
 
 ### Fixed
+
 - `?alias make/create` as aliases to `?alias add`. This improves continuity between the bot and its command structure. ([PR #3195](https://github.com/kyb3r/modmail/pull/3195))
 - Loading the blocked list with the `?blocked` command takes a long time when the list is large. ([PR #3242](https://github.com/kyb3r/modmail/pull/3242))
 - Reply not being forwarded from DM. (PR [#3239](https://github.com/modmail-dev/modmail/pull/3239))
@@ -138,9 +161,10 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 - Fixed typo for silent close command.
 - Fixed uncached member issue in large guild for react_to_contact and ticket creation.
 - Fixed blocked roles improperly saving in `blocked_users` config.
-- Fixed `?block` command improperly parsing reason as timestamp. 
+- Fixed `?block` command improperly parsing reason as timestamp.
 
 ### Internal
+
 - `ConfigManager.get` no longer accepts two positional arguments: the `convert` argument is now keyword-only.
 
 # v4.0.2
@@ -259,6 +283,7 @@ This is a hotfix release.
 - Set `LOG_DISCORD` environment variable to the logger level and log discord events.
 
 # v3.10.3
+
 This is a hotfix for contact command.
 
 ### Fixed
@@ -266,6 +291,7 @@ This is a hotfix for contact command.
 - Fixed a bug where contacting with no category argument defaults to the top category.
 
 # v3.10.2
+
 This is a hotfix for react to contact.
 
 ### Fixed
@@ -358,7 +384,6 @@ v3.10 adds group conversations while resolving other bugs and QOL changes. It is
 
 - Signature of `format_channel_name` in core/util.py changed to:
   - `format_channel_name(bot, author, exclude_channel=None, force_null=False)`
-
 
 # v3.9.2
 
@@ -525,12 +550,14 @@ This update is a quick hotfix for a weird behaviour experienced on 1 Feb 2021 wh
 - Added `thread_contact_silently` to allow opening threads silently by default. ([PR #2887](https://github.com/modmail-dev/modmail/pull/2887))
 
 ### Fixed
+
 - Permission levels were not respected.
 - `perms remove` was not working.
 - `logs` and `block` would not recognise users in a seperate server setup.
 - Custom emojis were not working with `confirm_thread_creation`.
 
 ### Internal
+
 - Optimised `perms get`, bot should respond faster now.
 
 # v3.7.7
@@ -616,6 +643,7 @@ This update is a quick hotfix for a weird behaviour experienced on 1 Feb 2021 wh
 - `?move` now does not require exact category names, accepts case-insensitive and startswith names.
 
 ### Internal
+
 - Use enums in config. ([GH #2821](https://github.com/modmail-dev/modmail/issues/2821))
 - `on_thread_close` event for plugins.
 - `on_thread_reply` event for plugins.
@@ -626,13 +654,11 @@ This update is a quick hotfix for a weird behaviour experienced on 1 Feb 2021 wh
 
 - Plugins downloading requirements in virtual environments.
 
-
 # v3.6.1
 
 ### Added
 
 - Proper error message if privileged intents not explicitly granted to bot.
-
 
 # v3.6.0
 
@@ -649,6 +675,7 @@ This update is a quick hotfix for a weird behaviour experienced on 1 Feb 2021 wh
 - `?help` shows "No command description" if no description provided. ([PR #2845](https://github.com/modmail-dev/modmail/pull/2845))
 
 ### Fixed
+
 - Unicode errors raised during windows selfhosting
 
 ### Internal
@@ -656,7 +683,6 @@ This update is a quick hotfix for a weird behaviour experienced on 1 Feb 2021 wh
 - Bump discord.py version to 1.5.1
 - Explicitly state intents used for connection
 - Use `--diff` for black CI instead of `--check` ([GH #2816](https://github.com/modmail-dev/modmail/issues/2816))
-
 
 # v3.5.0
 
@@ -676,7 +702,7 @@ Fixed discord.py issue.
 - Deleting channel manually will now close the thread.
 - Deleting messages will no longer cause the bot to produce warnings.
 - Plugins will automatically be removed when it fails to load.
-- Moved all database-related activities to clients.py under MongoDBClient, with possible future hook for additional database support. 
+- Moved all database-related activities to clients.py under MongoDBClient, with possible future hook for additional database support.
 - `bot.db` is deprecated in favour of `bot.api.db` and will be removed in the future.
 - Deprecated `bot.plugin_db.get_partition` in favour of `bot.api.get_plugin_partition` (not final).
 - Deprecated `MONGO_URI` config var (but will keep support in the future) in favour of `CONNECTION_URI` and `DATABASE_TYPE`. Right now there is one supported database - "mongodb", which is the default.
@@ -684,7 +710,6 @@ Fixed discord.py issue.
 ### Fixed
 
 - Plugins not loading in Windows OS. Now uses proactor event loop for asyncio which should fix this.
-
 
 # v3.4.1
 
@@ -699,7 +724,6 @@ Fixed discord.py issue.
 - `thread_create` is dispatched when the thread is registered as a thread by Modmail (i.e., when channel topic is edited).
 - `thread_ready` is dispatched when a thread finishes its setup steps.
 
-
 # v3.4.0
 
 ### Added
@@ -713,7 +737,7 @@ Fixed discord.py issue.
 - "enable" and "disable" support for yes or no config vars.
 - Added "perhaps you meant" section to `?config help`.
 - Multi-command alias is now more stable. With support for a single quote escape `\"`.
-- New command `?freply`, which behaves exactly like `?reply` with the addition that you can substitute `{channel}`, `{recipient}`, and `{author}` to be their respective values. 
+- New command `?freply`, which behaves exactly like `?reply` with the addition that you can substitute `{channel}`, `{recipient}`, and `{author}` to be their respective values.
 - New command `?repair`, repair any broken Modmail thread (with help from @officialpiyush).
 - Recipients get feedback when they edit their messages.
 - Chained delete for DMs now comes with a message.
@@ -963,10 +987,10 @@ Security update!
 
 # v3.0.0
 
-### Added 
+### Added
 
 - `?sponsors` command will list sponsors.
-- An alert will now be sent to the log channel if a thread channel fails to create. This could be due to a variety of problems such as insufficient permissions, or the category channel limit is met. 
+- An alert will now be sent to the log channel if a thread channel fails to create. This could be due to a variety of problems such as insufficient permissions, or the category channel limit is met.
 - Threads will close automatically after some time when `thread_auto_close` is set.
 - Custom closing messages can be configured with `thread_auto_close_response`.
 
@@ -977,15 +1001,16 @@ Security update!
 Read more about updating your bot [here](https://github.com/modmail-dev/modmail/wiki/updating)
 
 ### Changed
+
 - Channel names now can contain Unicode characters.
-- Debug logs are now located in a different file for each bot. (Internal change) 
+- Debug logs are now located in a different file for each bot. (Internal change)
 - Default cogs always appear first in the help command now.
 
 ### Fixed
+
 - Editing notes now work, minor bug with edit command is fixed.
 - Bug in the `?oauth` command where the response message fails to send when an ID is provided.
 - Plugin requirement installation now works in virtual environments
-
 
 # v2.24.1
 
@@ -997,11 +1022,11 @@ Fixed a bug with branches and `?plugin update`.
 
 ### Added
 
-Branch support for `?plugin add` and in the registry. Typically for developers.    
+Branch support for `?plugin add` and in the registry. Typically for developers.
 
 # v2.23.0
 
-### Added 
+### Added
 
 Added a "Mutual servers" field to the genesis embed if:
 a) The user is not in the main guild.
@@ -1015,7 +1040,7 @@ Notes with the `?note` command are now automatically pinned within the thread ch
 
 ### Added
 
-Added a 🛑 reaction to the paginators to delete the embed.  
+Added a 🛑 reaction to the paginators to delete the embed.
 
 ### Fixed
 
@@ -1023,7 +1048,7 @@ Added a 🛑 reaction to the paginators to delete the embed.
 
 # v2.21.0
 
-### Added 
+### Added
 
 New `?plugin registry compact` command which shows a more compact view of all plugins.
 
@@ -1042,21 +1067,22 @@ Add your plugin in the `plugins/registry.json` file in the main repository.
 
 ### What's new?
 
-  - New error message when using thread-only commands outside of threads.
-  - `?unnotify`, ability to undo `?notify`.
-  - `?notify` and `?subscribe` now accepts other users.
+- New error message when using thread-only commands outside of threads.
+- `?unnotify`, ability to undo `?notify`.
+- `?notify` and `?subscribe` now accepts other users.
 
 ### Changes
 
 This update contains mostly internal changes.
-  - Implemented support for the new discord.py v1.1.1.
-  - Improved help text for most commands.
-  - Completely revamped help command, few users changes.
-  - Removed ABC (internal).
+
+- Implemented support for the new discord.py v1.1.1.
+- Improved help text for most commands.
+- Completely revamped help command, few users changes.
+- Removed ABC (internal).
 
 # v2.20.0
 
-### What's new? 
+### What's new?
 
 New `?oauth whitelist` command, which allows you to whitelist users so they can log in via discord to view logs. To set up oauth login for your logviewer app, check the logviewer [repo](https://github.com/modmail-dev/logviewer).
 
@@ -1105,9 +1131,10 @@ Un-deprecated the `OWNERS` config variable to support Discord developer team acc
   - Supporter [2]
   - Regular [1]
 
-### Usage 
+### Usage
 
 You may add a role or user to a permission group through any of the following methods:
+
 - `?permissions add level owner @role`
 - `?permissions add level supporter member-name`
 - `?permissions add level moderator everyone`
@@ -1115,14 +1142,16 @@ You may add a role or user to a permission group through any of the following me
 - `?permissions add level administrator 78912384930291853`
 
 The same applies to individual commands permissions:
+
 - `?permissions add command command-name @member#1234`
 - and the other methods listed above.
 
 To revoke permission, use `remove` instead of `add`.
 
 To view all roles and users with permission for a permission level or command do:
--  `?permissions get command command-name`
--  `?permissions get level owner`
+
+- `?permissions get command command-name`
+- `?permissions get level owner`
 
 By default, all newly set up Modmail will have `OWNER` set to the owner of the bot, and `REGULAR` set to @everyone.
 
@@ -1143,7 +1172,7 @@ When updating to this version, all prior permission settings with guild-based pe
 
 ### Changed
 
-- Logs search command will search through log keys as well now. 
+- Logs search command will search through log keys as well now.
 - For example, `?logs search e7499e82f8ff`.
 
 # v2.17.1
@@ -1154,10 +1183,10 @@ Stricter fallback genesis embed search.
 
 ### Changed
 
-How Modmail checks if a channel is a thread: 
+How Modmail checks if a channel is a thread:
 
 1. The bot first checks if the channel topic is in the format `User ID: XXXX`, this means it is a thread.
-2. If a channel topic is not found, the bot searches through the message history of a channel to find the thread creation embed. This step should never yield a thread for an average user. Still, in the case of another bot messing up the channel topic (happened to a user before), this extra step was added. 
+2. If a channel topic is not found, the bot searches through the message history of a channel to find the thread creation embed. This step should never yield a thread for an average user. Still, in the case of another bot messing up the channel topic (happened to a user before), this extra step was added.
 
 # v2.17.0
 
@@ -1181,7 +1210,7 @@ An issue where a scheduled close would not execute over a long time if the recip
 
 ### Changed
 
-All support for Modmail API (api.modmail.tk) has terminated. 
+All support for Modmail API (api.modmail.tk) has terminated.
 If you're still using api.modmail.tk, you will need to migrate to the self-hosted database
 option ASAP. Your bot will not work unless you switch to the self-hosted option. Refer to the installation tutorial for information regarding self-hosted Modmail.
 
@@ -1208,13 +1237,13 @@ They will be provided by string variables that you can incorporate into them:
 - `logkey` - the key for the thread logs, e.g. (`5219ccc82ad4`)
 - `loglink` - the full link to the thread logs, e.g. (`https://logwebsite.com/logs/5219ccc82ad4`)
 
-Example usage would be: ``?config set thread_close_message {closer.mention} closed the thread, here is the link to your logs: [**`{logkey}`**]({loglink})``
+Example usage would be: `` ?config set thread_close_message {closer.mention} closed the thread, here is the link to your logs: [**`{logkey}`**]({loglink}) ``
 
 # v2.14.0
 
 ### What's new?
 
-Added the ability to enable the recipient to close their own threads. This takes place in the form of a reaction that the user can click to close their thread. This functionality is now enabled by default. 
+Added the ability to enable the recipient to close their own threads. This takes place in the form of a reaction that the user can click to close their thread. This functionality is now enabled by default.
 
 To disable this, do `?config set disable_recipient_thread_close true`
 
@@ -1233,7 +1262,7 @@ You now have complete control of the look of the thread creation and close embed
 
 # v2.13.13
 
-### What's new? 
+### What's new?
 
 Added the ability to disable the `sent_emoji` and `blocked_emoji` when a user messages Modmail.
 
@@ -1241,79 +1270,92 @@ You can do this via `?config set sent_emoji disable`.
 
 ### Fixed
 
-The bot now handles having too many roles to show in the thread created embed. 
+The bot now handles having too many roles to show in the thread created embed.
 
 # v2.13.12
 
 ### What's new?
+
 Added image link in title in case discord fails to embed an image.
 
 # v2.13.11
 
 ### What's new?
+
 - Introduced a new configuration variable `account_age` for setting a minimum account creation age.
   - Users blocked by this reason will be stored in `blocked` along with other reasons for being blocked.
   - `account_age` needs to be an ISO-8601 Duration Format (examples: `P12DT3H` 12 days and 3 hours, `P3Y5M` 3 years and 5 months `PT4H14M999S` 4 hours 14 minutes and 999 seconds). https://en.wikipedia.org/wiki/ISO_8601#Durations.
   - You can set `account_age` using `config set account_age time` where "time" can be a simple human-readable time string or an ISO-8601 Duration Format string.
 
 ### Changed
+
 - `?block` reason cannot start with `System Message: ` as it is now reserved for internal user blocking.
 - `?block`, like `?close`, now supports a block duration (temp blocking).
 
 # v2.13.10
 
 ### Fixed
+
 - Fixed an issue where status and activity do not work if they were modified wrongly in the database.
   - This was primarily an issue for older Modmail users, as the old `status` configuration variable clashes with the new `status` variable.
 
 # v2.13.9
 
 ### Fixed
+
 - Fixed a bug where an error was raised when a message with received during a scheduled closure.
 
 # v2.13.8
 
 ### Fixed
+
 - A bug where a thread was blocked from sending messages when multiple images were uploaded, due to a typo.
 
 ### Changed
+
 - Uses https://hasteb.in instead of https://hastebin.com for `?debug hastebin`.
 
 # v2.13.7
 
 ### What's new?
-- The ability to enable typing interactions. 
+
+- The ability to enable typing interactions.
   - If you want the bot to type in the thread channel if the user is also typing, add the config variable `user_typing` and set it to "yes" or "true". Use `config del` to disable the functionality. The same thing in reverse is also possible if you want the user to see the bot type when someone is typing in the thread channel add the `mod_typing` config variable.
 - New `status` command, change the bot's status to `online`, `idle`, `dnd`, `invisible`, or `offline`.
   - To remove the status (change it back to default), use `status clear`.
   - This also introduces a new internal configuration variable: `status`. Possible values are `online`, `idle`, `dnd`, `invisible`, and `offline`.
-  
+
 ### Changed
-- The internals for `activity` has drastically changed to accommodate the new `status` command.  
+
+- The internals for `activity` has drastically changed to accommodate the new `status` command.
 
 # v2.13.6
 
 ### Fixed
+
 - Fixed a bug in the contact command where the response message did not send.
 
 # v2.13.5
 
 ### What's new?
+
 - You will no longer need to view your bot debug logs from Heroku. `debug` will show you the recent logs within 24h through a series of embeds.
   - If you don't mind your data (may or may not be limited to user ID, guild ID, bot name) be on the internet, `debug hastebin` will upload a formatted logs file to https://hasteb.in.
   - `debug clear` will clear the locally cached logs.
   - Local logs are automatically erased at least once every 27h for bots hosted on Heroku.
 
 ### Fixed
-- Will no longer show  `Unclosed client session` and `Task was destroyed, but it is pending!` when the bot terminates.
-- `thread.create` is now synchronous so that the first message sent can be queued to be sent as soon as a thread is created. 
-    - This fixes a problem where if multiple messages are sent in quick succession, the first message sent (which triggers the thread creation) is not sent in order.
-- Trying to reply to someone who has DMs disabled or has blocked the bot is now handled, and the bot will send a message saying so. 
+
+- Will no longer show `Unclosed client session` and `Task was destroyed, but it is pending!` when the bot terminates.
+- `thread.create` is now synchronous so that the first message sent can be queued to be sent as soon as a thread is created.
+  - This fixes a problem where if multiple messages are sent in quick succession, the first message sent (which triggers the thread creation) is not sent in order.
+- Trying to reply to someone who has DMs disabled or has blocked the bot is now handled, and the bot will send a message saying so.
 
 ### Changed
+
 - `print` is replaced by logging.
   - New environment variable introduced: `LOG_LEVEL`.
-  - This influences the number of messages received in Heroku logs. 
+  - This influences the number of messages received in Heroku logs.
   - Possible options, from least to most severe, are: `INFO`, `DEBUG`, `WARNING`, `ERROR`, `CRITICAL`.
   - In most cases, you can ignore this change.
 - `on_error` and `CommandNotFound` are now logged.
@@ -1321,28 +1363,33 @@ Added image link in title in case discord fails to embed an image.
 # v2.13.4
 
 ### Changed
+
 - `?contact` no longer raise a silent error in Heroku logs when the recipient is a bot. Now Modmail responds with an error message.
 
 # v2.13.3
 
 ### Fixed
+
 - Fixed a typo in the config options.
 
 # v2.13.2
 
 ### Fixed
+
 - Installing `requirements.txt` files in plugins.
 
 # v2.13.1
 
 ### Fixed
+
 - Reading `requirements.txt` files in plugins.
 
 # v2.13.0
 
-### What's new? 
+### What's new?
+
 - Plugins:
-  - Think of it like addons! Anyone (with the skills) can create a plugin, make it public and distribute it. Add a welcome message to Modmail, or moderation commands? It's all up to your imagination!   Have a niche feature request that you think only your server would benefit? Plugins are your go-to!
+  - Think of it like addons! Anyone (with the skills) can create a plugin, make it public and distribute it. Add a welcome message to Modmail, or moderation commands? It's all up to your imagination! Have a niche feature request that you think only your server would benefit? Plugins are your go-to!
   - [Creating Plugins Documentation](https://github.com/modmail-dev/modmail/wiki/Plugins).
 
 # v2.12.5
@@ -1354,7 +1401,8 @@ Added image link in title in case discord fails to embed an image.
 # v2.12.4
 
 ### What's new?
-- Named colors are now supported! Over 900 different common color names are recognized. A list of color names can be found in [core/_color_data.py](https://github.com/modmail-dev/modmail/blob/master/core/_color_data.py).
+
+- Named colors are now supported! Over 900 different common color names are recognized. A list of color names can be found in [core/\_color_data.py](https://github.com/modmail-dev/modmail/blob/master/core/_color_data.py).
   - Named colors can be set the same way as hex. But this can only be done through `config set`, which means database modifications will not work.
   - For example: `config set main_color yellowish green`.
 - New config var `main_color` allows you to customize the main Modmail color (as requested by many). Defaults to Discord `blurple`.
@@ -1362,6 +1410,7 @@ Added image link in title in case discord fails to embed an image.
 # v2.12.3
 
 ### Fixed
+
 - Patched a bug where `logs` sub-commands were accessible by anyone.
 - Patched a bug where an error was raised when a thread is open where the recipient left the server.
 
@@ -1370,6 +1419,7 @@ Huge thanks to Sasiko for reporting these issues.
 # v2.12.2
 
 ### Fixed
+
 - Fixed a bug in self-hosted `?update` command.
 
 # v2.12.1
@@ -1381,80 +1431,96 @@ Huge thanks to Sasiko for reporting these issues.
 # v2.12.0
 
 ### Important
-**In the future, the Modmail API (https://modmail.tk) will be deprecated. This is because we are providing free service without getting anything in return. Thus we do not have the resources to scale to accommodate more users. 
-We recommend using your own database for logs. In the future you will soon get a `backup` command so you can download all your pre-existing data and migrate to your own database.** 
+
+**In the future, the Modmail API (https://modmail.tk) will be deprecated. This is because we are providing free service without getting anything in return. Thus we do not have the resources to scale to accommodate more users.
+We recommend using your own database for logs. In the future you will soon get a `backup` command so you can download all your pre-existing data and migrate to your own database.**
 
 ### Changed
+
 - A lot of painful code cleanup, which is good for us (the developers), but shouldn't affect you.
 - The appearance of the `?logs` command. It should be clearer with better info now.
 - Bot owners get access to all commands regardless of server permissions.
 - Blocked users no longer receive a message, only the blocked emoji will be sent.
 
 ### What's new?
+
 - **Note:** The following commands only work if you are self-hosting your logs. We recommend you to use your own database.
-- Log search queries, in the form of two new commands. 
+- Log search queries, in the form of two new commands.
 - `logs search [query]` - this searches all log messages for a query string.
 - `logs closed-by [user]` this returns all logs closed by a particular user
 
 ### Fixed
+
 - `activity listening to music` no longer results in two "to"s ("listening to to music").
   - This may require you to change your activity message to accommodate this fix.
-- A problem where `main_category_id` and `log_channel_id` weren't updated when their corresponding channel or category get deleted. 
+- A problem where `main_category_id` and `log_channel_id` weren't updated when their corresponding channel or category get deleted.
 
 # v2.11.0
 
 ### What's new?
+
 - `loglink` command, returns the log link for the current thread.
 
 # v2.10.2
 
 ### Changed
+
 - Your logs now track and show edited messages.
 
 # v2.10.1
 
 ### Changed
+
 - Use reply author's top role for the mod tag by default.
 
 # v2.10.0
 
 ### What's new?
-- `anonreply` command to anonymously reply to the recipient. 
-The username of the anonymous user defaults to the `mod_tag` (the footer text of a mod reply message) — the avatar defaults to the guild icon URL. However, you can change both of these via the `anon_username`, `anon_avatar_url`, and `anon_tag` config variables. 
+
+- `anonreply` command to anonymously reply to the recipient.
+  The username of the anonymous user defaults to the `mod_tag` (the footer text of a mod reply message) — the avatar defaults to the guild icon URL. However, you can change both of these via the `anon_username`, `anon_avatar_url`, and `anon_tag` config variables.
 
 ### Changed
+
 - Your bot now logs all messages sent in a thread channel, including discussions that take place. You can now toggle to view them in the log viewer app.
 
 # v2.9.4
 
 ### Fixed
+
 - Small bug due to a typo.
 
 # v2.9.3
 
 ### Changed
+
 - Forgot to enable custom embed colors.
 
 ### What's new?
+
 - Ability to set a custom `mod_tag` (the text in the footer of the mod reply embed, which by default says "Moderator")
 
 # v2.9.2
 
 ### Changed
+
 - Improve format of thread info embed. Slightly cleaner and simpler now.
 - All commands are now blurple instead of green.
 
 ### Fixed
-- Bug where the close command wouldn't work if you didn't configure a log channel. 
+
+- Bug where the close command wouldn't work if you didn't configure a log channel.
 
 ### What's new?
+
 - Ability to set your own custom `mod_color` and `recipient_color` for the thread message embeds.
 
 # v2.9.1
 
 ### Changed
-- Changed order of arguments for `contact`. This is so that you can use aliases to their full potential. 
-- For example: 
+
+- Changed order of arguments for `contact`. This is so that you can use aliases to their full potential.
+- For example:
   - `contact "Recruitment Category" @somedude`
 - You can add an alias by doing: `alias add recruit contact "Recruitment Category"`.
   - Now you can use the alias via: `recruit @somedude`.
@@ -1462,11 +1528,13 @@ The username of the anonymous user defaults to the `mod_tag` (the footer text of
 # v2.9.0
 
 ### What's new?
+
 - New command `note` will add a system message to your thread logs. - - This is useful for noting the context of a conversation.
 
 # v2.8.1
 
 ### Fixed
+
 - Fixed bug where thread logs were getting duplicated when using the `contact` command.
 - Fixed bug where the wrong key was used for logs, which caused some `log` command log links to point to an HTTP 404 Not Found.
   - A minor oversight from commit 1ba74d9.
@@ -1474,18 +1542,22 @@ The username of the anonymous user defaults to the `mod_tag` (the footer text of
 # v2.8.0
 
 ### Changed
+
 - Major improvement in viewing thread logs.
 - Log links are now rendered in HTML instead of plain text.
 
 # v2.7.2
 
-### What's new? 
+### What's new?
+
 - `config options` command to see a list of valid config variables that you can modify.
 
 ### Security
+
 Thread channels will now default to being private (`@everyone`'s read message perms set to `false`).
-  - If the thread creation category could not be resolved.
-  - This will save you from some trouble if, for whatever reason, your configuration gets messed up.
+
+- If the thread creation category could not be resolved.
+- This will save you from some trouble if, for whatever reason, your configuration gets messed up.
 
 # v2.7.1
 
@@ -1499,7 +1571,7 @@ Thread channels will now default to being private (`@everyone`'s read message pe
 
 - If your Modmail bot was set up a long time ago, you might experience an issue where messages were sent outside of the category.
   - To fix this, set `main_category_id` to the ID of the Modmail category.
-  
+
 # v2.7.0
 
 ### Changed
@@ -1510,24 +1582,29 @@ Thread channels will now default to being private (`@everyone`'s read message pe
 # v2.6.3
 
 ### Fixes
+
 - Fixed small issue with finding threads.
 
 # v2.6.2
 
 ### Fixes
+
 - Fixed log URLs for self-hosting users.
 
 # v2.6.1
 
 ### Fixed
+
 - Replaced the testing `API_BASE_URL` with the actual URL.
 
 # v2.6.0
 
 ### What's new?
+
 - `threads` is now a default alias to `logs`.
 
 ### Changed
+
 - Log URLs are moved to their own collection.
 - Log URLs are now `https://logs.modmail.tk/LOGKEY`, no more numbers before the log key.
 - We still support the numbers to not break everyone's URLs so quickly, but both work at the moment.
@@ -1536,21 +1613,25 @@ Thread channels will now default to being private (`@everyone`'s read message pe
 # v2.5.2
 
 ### Fixes
+
 - Fixed a bug where requests sent when the API was not ready.
 
 # v2.5.1
 
 ### Fixes
+
 - Emergency patch to save configs.
 
 # v2.5.0
 
 ### Background
+
 - Bots hosted by Heroku restart at least once every 27 hours.
-- During this period, local caches will be deleted, which results in the inability to set the scheduled close time to longer than 24 hours. This update resolves this issue. 
+- During this period, local caches will be deleted, which results in the inability to set the scheduled close time to longer than 24 hours. This update resolves this issue.
 - [PR #135](https://github.com/modmail-dev/modmail/pull/135)
 
 ### Changed
+
 - Created a new internal config var: `closures`.
 - Store closure details into `closures` when the scheduled time isn't "now".
   - Loaded upon bot restart.
@@ -1560,56 +1641,68 @@ Thread channels will now default to being private (`@everyone`'s read message pe
 # v2.4.5
 
 ### Fixed
+
 Fixed activity setting due to flawed logic in `config.get()` function.
 
 # v2.4.4
 
 ### Fixed
+
 Fixed a bug in the `?activity` command where it would fail to set the activity on bot restart if the activity type was `playing`.
 
 # v2.4.3
 
 ### Changed
- - Moved self-hosted log viewer to a separate repo.
+
+- Moved self-hosted log viewer to a separate repo.
 
 # v2.4.2
 
 ### What's new?
+
 - Ability to set your own Twitch URL for `streaming` activity status.
 
 # v2.4.1
 
 ### Fixed
+
 - Small bug in `?activity` command.
 
 # v2.4.0
 
 ### What's new?
+
 - Added the `?activity` command for setting the activity
 - [PR #131](https://github.com/modmail-dev/modmail/pull/131#issue-244686818) this supports multiple activity types (`playing`, `watching`, `listening`, and `streaming`).
 
 ### Removed
+
 - Removed the deprecated `status` command.
 - This also means you will have to reset your bot status with the `?activity` command, as the `?status` command was removed.
 
 # v2.3.0
 
 ### What's new?
+
 - Ability to self-host logs.
 
 ### Changed
+
 - Improved format for log channel embeds.
 - Roles are now comma-separated in info embed.
 - This only applies to separate server setups.
 
 ### Fixed
+
 - Bug in subscribe command.
   - It will now unsubscribe after a thread is closed.
 
 # v2.2.0
 
 ### What's new?
+
 - Notify command `notify [role]`.
+
   - Notify a given role or yourself to the next thread message received.
   - Once a thread message is received, you will be pinged once only.
 
@@ -1618,20 +1711,24 @@ Fixed a bug in the `?activity` command where it would fail to set the activity o
   - You will be pinged for every thread message received until you unsubscribe.
 
 ### Changed
+
 - Slightly improved log channel message format.
 
 # v2.1.1
 
 ### Fixed
+
 - Small bug in `close` command.
 
 # v2.1.0
 
 ### What's new?
+
 - Ability to set a custom thread-creation-response message.
   - Via `config set thread_creation_response [message]`.
 
 ### Changed
+
 - Improve `?logs` command format.
 - Improve thread log channel messages to have more relevant info.
 - Improve close command.
@@ -1641,27 +1738,32 @@ Fixed a bug in the `?activity` command where it would fail to set the activity o
 # v2.0.10
 
 ### Security
+
 - Fix a bug where blocked users were still able to message Modmail.
 
 # v2.0.9
 
 ### What's new?
+
 - Support for custom blocked and sent emoji.
 - Use the `config set blocked_emoji [emoji]` or `sent_emoji` commands.
 
 ### Fixes
+
 - Support multiple images and file attachments in one message.
 - This is only possible on mobile, so its good to handle it in code.
 
 # v2.0.8
 
 ### What's new?
+
 - Added the ability to use your own log channel.
   - You can do this via the `config set log_channel_id <id>` command.
 - Added the ability to use your own main inbox category.
   - You can do this via the `config set main_category_id <id>` command.
 
 ### Changed
+
 - You can now supply a reason when blocking a user.
 - Blocked users are now stored in the database instead of in the channel topic.
   - This means you can delete the top channel in the Modmail category now (after migrating the currently blocked users).
@@ -1669,9 +1771,11 @@ Fixed a bug in the `?activity` command where it would fail to set the activity o
 # v2.0.7
 
 ### What's new?
+
 - Added a `changelog` command to view the bot's changelog within discord.
 
 ### Changed
+
 - `update` command now shows the latest changes directly from CHANGELOG.md.
 - Auto-update messages also show the latest changes from the GitHub repo.
 - Removed the "latest changes" section from the `about` command.
@@ -1679,6 +1783,7 @@ Fixed a bug in the `?activity` command where it would fail to set the activity o
 # v2.0.6
 
 ### Fixed
+
 - Fix logs sending duplicated thread close logs.
 - The bot will now tell you that a user is no longer in the server when you try to reply to a thread.
   - Before this, it looked like you replied to the thread, but in reality, the message was not sent.
@@ -1686,18 +1791,21 @@ Fixed a bug in the `?activity` command where it would fail to set the activity o
 # v2.0.5
 
 ### Changed
+
 - `alias` command now checks if you are adding a valid alias-command combo.
 - Manually deleting a channel will now correctly close the thread and post logs.
 
 # v2.0.4
 
 ### Fixed
+
 - Fixed a one-off bug where the channel topic disappears, but Modmail operations should continue.
 - Fixed `linked_message_id` issues.
 
 # v2.0.3
 
 ### Fixed
+
 - The thread creation embed now shows the correct number of past logs.
 - If using a separate server setup, roles in the info embed now are shown as names instead of mentions.
   - This is because you can't mention roles across servers.
@@ -1705,16 +1813,19 @@ Fixed a bug in the `?activity` command where it would fail to set the activity o
 # v2.0.2
 
 ### Security
+
 - Made the `logs` command require "manage messages" permissions to execute.
   - Before this patch, anyone could use the `logs` commands.
 
 # v2.0.1
 
 ### Changed
+
 - Improved `block` / `unblock` commands.
   - They now take a more comprehensive range of arguments: usernames, nicknames, mentions, and user IDs.
 
 ### Fixed
+
 - Setup command now configures permissions correctly so that the bot will always be able to see the main operations category.
 
 # v2.0.0
@@ -1724,15 +1835,18 @@ To use this release, you must acquire an API token from https://modmail.tk.
 Read the updated installation guide [here](https://github.com/modmail-dev/modmail/wiki/installation).
 
 ### Changed
+
 - Stability improvements through synchronization primitives.
 - Refactor thread management and code.
 - Update command now uses `api.modmail.tk`.
 - `contact` command no longer tells the user you messaged them 👻
 
 ### Fixed
+
 - `status` command now changes playing status indefinitely.
 
 ### What's new?
+
 - Dynamic `help` command (#84).
 - Dynamic configuration through `api.modmail.tk`.
 - Thread logs via `logs.modmail.tk` (#78).
@@ -1743,5 +1857,6 @@ Read the updated installation guide [here](https://github.com/modmail-dev/modmai
 - NSFW Command to change channels to NSFW (#77).
 
 ### Removed
+
 - Removed `archive` command.
   - Explanation: With thread logs (that lasts forever), there's no point in archiving.
