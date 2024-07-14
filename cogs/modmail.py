@@ -36,25 +36,15 @@ class Modmail(commands.Cog):
         You only need to run this command
         once after configuring Modmail.
         """
-
-        if ctx.guild != self.bot.modmail_guild:
-            return await ctx.send(f"You can only setup in the Modmail guild: {self.bot.modmail_guild}.")
+        guild = ctx.guild
 
         if self.bot.main_category is not None:
             logger.debug("Can't re-setup server, main_category is found.")
-            return await ctx.send(f"{self.bot.modmail_guild} is already set up.")
-
-        if self.bot.modmail_guild is None:
-            embed = discord.Embed(
-                title="Error",
-                description="Modmail functioning guild not found.",
-                color=self.bot.error_color,
-            )
-            return await ctx.send(embed=embed)
+            return await ctx.send(f"{guild} is already set up.")
 
         overwrites = {
-            self.bot.modmail_guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            self.bot.modmail_guild.me: discord.PermissionOverwrite(read_messages=True),
+            guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            guild.me: discord.PermissionOverwrite(read_messages=True),
         }
 
         for level in PermissionLevel:
@@ -64,20 +54,19 @@ class Modmail(commands.Cog):
             for perm in permissions:
                 perm = int(perm)
                 if perm == -1:
-                    key = self.bot.modmail_guild.default_role
+                    key = guild.default_role
                 else:
-                    key = self.bot.modmail_guild.get_member(perm)
+                    key = guild.get_member(perm)
                     if key is None:
-                        key = self.bot.modmail_guild.get_role(perm)
+                        key = guild.get_role(perm)
                 if key is not None:
                     logger.info("Granting %s access to Modmail category.", key.name)
                     overwrites[key] = discord.PermissionOverwrite(read_messages=True)
 
-        category = await self.bot.modmail_guild.create_category(name="Modmail", overwrites=overwrites)
-
+        category = await guild.create_category(name="Modmail", overwrites=overwrites)
         await category.edit(position=0)
 
-        log_channel = await self.bot.modmail_guild.create_text_channel(name="bot-logs", category=category)
+        log_channel = await guild.create_text_channel(name="bot-logs", category=category)
 
         embed = discord.Embed(
             title="Friendly Reminder",
@@ -90,8 +79,8 @@ class Modmail(commands.Cog):
         embed.add_field(
             name="Thanks for using our bot!",
             value="If you like what you see, consider giving the "
-            "[repo a star](https://github.com/modmail-dev/modmail) :star: and if you are "
-            "feeling extra generous, buy us coffee on [Patreon](https://patreon.com/kyber) :heart:!",
+            "[repo a star](https://github.com/PBOwner/modmail) :star: and if you are "
+            "feeling extra generous, buy us coffee on [Patreon](https://patreon.com/PBOwner) :heart:!",
         )
 
         embed.set_footer(text=f'Type "{self.bot.prefix}help" for a complete list of commands.')
