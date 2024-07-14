@@ -385,10 +385,7 @@ class Thread:
 
     async def _close_after(self, after, closer, silent, delete_channel, message):
         await asyncio.sleep(after)
-        timeout = self.bot.config.get("thread_auto_close")
-        if timeout != isodate.Duration():
-            return self.bot.loop.create_task(self._close(closer, silent, delete_channel, message, True))
-        logger.debug("Cancelling thread auto close task due to disabled thread_auto_close")
+        return self.bot.loop.create_task(self._close(closer, silent, delete_channel, message, True))
 
     async def close(
         self,
@@ -431,6 +428,14 @@ class Thread:
             await self._close(closer, silent, delete_channel, message)
 
     async def _close(self, closer, silent=False, delete_channel=True, message=None, scheduled=False):
+
+        if (
+            scheduled
+            and closer.id == self.bot.user.id
+            and self.bot.config.get("thread_auto_close") == isodate.Duration()
+        ):
+            return logger.info("Thread auto close cancelled due to disabled thread_auto_close")
+
         try:
             self.manager.cache.pop(self.id)
         except KeyError as e:
