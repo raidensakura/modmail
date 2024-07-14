@@ -163,7 +163,7 @@ class Thread:
         recipient = self.recipient
 
         # in case it creates a channel outside of category
-        overwrites = {self.bot.modmail_guild.default_role: discord.PermissionOverwrite(read_messages=False)}
+        overwrites = {self.bot.guild.default_role: discord.PermissionOverwrite(read_messages=False)}
 
         category = category or self.bot.main_category
 
@@ -240,7 +240,7 @@ class Thread:
                 footer = self.bot.config["thread_creation_footer"]
 
             embed.set_footer(
-                text=footer, icon_url=self.bot.get_guild_icon(guild=self.bot.modmail_guild, size=128)
+                text=footer, icon_url=self.bot.get_guild_icon(guild=self.bot.guild, size=128)
             )
             embed.title = self.bot.config["thread_creation_title"]
 
@@ -348,7 +348,7 @@ class Thread:
         embed = discord.Embed(color=color, description=user.mention, timestamp=time)
 
         if user.dm_channel:
-            footer = f"User ID: {user.id} • DM ID: {user.dm_channel.id}"
+            footer = f"User ID: {user.id}  DM ID: {user.dm_channel.id}"
         else:
             footer = f"User ID: {user.id}"
 
@@ -366,7 +366,7 @@ class Thread:
             embed.set_footer(text=footer)
         else:
             embed.set_author(name=str(user), icon_url=user.display_avatar.url, url=log_url)
-            embed.set_footer(text=f"{footer} • (not in main server)")
+            embed.set_footer(text=f"{footer}  (not in main server)")
 
         embed.description += ", ".join(user_info)
 
@@ -1263,8 +1263,9 @@ class ThreadManager:
         self.cache = {}
 
     async def populate_cache(self) -> None:
-        for channel in self.bot.modmail_guild.text_channels:
-            await self.find(channel=channel)
+        for guild in self.bot.guilds:
+            for channel in guild.text_channels:
+                await self.find(channel=channel)
 
     def __len__(self):
         return len(self.cache)
@@ -1319,7 +1320,7 @@ class ThreadManager:
 
             channel = discord.utils.find(
                 lambda x: (check(x.topic)) if x.topic else False,
-                self.bot.modmail_guild.text_channels,
+                self.bot.guilds,
             )
 
             if channel:
