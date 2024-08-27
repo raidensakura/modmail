@@ -1088,7 +1088,7 @@ class Thread:
 
         file_upload_count = 1
 
-        for url, filename, _ in attachments:
+        for url, filename in attachments:
             embed.add_field(name=f"File upload ({file_upload_count})", value=f"[{filename}]({url})")
             file_upload_count += 1
 
