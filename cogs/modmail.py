@@ -1777,7 +1777,7 @@ class Modmail(commands.Cog):
                 title="Success",
                 description=f"""
                 {mention} has been whitelisted.
-                They were previously blocked by <@{blocklist_entry.blocking_user_id}> {" for "+blocklist_entry.reason if blocklist_entry.reason is not None else ""}.
+                They were previously blocked by <@{blocklist_entry.blocking_user_id}> {" for " + blocklist_entry.reason if blocklist_entry.reason is not None else ""}.
                 """,
                 color=self.bot.main_color,
             )

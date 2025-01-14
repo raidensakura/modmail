@@ -413,7 +413,7 @@ class MessagePaginatorSession(PaginatorSession):
 
     def _set_footer(self) -> None:
         if self.embed is not None:
-            footer_text = f"Page {self.current+1} of {len(self.pages)}"
+            footer_text = f"Page {self.current + 1} of {len(self.pages)}"
             if self.footer_text:
                 footer_text = footer_text + " • " + self.footer_text
 

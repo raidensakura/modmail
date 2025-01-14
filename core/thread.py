@@ -428,7 +428,6 @@ class Thread:
             await self._close(closer, silent, delete_channel, message)
 
     async def _close(self, closer, silent=False, delete_channel=True, message=None, scheduled=False):
-
         if (
             scheduled
             and closer.id == self.bot.user.id

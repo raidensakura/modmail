@@ -1095,8 +1095,7 @@ class Utility(commands.Cog):
 
                     if multiple_alias:
                         embed.description = (
-                            "The command you are attempting to point "
-                            f"to does not exist: `{linked_command}`."
+                            f"The command you are attempting to point to does not exist: `{linked_command}`."
                         )
                     else:
                         embed.description = (
@@ -2089,7 +2088,7 @@ class Utility(commands.Cog):
                         title="Bot has been updated",
                         color=self.bot.main_color,
                     )
-                    embed.set_footer(text=f"Updating Modmail v{self.bot.version} " f"-> v{latest.version}")
+                    embed.set_footer(text=f"Updating Modmail v{self.bot.version} -> v{latest.version}")
                     embed.description = latest.description
                     for name, value in latest.fields.items():
                         embed.add_field(name=name, value=truncate(value, 200))
@@ -2133,7 +2132,7 @@ class Utility(commands.Cog):
         body = utils.cleanup_code(body)
         stdout = StringIO()
 
-        to_compile = f'async def func():\n{indent(body, "  ")}'
+        to_compile = f"async def func():\n{indent(body, '  ')}"
 
         def paginate(text: str):
             """Simple generator that paginates text."""

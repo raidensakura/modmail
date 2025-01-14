@@ -14,10 +14,8 @@ dependencies = [
     "colorama~=0.4.5",
     "emoji~=1.7.0",
     "isodate~=0.6.0",
-    "motor~=3.1.2",
     "natural~=0.2.0",
     "parsedatetime~=2.6",
-    "pymongo[srv]",
     "python-dateutil~=2.8.1",
     "python-dotenv~=1.0.0",
     "uvloop~=0.17.0; sys_platform != \"win32\"",
@@ -26,54 +24,14 @@ dependencies = [
     "strenum<1.0.0,>=0.4.15",
     "discord-py[speed]==2.4.0",
     "packaging<24.0,>=23.2",
-    "typing-extensions>=4.12.2",
+    "typing-extensions<5.0.0,>=4.12.2",
+    "motor>=3.5.1",
+    "pymongo<4.9",
 ]
 readme = "README.md"
 license = {text = "AGPL-3.0"}
 
-[tool.poetry]
-name = "discord-modmail"
-version = "4.3.3"
-description = "A Modmail fork with a focus on improvements and bug fixes"
-authors = [
-	"Raiden Sakura <raiden@project-mei.xyz>",
-	"kyb3r <noemail@example.com>",
-    "4jr <noemail@example.com>",
-    "Taki <noemail@example.com>"
-	]
-license = "AGPL-3.0"
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = ">=3.9, <3.12"
-aiohttp = {version = "3.9.1", extras = ["speedups"]}
-colorama = "~=0.4.5"
-emoji = "~=1.7.0"
-isodate = "~=0.6.0"
-motor = "~=3.1.2"
-natural = "~=0.2.0"
-parsedatetime = "~=2.6"
-pymongo = {extras = ["srv"], version = "*"}
-python-dateutil = "~=2.8.1"
-python-dotenv = "~=1.0.0"
-uvloop = {version = "~=0.17.0", markers = "sys_platform != 'win32'"}
-requests = "~=2.31.0"
-attrs = "~=23.1.0"
-strenum = "^0.4.15"
-"discord.py" = {version = "2.4.0", extras = ["speed"]}
-packaging = "^23.2"
-typing-extensions = "^4.12.2"
-
-[tool.poetry.group.dev.dependencies]
-black = "^23.12.0"
-ruff = "^0.1.9"
-tomli = "^2.0.1"
-pre-commit = "^3.6.0"
-
-[tool.pdm]
-distribution = true
-
-[tool.pdm.dev-dependencies]
+[dependency-groups]
 dev = [
     "black<24.0.0,>=23.12.0",
     "ruff<1.0.0,>=0.1.9",
@@ -81,12 +39,21 @@ dev = [
     "pre-commit<4.0.0,>=3.6.0",
 ]
 
-[tool.pdm.build]
-includes = []
+[lint]
+select = ["C90", "E", "F", "I001", "PGH004", "RUF100"]
+ignore = ["F405", "E741", "C901", "F403", "E501"]
+fixable = ["I001"]
+mccabe.max-complexity = 25
+isort.combine-as-imports = true
 
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+[tool.ruff]
+target-version = "py311"
+line-length = 110
+fix = true
+force-exclude = true
+exclude = [
+    "@local",
+]
 
 [tool.black]
 line-length = "110"
@@ -108,20 +75,3 @@ extend-exclude = '''
   )/
 )
 '''
-
-[tool.ruff]
-target-version = "py311"
-line-length = 110
-select = ["C90", "E", "F", "I001", "PGH004", "RUF100"]
-ignore = ["F405", "E741", "C901", "F403", "E501"]
-fix = true
-fixable = ["I001"]
-isort.combine-as-imports = true
-force-exclude = true
-exclude = [
-    "@local",
-]
-
-[tool.ruff.mccabe]
-# Unlike Flake8, default to a complexity level of 10.
-max-complexity = 25

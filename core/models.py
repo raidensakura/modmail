@@ -28,15 +28,15 @@ if ".heroku" in os.environ.get("PYTHONHOME", ""):
 class ModmailLogger(logging.Logger):
     @staticmethod
     def _debug_(*msgs):
-        return f'{Fore.CYAN}{" ".join(msgs)}{Style.RESET_ALL}'
+        return f"{Fore.CYAN}{' '.join(msgs)}{Style.RESET_ALL}"
 
     @staticmethod
     def _info_(*msgs):
-        return f'{Fore.LIGHTMAGENTA_EX}{" ".join(msgs)}{Style.RESET_ALL}'
+        return f"{Fore.LIGHTMAGENTA_EX}{' '.join(msgs)}{Style.RESET_ALL}"
 
     @staticmethod
     def _error_(*msgs):
-        return f'{Fore.RED}{" ".join(msgs)}{Style.RESET_ALL}'
+        return f"{Fore.RED}{' '.join(msgs)}{Style.RESET_ALL}"
 
     def debug(self, msg, *args, **kwargs):
         if self.isEnabledFor(logging.DEBUG):

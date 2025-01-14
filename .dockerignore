@@ -150,7 +150,7 @@ Procfile
 *.md
 .*.json
 Dockerfile
-docker-compose.yml
+*compose.yml
 requirements.txt
 LICENSE
 PRIVACY.md

@@ -1625,7 +1625,7 @@ class ModmailBot(commands.Bot):
                 user = data["user"]
                 embed.add_field(
                     name="Merge Commit",
-                    value=f"[`{short_sha}`]({html_url}) " f"{message} - {user['username']}",
+                    value=f"[`{short_sha}`]({html_url}) {message} - {user['username']}",
                 )
                 embed.set_author(
                     name=user["username"] + " - Updating Bot",
@@ -1675,7 +1675,7 @@ class ModmailBot(commands.Bot):
                     if self.hosting_method in (HostingMethod.PM2, HostingMethod.SYSTEMD):
                         embed = discord.Embed(title="Bot has been updated", color=self.main_color)
                         embed.set_footer(
-                            text=f"Updating Modmail v{self.version} " f"-> v{latest.version} {message}"
+                            text=f"Updating Modmail v{self.version} -> v{latest.version} {message}"
                         )
                         if self.config["update_notifications"]:
                             await channel.send(embed=embed)

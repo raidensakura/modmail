@@ -8,6 +8,10 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+### Changed
+
+- Switch package manager from poetry/pdm to uv.
+
 # v4.3.3
 
 ### Added

@@ -22,7 +22,7 @@ Modmail has quite a few significant problems with its feature implementations, r
 
 This is a general installation guide for developers. Refer to the [documentation](https://modmail-docs.netlify.app) for user guide.
 
-This guide assumes you have installed **git**, a **compatible Python version** and [**Poetry**](https://python-poetry.org/) / [**PDM**](https://pdm-project.org/) installed.
+This guide assumes you have installed **git**, a **compatible Python version** and [**uv**](https://docs.astral.sh/uv/getting-started/installation/) installed.
 
 1. Clone the repository
     ```console
@@ -32,20 +32,12 @@ This guide assumes you have installed **git**, a **compatible Python version** a
 2. Create a Discord bot account, grant the necessary intents, and invite the bot.
 3. Create a MongoDB database and a user for the bot to connect to.
 4. Rename the file `.env.example` to `.env` and fill it with appropriate values.
-5. Install project dependencies and run the bot.
-	- Using Poetry:  
-
-		```console
-		$ poetry install --no-root
-		$ poetry run python bot.py
-		```
-	- Using PDM:
-
-		```console
-		$ pdm install
-		$ pdm run python bot.py
-		```
-7. [Optional] Load the logviewer plugin with `[p]plugin load raidensakura/modmail-plugins/logviewer@main`
+5. Install project dependencies and run the bot.  
+    ```console
+    $ uv install
+    $ uv run bot.py
+    ```
+7. [Optional] Load the logviewer plugin with `[p]plugin load logviewer`
 
 ## Running the Docker Image
 
@@ -59,6 +51,10 @@ This guide assume you already have Docker or Docker Compose installed.
     ```console
     $ docker compose up -d
     ```
+- Developing with Docker Compose:
+    ```console
+    $ docker compose watch
+    ```
 
 ## Support & Issues
 
@@ -70,20 +66,24 @@ Check out the [contributing guidelines](https://github.com/raidensakura/modmail/
 
 The [develop](https://github.com/raidensakura/modmail/tree/develop) branch is where most of the features are tested before stable release.
 
-This project has included pre-commit script that automatically run black and ruff linter on every commit.
+This project has included pre-commit script that can automatically run black and ruff linter on every commit.
 
 1. Install development dependencies.
     ```console
-    $ poetry install --no-root --only dev
+    $ uv sync --dev
     ```
-2. Install the pre-commit hook.
+2. Run the pre-commit hook.
     ```console
-    $ poetry run pre-commit install
+    $ uv run pre-commit
+    ```
+3. Install the pre-commit hook (Optional).
+    ```console
+    $ uv run pre-commit install
     ```
     
 Alternatively, you can also lint the codebase manually
 
 ```console
-$ poetry run black .
-$ poetry run ruff .
+$ uv run black .
+$ uv run ruff format .
 ```

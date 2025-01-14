@@ -1,18 +1,33 @@
 services:
   bot:
+    # Using the public image
     image: ghcr.io/raidensakura/modmail:stable
+    # Building the image locally
+    build:
+      context: .
+      dockerfile: Dockerfile
+    develop:
+      watch:
+      - action: sync+restart
+        path: ./
+        target: /app
+        ignore:
+          - .venv/
     container_name: modmail
     restart: always
     environment:
-      - CONNECTION_URI=mongodb://db
+      - CONNECTION_URI=mongodb://mongo
     env_file:
       - .env
     depends_on:
-      - db
+      - mongo
 
-  db:
-    image: mongo
+  mongo:
+    image: mongo:7
     container_name: modmail-db
     restart: always
     volumes:
-      - ./env/db:/data/db
+      - mongodb:/data/db
+
+volumes:
+  mongodb:

@@ -135,8 +135,6 @@ def updates_enabled():
         return not ctx.bot.config["disable_updates"]
 
     predicate.fail_msg = (
-        "Updates are disabled on this bot instance. "
-        "View `?config help disable_updates` for "
-        "more information."
+        "Updates are disabled on this bot instance. View `?config help disable_updates` for more information."
     )
     return commands.check(predicate)
