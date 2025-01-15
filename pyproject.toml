@@ -27,6 +27,7 @@ dependencies = [
     "typing-extensions<5.0.0,>=4.12.2",
     "motor>=3.5.1",
     "pymongo<4.9",
+    "pip>=24.3.1",
 ]
 readme = "README.md"
 license = {text = "AGPL-3.0"}

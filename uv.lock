@@ -388,6 +388,7 @@ dependencies = [
     { name = "natural" },
     { name = "packaging" },
     { name = "parsedatetime" },
+    { name = "pip" },
     { name = "pymongo" },
     { name = "python-dateutil" },
     { name = "python-dotenv" },
@@ -417,6 +418,7 @@ requires-dist = [
     { name = "natural", specifier = "~=0.2.0" },
     { name = "packaging", specifier = ">=23.2,<24.0" },
     { name = "parsedatetime", specifier = "~=2.6" },
+    { name = "pip", specifier = ">=24.3.1" },
     { name = "pymongo", specifier = "<4.9" },
     { name = "python-dateutil", specifier = "~=2.8.1" },
     { name = "python-dotenv", specifier = "~=1.0.0" },
@@ -739,6 +741,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz", hash = "sha256:a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712", size = 51043 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cc/20/ff623b09d963f88bfde16306a54e12ee5ea43e9b597108672ff3a408aad6/pathspec-0.12.1-py3-none-any.whl", hash = "sha256:a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08", size = 31191 },
+]
+
+[[package]]
+name = "pip"
+version = "24.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f4/b1/b422acd212ad7eedddaf7981eee6e5de085154ff726459cf2da7c5a184c1/pip-24.3.1.tar.gz", hash = "sha256:ebcb60557f2aefabc2e0f918751cd24ea0d56d8ec5445fe1807f1d2109660b99", size = 1931073 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ef/7d/500c9ad20238fcfcb4cb9243eede163594d7020ce87bd9610c9e02771876/pip-24.3.1-py3-none-any.whl", hash = "sha256:3790624780082365f47549d032f3770eeb2b1e8bd1f7b2e02dace1afa361b4ed", size = 1822182 },
 ]
 
 [[package]]
