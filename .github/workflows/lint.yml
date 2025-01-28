@@ -22,9 +22,6 @@ jobs:
         with:
           options: "--check --verbose"
           src: "./"
-          use_pyproject: true
 
       - name: Run ruff linter
         uses: astral-sh/ruff-action@v3
-        with:
-          version-file: "./pyproject.toml"
