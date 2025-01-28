@@ -15,25 +15,21 @@ jobs:
         python-version: ["3.11"]
     name: Python ${{ matrix.python-version }} on ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        architecture: x64
-    - uses: Gr1N/setup-poetry@v9
-    - name: Cache poetry
-      id: cache-poetry
-      uses: actions/cache@v4.0.2
-      with:
-        path: ~/.cache/pypoetry/virtualenvs
-        key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
-    - name: Maybe install dependencies
-      if: steps.cache-venv.outputs.cache-hit != 'true'
-      run: poetry install --no-root --only dev
-    - name: Ruff
-      run: poetry run ruff . --no-fix --config pyproject.toml
-      continue-on-error: true
-    - name: Black
-      run: |
-        poetry run black . --diff --check --config pyproject.toml
+      - uses: actions/checkout@v4
+
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Run ruff linter
+        run: uv run ruff . --no-fix --config pyproject.toml
+        continue-on-error: true
+      - name: Run black linter
+        run: |
+          uv run black . --diff --check --config pyproject.toml
