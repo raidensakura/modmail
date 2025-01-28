@@ -1,3 +1,4 @@
+import _string  # type: ignore
 import json
 import logging
 import os
@@ -10,7 +11,6 @@ from logging.handlers import RotatingFileHandler
 from string import Formatter
 from typing import Dict, Optional
 
-import _string  # type: ignore
 import discord
 from discord.ext import commands
 

@@ -40,21 +40,44 @@ dev = [
     "pre-commit<4.0.0,>=3.6.0",
 ]
 
-[lint]
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+[tool.ruff.lint]
 select = ["C90", "E", "F", "I001", "PGH004", "RUF100"]
 ignore = ["F405", "E741", "C901", "F403", "E501"]
-fixable = ["I001"]
+fixable = ["ALL"]
 mccabe.max-complexity = 25
 isort.combine-as-imports = true
-
-[tool.ruff]
-target-version = "py311"
-line-length = 110
-fix = true
-force-exclude = true
-exclude = [
-    "@local",
-]
+unfixable = []
 
 [tool.black]
 line-length = "110"

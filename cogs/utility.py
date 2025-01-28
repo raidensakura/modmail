@@ -23,7 +23,13 @@ from packaging import version
 
 from core import checks, migrations, utils
 from core.changelog import Changelog
-from core.models import HostingMethod, InvalidConfigError, PermissionLevel, UnseenFormatter, getLogger
+from core.models import (
+    HostingMethod,
+    InvalidConfigError,
+    PermissionLevel,
+    UnseenFormatter,
+    getLogger,
+)
 from core.paginator import EmbedPaginatorSession, MessagePaginatorSession
 from core.utils import DummyParam, is_image_url, trigger_typing, truncate
 
