@@ -17,6 +17,7 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 ### Added
 
 - `?snippet` command now include a truncated preview of a snippet's content.
+- Support for custom activities with `?activity custom <text>` ([PR #3352](https://github.com/modmail-dev/Modmail/pull/3352))
 
 ### Fixed
 

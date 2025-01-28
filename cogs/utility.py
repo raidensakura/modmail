@@ -482,11 +482,12 @@ class Utility(commands.Cog):
         Set an activity status for the bot.
 
         Possible activity types:
-            - `playing`
-            - `streaming`
-            - `listening`
-            - `watching`
-            - `competing`
+        - `playing`
+        - `streaming`
+        - `listening`
+        - `watching`
+        - `competing`
+        - `custom`
 
         When activity type is set to `listening`,
         it must be followed by a "to": "listening to..."
@@ -497,6 +498,9 @@ class Utility(commands.Cog):
         When activity type is set to `streaming`, you can set
         the linked twitch page:
         - `{prefix}config set twitch_url https://www.twitch.tv/somechannel/`
+
+        When activity type is set to `custom`, you can set
+        any custom text as the activity message.
 
         To remove the current activity status:
         - `{prefix}activity clear`
@@ -528,6 +532,8 @@ class Utility(commands.Cog):
             msg += f"to {activity.name}."
         elif activity.type == ActivityType.competing:
             msg += f"in {activity.name}."
+        elif activity.type == ActivityType.custom:
+            msg = f"Custom activity set to: {activity.name}."
         else:
             msg += f"{activity.name}."
 
@@ -597,7 +603,9 @@ class Utility(commands.Cog):
         elif activity_type == ActivityType.streaming:
             url = self.bot.config["twitch_url"]
 
-        if activity_type is not None:
+        if activity_type == ActivityType.custom:
+            activity = discord.CustomActivity(name=activity_message)
+        elif activity_type is not None:
             activity = discord.Activity(type=activity_type, name=activity_message, url=url)
         else:
             activity = None
