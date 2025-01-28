@@ -28,7 +28,7 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Run ruff linter
-        run: uv run ruff . --no-fix --config pyproject.toml
+        run: uv run ruff check --config pyproject.toml
         continue-on-error: true
       - name: Run black linter
         run: |
