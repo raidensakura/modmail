@@ -21,6 +21,12 @@ services:
       - .env
     depends_on:
       - mongo
+    # Required for exposing logviewer port to the internet
+    ports:
+      - 8000:8000
+    # Uncomment and edit the path in case you need to install a local plugin
+    # volumes:
+    #   - ../modmail-plugins/:/home/modmail/plugins/@local/
 
   mongo:
     image: mongo:7
