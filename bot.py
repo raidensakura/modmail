@@ -846,6 +846,33 @@ class ModmailBot(commands.Bot):
 
         return blocked
 
+    def check_local_git(self) -> bool:
+        """
+        Checks if the bot is installed via git.
+        """
+        valid_local_git = False
+        git_folder_path = os.path.join(".git")
+
+        # Check if the .git folder exists and is a directory
+        if os.path.exists(git_folder_path) and os.path.isdir(git_folder_path):
+            required_files = ["config", "HEAD"]
+            required_dirs = ["refs", "objects"]
+
+            # Verify required files exist
+            for file in required_files:
+                if not os.path.isfile(os.path.join(git_folder_path, file)):
+                    return valid_local_git
+
+            # Verify required directories exist
+            for directory in required_dirs:
+                if not os.path.isdir(os.path.join(git_folder_path, directory)):
+                    return valid_local_git
+
+            # If all checks pass, set valid_local_git to True
+            valid_local_git = True
+
+        return valid_local_git
+
     async def get_thread_cooldown(self, author: discord.Member):
         thread_cooldown = self.config.get("thread_cooldown")
         now = discord.utils.utcnow()
@@ -1707,6 +1734,12 @@ class ModmailBot(commands.Bot):
 
         if not self.config.get("github_token") and self.hosting_method == HostingMethod.HEROKU:
             logger.warning("GitHub access token not found.")
+            logger.warning("Autoupdates disabled.")
+            self.autoupdate.cancel()
+            return
+
+        if not self.check_local_git():
+            logger.warning("Bot not installed via git.")
             logger.warning("Autoupdates disabled.")
             self.autoupdate.cancel()
             return
