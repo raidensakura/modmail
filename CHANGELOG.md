@@ -8,9 +8,16 @@ however, insignificant breaking changes do not guarantee a major version bump, s
 
 # [UNRELEASED]
 
+# v4.3.4
+
+### Added
+
+- Added git folder checks to indicate the bot not being installed via git when updating.
+
 ### Changed
 
-- Switch package manager from poetry/pdm to uv.
+- Switched package manager from poetry/pdm to uv.
+- Updated Actions workflow to use uv package manager.
 
 # v4.3.3
 
