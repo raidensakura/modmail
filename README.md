@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://modmail-docs.netlify.app/logo-long.png" align="center"><br>
+  <img src="https://modmail.project-mei.xyz/logo-long.png" align="center"><br>
   <strong><i>A Modmail fork with a focus on improvements and bug fixes.</i></strong><br><br>
 
   <img alt="Dynamic TOML Badge" src="https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fraidensakura%2Fmodmail%2Fstable%2Fpyproject.toml&query=project.version&style=flat&label=Version&color=7d5edd">
