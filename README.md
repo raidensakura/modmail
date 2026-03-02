@@ -1,3 +1,5 @@
+> [!IMPORTANT]
+> This repository is no longer actively maintained. Read more about it [here](https://project-mei.xyz/blog/dont-host-modmail/).
 <div align="center">
   <img src="https://modmail.project-mei.xyz/logo-long.png" align="center"><br>
   <strong><i>A Modmail fork with a focus on improvements and bug fixes.</i></strong><br><br>
